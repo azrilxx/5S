@@ -62,36 +62,20 @@ export default function Sidebar() {
   const [location] = useLocation();
   const { user, logout } = useAuth();
 
-  console.log("Sidebar component - user:", user);
-
-  if (!user) {
-    console.log("Sidebar: No user found, not rendering sidebar");
-    return null;
-  }
+  if (!user) return null;
 
   return (
-    <div 
-      className="fixed inset-y-0 left-0 z-50 w-64 bg-blue-600 shadow-lg border-r-4 border-yellow-400" 
-      style={{ 
-        display: 'block !important', 
-        visibility: 'visible',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '256px',
-        height: '100vh'
-      }}
-    >
+    <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg border-r border-slate-200">
       <div className="flex flex-col h-full">
         {/* Logo/Brand */}
         <div className="flex items-center px-6 py-4 border-b border-slate-200">
           <div className="flex items-center">
-            <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center">
-              <ClipboardList className="text-black h-5 w-5" />
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+              <ClipboardList className="text-white h-5 w-5" />
             </div>
             <div className="ml-3">
-              <h1 className="text-lg font-semibold text-white">SIDEBAR TEST</h1>
-              <p className="text-xs text-yellow-200">Can you see this?</p>
+              <h1 className="text-lg font-semibold text-slate-900">Karisma 5S</h1>
+              <p className="text-xs text-slate-500">Audit System</p>
             </div>
           </div>
         </div>

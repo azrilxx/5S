@@ -21,10 +21,7 @@ export default function Layout({
 }: LayoutProps) {
   const { user } = useAuth();
 
-  console.log("Layout component - user:", user);
-
   if (!user) {
-    console.log("Layout: No user found, not rendering layout");
     return null;
   }
 
