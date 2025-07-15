@@ -90,14 +90,7 @@ export default function Login() {
             </Button>
           </form>
           
-          <div className="mt-4 text-center text-sm text-slate-600">
-            <p className="font-medium mb-2">Demo credentials:</p>
-            <div className="space-y-1">
-              <p><strong>Admin:</strong> admin / admin123</p>
-              <p><strong>Users:</strong> calvin, jenn, jennifer, maz, suzi, etc.</p>
-              <p><strong>User password:</strong> karisma123</p>
-            </div>
-          </div>
+
         </CardContent>
       </Card>
     </div>

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
-import argon2 from "argon2";
+import bcrypt from "bcrypt";
 import { storage } from "../storage.js";
 import { TokenService, AuthenticatedRequest } from "../middleware/auth.js";
 import { 
@@ -50,12 +50,7 @@ export const changePasswordSchema = z.object({
 class PasswordService {
   static async hash(password: string): Promise<string> {
     try {
-      return await argon2.hash(password, {
-        type: argon2.argon2id,
-        memoryCost: 19456, // 19 MB
-        timeCost: 2,
-        parallelism: 1,
-      });
+      return await bcrypt.hash(password, 10);
     } catch (error) {
       throw new ApiError(500, "Password hashing failed");
     }
@@ -63,7 +58,7 @@ class PasswordService {
 
   static async verify(hashedPassword: string, password: string): Promise<boolean> {
     try {
-      return await argon2.verify(hashedPassword, password);
+      return await bcrypt.compare(password, hashedPassword);
     } catch (error) {
       throw new ApiError(500, "Password verification failed");
     }
