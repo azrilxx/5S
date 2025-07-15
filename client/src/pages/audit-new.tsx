@@ -18,16 +18,27 @@ export default function AuditNew() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTeam, setSelectedTeam] = useState<string>('');
 
-  const { data: zones, isLoading: zonesLoading } = useQuery({
+  const { data: allZones, isLoading: zonesLoading } = useQuery({
     queryKey: ["/api/zones"],
   });
 
-  const { data: buildings } = useQuery({
-    queryKey: ["/api/buildings"],
+  const { data: currentUser } = useQuery({
+    queryKey: ["/api/users/me"],
   });
 
   const { data: teams } = useQuery({
     queryKey: ["/api/teams"],
+  });
+
+  // Filter zones based on user's team assignments (admins see all zones)
+  const zones = currentUser?.role === 'admin' ? allZones : 
+    allZones?.filter((zone: any) => {
+      const userTeam = teams?.find((team: any) => team.name === currentUser?.team);
+      return userTeam?.assigned_zones?.includes(zone.name);
+    });
+
+  const { data: buildings } = useQuery({
+    queryKey: ["/api/buildings"],
   });
 
   const selectedZoneDetails = zones?.find((z: any) => z.name === selectedZone);
