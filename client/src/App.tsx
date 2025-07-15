@@ -13,6 +13,15 @@ import Actions from "@/pages/actions";
 import Schedules from "@/pages/schedules";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
+import Zones from "@/pages/zones";
+import Teams from "@/pages/teams";
+import Learn from "@/pages/learn";
+import Trainings from "@/pages/trainings";
+import Feedback from "@/pages/feedback";
+import Analytics from "@/pages/analytics";
+import KPITracking from "@/pages/kpi";
+import Documentation from "@/pages/documentation";
+import AccessControl from "@/pages/access-control";
 import { useEffect } from "react";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -79,6 +88,51 @@ function Router() {
       <Route path="/settings">
         <ProtectedRoute>
           <Settings />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/zones">
+        <ProtectedRoute>
+          <Zones />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/teams">
+        <ProtectedRoute>
+          <Teams />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/learn">
+        <ProtectedRoute>
+          <Learn />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/trainings">
+        <ProtectedRoute>
+          <Trainings />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/feedback">
+        <ProtectedRoute>
+          <Feedback />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/analytics">
+        <ProtectedRoute>
+          <Analytics />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/kpi">
+        <ProtectedRoute>
+          <KPITracking />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/documentation">
+        <ProtectedRoute>
+          <Documentation />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/access-control">
+        <ProtectedRoute>
+          <AccessControl />
         </ProtectedRoute>
       </Route>
       <Route component={NotFound} />

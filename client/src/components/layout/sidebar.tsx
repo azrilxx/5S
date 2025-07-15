@@ -7,17 +7,55 @@ import {
   CheckSquare, 
   BarChart3, 
   Settings,
-  LogOut
+  LogOut,
+  MapPin,
+  Users,
+  BookOpen,
+  GraduationCap,
+  MessageSquare,
+  Shield,
+  TrendingUp,
+  FileText,
+  Target
 } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 
-const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Audits", href: "/audits", icon: ClipboardList },
-  { name: "Schedules", href: "/schedules", icon: Calendar },
-  { name: "Actions", href: "/actions", icon: CheckSquare },
-  { name: "Reports", href: "/reports", icon: BarChart3 },
-  { name: "Settings", href: "/settings", icon: Settings },
+const navigationSections = [
+  {
+    title: "Core Functions",
+    items: [
+      { name: "Dashboard", href: "/", icon: LayoutDashboard },
+      { name: "Audits", href: "/audits", icon: ClipboardList },
+      { name: "Corrective Actions", href: "/actions", icon: CheckSquare },
+      { name: "Schedules", href: "/schedules", icon: Calendar },
+    ]
+  },
+  {
+    title: "Management",
+    items: [
+      { name: "Zones", href: "/zones", icon: MapPin },
+      { name: "Teams", href: "/teams", icon: Users },
+      { name: "Reports", href: "/reports", icon: BarChart3 },
+      { name: "Analytics", href: "/analytics", icon: TrendingUp },
+      { name: "KPI Tracking", href: "/kpi", icon: Target },
+    ]
+  },
+  {
+    title: "Learning & Development",
+    items: [
+      { name: "Learn 5S", href: "/learn", icon: BookOpen },
+      { name: "Trainings", href: "/trainings", icon: GraduationCap },
+      { name: "Documentation", href: "/documentation", icon: FileText },
+    ]
+  },
+  {
+    title: "System",
+    items: [
+      { name: "Feedback", href: "/feedback", icon: MessageSquare },
+      { name: "Settings", href: "/settings", icon: Settings },
+      { name: "Access Control", href: "/access-control", icon: Shield },
+    ]
+  }
 ];
 
 export default function Sidebar() {
@@ -43,27 +81,36 @@ export default function Sidebar() {
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 px-4 py-4 space-y-2">
-          {navigation.map((item) => {
-            const Icon = item.icon;
-            const isActive = location === item.href;
-            
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
-                  isActive
-                    ? "bg-primary text-white"
-                    : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
-                )}
-              >
-                <Icon className="mr-3 h-5 w-5" />
-                <span>{item.name}</span>
-              </Link>
-            );
-          })}
+        <nav className="flex-1 px-4 py-4 space-y-6 overflow-y-auto">
+          {navigationSections.map((section) => (
+            <div key={section.title}>
+              <h3 className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                {section.title}
+              </h3>
+              <div className="space-y-1">
+                {section.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = location === item.href;
+                  
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={cn(
+                        "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+                        isActive
+                          ? "bg-primary text-white"
+                          : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+                      )}
+                    >
+                      <Icon className="mr-3 h-4 w-4" />
+                      <span>{item.name}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
         {/* User Profile */}
