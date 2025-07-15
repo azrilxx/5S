@@ -5,6 +5,8 @@ import {
   type Action, type InsertAction, type Schedule, type InsertSchedule,
   type Report, type InsertReport
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -371,4 +373,207 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: number, updates: Partial<InsertUser>): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set(updates)
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
+  }
+
+  async getAllZones(): Promise<Zone[]> {
+    return await db.select().from(zones);
+  }
+
+  async getZone(id: number): Promise<Zone | undefined> {
+    const [zone] = await db.select().from(zones).where(eq(zones.id, id));
+    return zone || undefined;
+  }
+
+  async createZone(insertZone: InsertZone): Promise<Zone> {
+    const [zone] = await db
+      .insert(zones)
+      .values(insertZone)
+      .returning();
+    return zone;
+  }
+
+  async getAllTeams(): Promise<Team[]> {
+    return await db.select().from(teams);
+  }
+
+  async getTeam(id: number): Promise<Team | undefined> {
+    const [team] = await db.select().from(teams).where(eq(teams.id, id));
+    return team || undefined;
+  }
+
+  async createTeam(insertTeam: InsertTeam): Promise<Team> {
+    const [team] = await db
+      .insert(teams)
+      .values(insertTeam)
+      .returning();
+    return team;
+  }
+
+  async getAllAudits(): Promise<Audit[]> {
+    return await db.select().from(audits);
+  }
+
+  async getAudit(id: number): Promise<Audit | undefined> {
+    const [audit] = await db.select().from(audits).where(eq(audits.id, id));
+    return audit || undefined;
+  }
+
+  async createAudit(insertAudit: InsertAudit): Promise<Audit> {
+    const [audit] = await db
+      .insert(audits)
+      .values(insertAudit)
+      .returning();
+    return audit;
+  }
+
+  async updateAudit(id: number, updates: Partial<InsertAudit>): Promise<Audit | undefined> {
+    const [audit] = await db
+      .update(audits)
+      .set(updates)
+      .where(eq(audits.id, id))
+      .returning();
+    return audit || undefined;
+  }
+
+  async getAuditsByZone(zone: string): Promise<Audit[]> {
+    return await db.select().from(audits).where(eq(audits.zone, zone));
+  }
+
+  async getAuditsByAuditor(auditor: string): Promise<Audit[]> {
+    return await db.select().from(audits).where(eq(audits.auditor, auditor));
+  }
+
+  async getChecklistItemsByAudit(auditId: number): Promise<ChecklistItem[]> {
+    return await db.select().from(checklistItems).where(eq(checklistItems.auditId, auditId));
+  }
+
+  async createChecklistItem(insertItem: InsertChecklistItem): Promise<ChecklistItem> {
+    const [item] = await db
+      .insert(checklistItems)
+      .values(insertItem)
+      .returning();
+    return item;
+  }
+
+  async updateChecklistItem(id: number, updates: Partial<InsertChecklistItem>): Promise<ChecklistItem | undefined> {
+    const [item] = await db
+      .update(checklistItems)
+      .set(updates)
+      .where(eq(checklistItems.id, id))
+      .returning();
+    return item || undefined;
+  }
+
+  async getAllActions(): Promise<Action[]> {
+    return await db.select().from(actions);
+  }
+
+  async getAction(id: number): Promise<Action | undefined> {
+    const [action] = await db.select().from(actions).where(eq(actions.id, id));
+    return action || undefined;
+  }
+
+  async createAction(insertAction: InsertAction): Promise<Action> {
+    const [action] = await db
+      .insert(actions)
+      .values(insertAction)
+      .returning();
+    return action;
+  }
+
+  async updateAction(id: number, updates: Partial<InsertAction>): Promise<Action | undefined> {
+    const [action] = await db
+      .update(actions)
+      .set(updates)
+      .where(eq(actions.id, id))
+      .returning();
+    return action || undefined;
+  }
+
+  async getActionsByAssignee(assignee: string): Promise<Action[]> {
+    return await db.select().from(actions).where(eq(actions.assignee, assignee));
+  }
+
+  async getActionsByZone(zone: string): Promise<Action[]> {
+    return await db.select().from(actions).where(eq(actions.zone, zone));
+  }
+
+  async getAllSchedules(): Promise<Schedule[]> {
+    return await db.select().from(schedules);
+  }
+
+  async getSchedule(id: number): Promise<Schedule | undefined> {
+    const [schedule] = await db.select().from(schedules).where(eq(schedules.id, id));
+    return schedule || undefined;
+  }
+
+  async createSchedule(insertSchedule: InsertSchedule): Promise<Schedule> {
+    const [schedule] = await db
+      .insert(schedules)
+      .values(insertSchedule)
+      .returning();
+    return schedule;
+  }
+
+  async updateSchedule(id: number, updates: Partial<InsertSchedule>): Promise<Schedule | undefined> {
+    const [schedule] = await db
+      .update(schedules)
+      .set(updates)
+      .where(eq(schedules.id, id))
+      .returning();
+    return schedule || undefined;
+  }
+
+  async getActiveSchedules(): Promise<Schedule[]> {
+    return await db.select().from(schedules).where(eq(schedules.status, 'active'));
+  }
+
+  async getAllReports(): Promise<Report[]> {
+    return await db.select().from(reports);
+  }
+
+  async getReport(id: number): Promise<Report | undefined> {
+    const [report] = await db.select().from(reports).where(eq(reports.id, id));
+    return report || undefined;
+  }
+
+  async createReport(insertReport: InsertReport): Promise<Report> {
+    const [report] = await db
+      .insert(reports)
+      .values(insertReport)
+      .returning();
+    return report;
+  }
+}
+
+export const storage = new DatabaseStorage();
