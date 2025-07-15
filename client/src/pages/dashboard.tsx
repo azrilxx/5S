@@ -19,8 +19,6 @@ import {
 import Layout from "@/components/layout/layout";
 import { useLocation } from "wouter";
 import { useAuth } from "@/components/auth/auth-provider";
-import { NotificationTrigger } from "@/components/notifications/notification-trigger";
-import { Notification } from "@/components/notifications/notification-system";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -42,12 +40,7 @@ export default function Dashboard() {
     setLocation("/audits");
   };
 
-  const handleNotificationTrigger = (notification: Notification) => {
-    // Use the global notification function to show toast
-    if ((window as any).showNotification) {
-      (window as any).showNotification(notification);
-    }
-  };
+
 
   if (isLoading) {
     return (

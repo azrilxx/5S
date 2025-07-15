@@ -1,6 +1,5 @@
-import { Bell, Plus, Home, Calendar, Users, Settings, BarChart3, Menu } from "lucide-react";
+import { Plus, Home, Calendar, Users, Settings, BarChart3, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import {
   DropdownMenu,
@@ -39,13 +38,7 @@ export default function Header({
               </Button>
             </Link>
           )}
-          <Button variant="outline" size="sm" className="hover:bg-slate-50 border-slate-300">
-            <Bell className="h-4 w-4 mr-2" />
-            Notifications
-            <Badge variant="destructive" className="ml-2 shadow-sm">
-              3
-            </Badge>
-          </Button>
+
           {showNewAuditButton && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
