@@ -1,0 +1,87 @@
+ * Enhance the Karisma 5S Audit app with full Super Admin capabilities based on GoAudit-inspired architecture.
+ * Your mission is to:
+ * 1. Integrate all super admin features listed below.
+ * 2. Maintain current UI/UX theme as seen in `AdminDashboard`.
+ * 3. Ensure all logic, views, and API layers reflect the role-based control properly.
+ * 4. Use internal Replit DB if required for persistent state.
+ * 5. Create UI routes, server logic, and update role guard middleware accordingly.
+ */
+
+/// 🔐 ROLES
+// - Super Admin: has access to everything listed below
+// - Admin: standard access to audit zones, team assignments, and dashboard
+// - User: view-only + own assignments
+
+/// 👥 User Management
+// - Add `User Management` module under SYSTEM ADMINISTRATION sidebar
+// - Allow super admin to:
+//   - View all users
+//   - Create/edit/delete users
+//   - Assign roles: user, admin
+//   - Reset password functionality (auto: karisma123 or custom)
+
+/// 🏢 Zone Management
+// - Extend Zones module to include:
+//   - Grouping by building/floor
+//   - Edit/delete/create zones
+//   - Only super admin can group/manage structure
+
+/// 📝 Question Editor
+// - Add `/question-editor` route
+// - Enable super admin to:
+//   - Edit questions for each 5S category
+//   - Enable/disable per zone (use dropdown to select zone)
+
+/// 📊 Reporting
+// - Enhance Reports route with:
+//   - Filters: user, zone, date
+//   - Export: PDF / CSV (use client-side lib)
+//   - View audit history with compliance breakdown
+
+/// ⚠️ Action Tracker
+// - Show all open actions across zones
+// - Add assignment modal for super admin to reassign or change status/due date
+
+/// 📅 Schedule Planning
+// - Add module under `Schedules` for:
+//   - Recurring audit creation
+//   - Assigning users per zone weekly/monthly
+//   - Use cron-like backend scheduler or mock on app load
+
+/// 🛡️ Audit Configuration
+// - Add settings panel to:
+//   - Define scoring scheme
+//   - Toggle N/A
+//   - Set weightage per 5S dimension
+
+/// 🏷️ Tags/Labels
+// - Under settings, add editable tag manager
+// - Tags apply to audit comments and corrective actions
+
+/// 🔔 Notification Rules
+// - Create `/notifications-rules` UI
+// - Admin defines rules for:
+//   - Overdue tasks
+//   - Failed audits
+//   - Optional: mock Slack/email handler for internal use
+
+/// 🛠️ System Settings
+// - Extend Settings:
+//   - Enable offline mode (if local storage fallback is desired)
+//   - Set retention (auto-delete data after X days)
+//   - Theme config: app name, logo
+
+/// 🔐 AUTH
+// - Ensure login distinguishes between user/admin roles
+// - Inject `superAdmin` boolean in token or session
+// - Protect routes accordingly
+
+/// 🧪 TESTING
+// - Login as admin → verify enhanced dashboard
+// - Login as user → access only limited actions
+// - Validate that CRUD, filters, exports work
+
+/// 📌 FINAL NOTE
+// All dummy data should be used where no DB yet exists
+// If component already exists (e.g. Zones), **enhance** instead of replacing
+// Match styling and responsiveness to current layout

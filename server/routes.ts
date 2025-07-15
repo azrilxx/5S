@@ -169,6 +169,59 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
+  app.post("/api/zones", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can create zones
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const zone = await storage.createZone(req.body);
+      res.status(201).json(zone);
+    } catch (error) {
+      console.error("Create zone error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.put("/api/zones/:id", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can update zones
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const zone = await storage.updateZone(id, req.body);
+      if (!zone) {
+        return res.status(404).json({ message: "Zone not found" });
+      }
+      res.json(zone);
+    } catch (error) {
+      console.error("Update zone error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/zones/:id", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can delete zones
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteZone(id);
+      if (!success) {
+        return res.status(404).json({ message: "Zone not found" });
+      }
+      res.json({ message: "Zone deleted successfully" });
+    } catch (error) {
+      console.error("Delete zone error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Team routes
   app.get("/api/teams", authenticateToken, async (req, res) => {
     try {
@@ -190,6 +243,59 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
       res.json(team);
     } catch (error) {
       console.error("Get team error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/teams", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can create teams
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const team = await storage.createTeam(req.body);
+      res.status(201).json(team);
+    } catch (error) {
+      console.error("Create team error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.put("/api/teams/:id", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can update teams
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const team = await storage.updateTeam(id, req.body);
+      if (!team) {
+        return res.status(404).json({ message: "Team not found" });
+      }
+      res.json(team);
+    } catch (error) {
+      console.error("Update team error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/teams/:id", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can delete teams
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteTeam(id);
+      if (!success) {
+        return res.status(404).json({ message: "Team not found" });
+      }
+      res.json({ message: "Team deleted successfully" });
+    } catch (error) {
+      console.error("Delete team error:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });

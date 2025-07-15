@@ -19,7 +19,9 @@ import {
   FileText,
   Target,
   Menu,
-  X
+  X,
+  Edit,
+  Bell
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -61,6 +63,8 @@ const getNavigationSections = (userRole: string) => {
         title: "Management",
         items: [
           { name: "Zones", href: "/zones", icon: MapPin },
+          { name: "Question Editor", href: "/question-editor", icon: Edit },
+          { name: "Action Tracker", href: "/action-tracker", icon: Target },
           { name: "Reports", href: "/reports", icon: BarChart3 },
           { name: "Analytics", href: "/analytics", icon: TrendingUp },
           { name: "KPI Tracking", href: "/kpi", icon: Target },
@@ -70,6 +74,7 @@ const getNavigationSections = (userRole: string) => {
         title: "System Administration",
         items: [
           { name: "User Management", href: "/user-management", icon: Users },
+          { name: "Notification Rules", href: "/notification-rules", icon: Bell },
           { name: "Settings", href: "/settings", icon: Settings },
           { name: "Access Control", href: "/access-control", icon: Shield },
           { name: "System Logs", href: "/system-logs", icon: FileText },

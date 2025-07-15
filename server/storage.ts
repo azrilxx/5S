@@ -1,9 +1,10 @@
 import { 
-  users, zones, teams, audits, checklistItems, actions, schedules, reports,
+  users, zones, teams, audits, checklistItems, actions, schedules, reports, questions, notificationRules,
   type User, type InsertUser, type Zone, type InsertZone, type Team, type InsertTeam,
   type Audit, type InsertAudit, type ChecklistItem, type InsertChecklistItem,
   type Action, type InsertAction, type Schedule, type InsertSchedule,
-  type Report, type InsertReport
+  type Report, type InsertReport, type Question, type InsertQuestion,
+  type NotificationRule, type InsertNotificationRule
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -20,6 +21,8 @@ export interface IStorage {
   getAllZones(): Promise<Zone[]>;
   getZone(id: number): Promise<Zone | undefined>;
   createZone(zone: InsertZone): Promise<Zone>;
+  updateZone(id: number, zone: Partial<InsertZone>): Promise<Zone | undefined>;
+  deleteZone(id: number): Promise<boolean>;
 
   // Team methods
   getAllTeams(): Promise<Team[]>;
@@ -60,6 +63,20 @@ export interface IStorage {
   getAllReports(): Promise<Report[]>;
   getReport(id: number): Promise<Report | undefined>;
   createReport(report: InsertReport): Promise<Report>;
+
+  // Question methods
+  getAllQuestions(): Promise<Question[]>;
+  getQuestion(id: number): Promise<Question | undefined>;
+  createQuestion(question: InsertQuestion): Promise<Question>;
+  updateQuestion(id: number, question: Partial<InsertQuestion>): Promise<Question | undefined>;
+  deleteQuestion(id: number): Promise<boolean>;
+
+  // Notification rule methods
+  getAllNotificationRules(): Promise<NotificationRule[]>;
+  getNotificationRule(id: number): Promise<NotificationRule | undefined>;
+  createNotificationRule(rule: InsertNotificationRule): Promise<NotificationRule>;
+  updateNotificationRule(id: number, rule: Partial<InsertNotificationRule>): Promise<NotificationRule | undefined>;
+  deleteNotificationRule(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -589,6 +606,67 @@ export class DatabaseStorage implements IStorage {
       .values(insertReport)
       .returning();
     return report;
+  }
+
+  // Questions methods
+  async getAllQuestions(): Promise<Question[]> {
+    return await db.select().from(questions);
+  }
+
+  async getQuestion(id: number): Promise<Question | undefined> {
+    const [question] = await db.select().from(questions).where(eq(questions.id, id));
+    return question || undefined;
+  }
+
+  async createQuestion(insertQuestion: InsertQuestion): Promise<Question> {
+    const [question] = await db.insert(questions).values(insertQuestion).returning();
+    return question;
+  }
+
+  async updateQuestion(id: number, updates: Partial<InsertQuestion>): Promise<Question | undefined> {
+    const [question] = await db.update(questions).set({ ...updates, updatedAt: new Date() }).where(eq(questions.id, id)).returning();
+    return question || undefined;
+  }
+
+  async deleteQuestion(id: number): Promise<boolean> {
+    const result = await db.delete(questions).where(eq(questions.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Notification Rules methods
+  async getAllNotificationRules(): Promise<NotificationRule[]> {
+    return await db.select().from(notificationRules);
+  }
+
+  async getNotificationRule(id: number): Promise<NotificationRule | undefined> {
+    const [rule] = await db.select().from(notificationRules).where(eq(notificationRules.id, id));
+    return rule || undefined;
+  }
+
+  async createNotificationRule(insertRule: InsertNotificationRule): Promise<NotificationRule> {
+    const [rule] = await db.insert(notificationRules).values(insertRule).returning();
+    return rule;
+  }
+
+  async updateNotificationRule(id: number, updates: Partial<InsertNotificationRule>): Promise<NotificationRule | undefined> {
+    const [rule] = await db.update(notificationRules).set({ ...updates, updatedAt: new Date() }).where(eq(notificationRules.id, id)).returning();
+    return rule || undefined;
+  }
+
+  async deleteNotificationRule(id: number): Promise<boolean> {
+    const result = await db.delete(notificationRules).where(eq(notificationRules.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Zone methods implementation
+  async updateZone(id: number, updates: Partial<InsertZone>): Promise<Zone | undefined> {
+    const [zone] = await db.update(zones).set(updates).where(eq(zones.id, id)).returning();
+    return zone || undefined;
+  }
+
+  async deleteZone(id: number): Promise<boolean> {
+    const result = await db.delete(zones).where(eq(zones.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
   }
 }
 

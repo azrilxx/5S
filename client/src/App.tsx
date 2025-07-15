@@ -17,6 +17,9 @@ import Zones from "@/pages/zones";
 import Teams from "@/pages/teams";
 import UserManagement from "@/pages/user-management";
 import SystemLogs from "@/pages/system-logs";
+import QuestionEditor from "@/pages/question-editor";
+import ActionTracker from "@/pages/action-tracker";
+import NotificationRules from "@/pages/notification-rules";
 import Learn from "@/pages/learn";
 import Trainings from "@/pages/trainings";
 import Feedback from "@/pages/feedback";
@@ -117,6 +120,21 @@ function Router() {
       <Route path="/system-logs">
         <ProtectedRoute>
           <SystemLogs />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/question-editor">
+        <ProtectedRoute>
+          <QuestionEditor />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/action-tracker">
+        <ProtectedRoute>
+          <ActionTracker />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/notification-rules">
+        <ProtectedRoute>
+          <NotificationRules />
         </ProtectedRoute>
       </Route>
       <Route path="/learn">
