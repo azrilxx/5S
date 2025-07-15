@@ -1,6 +1,16 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { authApi, tokenStorage, type User } from "@/lib/auth";
+import { authApi, tokenStorage } from "@/lib/auth";
+
+interface User {
+  id: number;
+  username: string;
+  name: string;
+  email: string;
+  role: string;
+  team: string | null;
+  zones: string[];
+}
 
 interface AuthContextType {
   user: User | null;
@@ -15,23 +25,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Check for existing token and get user data
   const { data: userData, isLoading: isUserLoading, error } = useQuery({
-    queryKey: ["/api/users/me"],
+    queryKey: ['/api/users/me'],
     enabled: !!tokenStorage.get(),
     retry: false,
   });
 
   useEffect(() => {
-    if (userData) {
-      setUser(userData as User);
+    if (userData && userData.success) {
+      setUser(userData.data);
       setIsLoading(false);
-    } else if (error) {
-      // If there's an error, clear the token and mark as not loading
-      tokenStorage.remove();
-      setUser(null);
-      setIsLoading(false);
-    } else if (!tokenStorage.get()) {
-      // No token, not loading
+    } else if (error || !tokenStorage.get()) {
       setUser(null);
       setIsLoading(false);
     } else {

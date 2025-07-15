@@ -1,4 +1,3 @@
-import { useAuth } from "@/components/auth/auth-provider";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Sidebar from "./sidebar";
 import Header from "./header";
@@ -20,12 +19,7 @@ export default function Layout({
   showHomeButton,
   onNewAudit 
 }: LayoutProps) {
-  const { user } = useAuth();
   const isMobile = useIsMobile();
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
