@@ -10,8 +10,12 @@ export interface User {
 }
 
 export interface AuthResponse {
-  token: string;
-  user: User;
+  success: boolean;
+  data: {
+    accessToken: string;
+    refreshToken: string;
+    user: User;
+  };
 }
 
 export const authApi = {

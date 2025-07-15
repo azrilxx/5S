@@ -31,8 +31,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (username: string, password: string) => {
     try {
       const response = await authApi.login(username, password);
-      tokenStorage.set(response.token);
-      setUser(response.user);
+      if (response.success && response.data) {
+        tokenStorage.set(response.data.accessToken);
+        setUser(response.data.user);
+      } else {
+        throw new Error("Login failed");
+      }
     } catch (error) {
       throw error;
     }
