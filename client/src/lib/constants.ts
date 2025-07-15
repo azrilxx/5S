@@ -49,11 +49,22 @@ export const FIVE_S_QUESTIONS = {
 };
 
 export const ZONES = [
-  'Office Ground Floor',
-  'Factory Zone 1',
-  'Factory Zone 2',
-  'First Floor',
-  'Second Floor'
+  "Main Door",
+  "Receptionist",
+  "Shoes Area", 
+  "Meeting Room (Ground Floor)",
+  "Surau Area (In)",
+  "Surau Area (Out)",
+  "Factory Zone 1",
+  "Factory Zone 2",
+  "Meeting Room (First Floor)",
+  "Pantry",
+  "Sales 1",
+  "Sales 2",
+  "Common Area (Second Floor)",
+  "Account",
+  "Filing Room",
+  "Admin"
 ];
 
 export const TEAMS = [
