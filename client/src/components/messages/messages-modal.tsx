@@ -1,21 +1,19 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Mail, Send, Trash2, MailOpen, Plus, User, Clock, CheckCircle, Home } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Mail, Send, Trash2, Plus, User, Clock, CheckCircle, X } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/components/auth/auth-provider";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "wouter";
 
 type Message = {
   id: number;
@@ -27,7 +25,12 @@ type Message = {
   createdAt: string;
 };
 
-export default function Messages() {
+interface MessagesModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export default function MessagesModal({ open, onOpenChange }: MessagesModalProps) {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [composeOpen, setComposeOpen] = useState(false);
   const [recipient, setRecipient] = useState("");
@@ -41,19 +44,19 @@ export default function Messages() {
   // Fetch received messages
   const { data: messages = [] } = useQuery({
     queryKey: ["/api/messages"],
-    enabled: !!user,
+    enabled: !!user && open,
   });
 
   // Fetch sent messages
   const { data: sentMessages = [] } = useQuery({
     queryKey: ["/api/messages/sent"],
-    enabled: !!user,
+    enabled: !!user && open,
   });
 
   // Fetch all users for recipient selection
   const { data: users = [] } = useQuery({
     queryKey: ["/api/users"],
-    enabled: !!user,
+    enabled: !!user && open,
   });
 
   // Send message mutation
@@ -146,10 +149,18 @@ export default function Messages() {
     deleteMessage.mutate(messageId);
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      setSelectedMessage(null);
+      setComposeOpen(false);
+    }
+    onOpenChange(newOpen);
+  };
+
   const renderMessageList = (messageList: Message[], isSent = false) => (
-    <div className="space-y-2">
+    <div className="space-y-2 max-h-60 overflow-y-auto">
       {messageList.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-4 text-gray-500 text-sm">
           {isSent ? "No sent messages" : "No messages"}
         </div>
       ) : (
@@ -163,32 +174,30 @@ export default function Messages() {
             }`}
             onClick={() => handleMessageClick(message)}
           >
-            <CardContent className="p-4">
+            <CardContent className="p-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    {!message.isRead && !isSent && (
-                      <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                    )}
-                    <User className="w-4 h-4 text-gray-500" />
-                    <span className="font-medium">
-                      {isSent ? message.recipient : message.sender}
-                    </span>
-                  </div>
+                <div className="flex items-center gap-2">
+                  {!message.isRead && !isSent && (
+                    <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                  )}
+                  <User className="w-3 h-3 text-gray-500" />
+                  <span className="font-medium text-sm">
+                    {isSent ? message.recipient : message.sender}
+                  </span>
                   {message.isRead && !isSent && (
-                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <CheckCircle className="w-3 h-3 text-green-500" />
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Clock className="w-4 h-4" />
+                <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <Clock className="w-3 h-3" />
                   {format(new Date(message.createdAt), "MMM d, h:mm a")}
                 </div>
               </div>
-              <div className="mt-2">
-                <div className="font-medium text-sm">
+              <div className="mt-1">
+                <div className="font-medium text-xs">
                   {message.subject || "No subject"}
                 </div>
-                <div className="text-sm text-gray-600 mt-1 line-clamp-2">
+                <div className="text-xs text-gray-600 mt-1 line-clamp-2">
                   {message.body}
                 </div>
               </div>
@@ -202,37 +211,37 @@ export default function Messages() {
   const renderMessageDetail = () => {
     if (!selectedMessage) {
       return (
-        <div className="flex items-center justify-center h-full text-gray-500">
+        <div className="flex items-center justify-center h-48 text-gray-500">
           <div className="text-center">
-            <Mail className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-            <p>Select a message to view details</p>
+            <Mail className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+            <p className="text-sm">Select a message to view details</p>
           </div>
         </div>
       );
     }
 
     return (
-      <div className="h-full flex flex-col">
-        <div className="p-6 border-b">
+      <div className="h-48">
+        <div className="p-3 border-b bg-gray-50">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold">
+              <h3 className="font-medium text-sm">
                 {selectedMessage.subject || "No subject"}
-              </h2>
-              <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+              </h3>
+              <div className="flex items-center gap-3 mt-1 text-xs text-gray-600">
                 <div className="flex items-center gap-1">
-                  <User className="w-4 h-4" />
+                  <User className="w-3 h-3" />
                   <span>From: {selectedMessage.sender}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  <span>{format(new Date(selectedMessage.createdAt), "MMM d, yyyy 'at' h:mm a")}</span>
+                  <Clock className="w-3 h-3" />
+                  <span>{format(new Date(selectedMessage.createdAt), "MMM d, h:mm a")}</span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               {!selectedMessage.isRead && selectedMessage.recipient === user?.username && (
-                <Badge variant="secondary">Unread</Badge>
+                <Badge variant="secondary" className="text-xs">Unread</Badge>
               )}
               <Button
                 variant="outline"
@@ -240,13 +249,13 @@ export default function Messages() {
                 onClick={() => handleDeleteMessage(selectedMessage.id)}
                 disabled={deleteMessage.isPending}
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-3 h-3" />
               </Button>
             </div>
           </div>
         </div>
-        <div className="flex-1 p-6 overflow-y-auto">
-          <div className="whitespace-pre-wrap text-gray-700">
+        <div className="p-3 overflow-y-auto h-32">
+          <div className="whitespace-pre-wrap text-gray-700 text-sm">
             {selectedMessage.body}
           </div>
         </div>
@@ -254,111 +263,101 @@ export default function Messages() {
     );
   };
 
-  return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <Link href="/">
-            <Button variant="outline" size="sm">
-              <Home className="w-4 h-4 mr-2" />
-              Dashboard
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold">Messages</h1>
-            <p className="text-gray-600">Team communication and announcements</p>
-          </div>
-        </div>
-        <Dialog open={composeOpen} onOpenChange={setComposeOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              New Message
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Compose Message</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="recipient">To</Label>
-                <Select value={recipient} onValueChange={setRecipient}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select recipient" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {users
-                      .filter((u: any) => u.username !== user?.username)
-                      .map((u: any) => (
-                        <SelectItem key={u.username} value={u.username}>
-                          {u.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="subject">Subject</Label>
-                <Input
-                  id="subject"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  placeholder="Enter subject (optional)"
-                />
-              </div>
-              <div>
-                <Label htmlFor="body">Message</Label>
-                <Textarea
-                  id="body"
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  placeholder="Type your message..."
-                  rows={6}
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setComposeOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSendMessage} disabled={sendMessage.isPending}>
-                  <Send className="w-4 h-4 mr-2" />
-                  Send
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+  const renderComposeForm = () => (
+    <div className="space-y-3">
+      <div>
+        <Label htmlFor="recipient" className="text-sm">To</Label>
+        <Select value={recipient} onValueChange={setRecipient}>
+          <SelectTrigger className="h-8">
+            <SelectValue placeholder="Select recipient" />
+          </SelectTrigger>
+          <SelectContent>
+            {users
+              .filter((u: any) => u.username !== user?.username)
+              .map((u: any) => (
+                <SelectItem key={u.username} value={u.username}>
+                  {u.name}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
-        <div className="lg:col-span-1">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="inbox">Inbox</TabsTrigger>
-              <TabsTrigger value="sent">Sent</TabsTrigger>
-            </TabsList>
-            <TabsContent value="inbox" className="mt-4">
-              <div className="h-[calc(100vh-320px)] overflow-y-auto">
-                {renderMessageList(messages)}
-              </div>
-            </TabsContent>
-            <TabsContent value="sent" className="mt-4">
-              <div className="h-[calc(100vh-320px)] overflow-y-auto">
-                {renderMessageList(sentMessages, true)}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        <div className="lg:col-span-2">
-          <Card className="h-full">
-            <CardContent className="p-0 h-full">
-              {renderMessageDetail()}
-            </CardContent>
-          </Card>
-        </div>
+      <div>
+        <Label htmlFor="subject" className="text-sm">Subject</Label>
+        <Input
+          id="subject"
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          placeholder="Enter subject (optional)"
+          className="h-8"
+        />
+      </div>
+      <div>
+        <Label htmlFor="body" className="text-sm">Message</Label>
+        <Textarea
+          id="body"
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          placeholder="Type your message..."
+          rows={4}
+          className="resize-none"
+        />
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" size="sm" onClick={() => setComposeOpen(false)}>
+          Cancel
+        </Button>
+        <Button size="sm" onClick={handleSendMessage} disabled={sendMessage.isPending}>
+          <Send className="w-3 h-3 mr-1" />
+          Send
+        </Button>
       </div>
     </div>
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center justify-between">
+            <span>Messages</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setComposeOpen(true)}
+              disabled={composeOpen}
+            >
+              <Plus className="w-3 h-3 mr-1" />
+              New Message
+            </Button>
+          </DialogTitle>
+        </DialogHeader>
+
+        {composeOpen ? (
+          renderComposeForm()
+        ) : (
+          <div className="space-y-4">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="inbox">Inbox</TabsTrigger>
+                <TabsTrigger value="sent">Sent</TabsTrigger>
+              </TabsList>
+              <TabsContent value="inbox" className="mt-3">
+                {renderMessageList(messages)}
+              </TabsContent>
+              <TabsContent value="sent" className="mt-3">
+                {renderMessageList(sentMessages, true)}
+              </TabsContent>
+            </Tabs>
+
+            {selectedMessage && (
+              <div className="border-t pt-4">
+                {renderMessageDetail()}
+              </div>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

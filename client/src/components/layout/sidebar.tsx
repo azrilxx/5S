@@ -28,6 +28,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useState } from "react";
+import MessagesButton from "@/components/messages/messages-button";
 
 const getNavigationSections = (userRole: string) => {
   const coreFunctions = [
@@ -40,14 +41,12 @@ const getNavigationSections = (userRole: string) => {
     coreFunctions.push(
       { name: "Corrective Actions", href: "/actions", icon: CheckSquare },
       { name: "Teams", href: "/teams", icon: Users },
-      { name: "Schedules", href: "/schedules", icon: Calendar },
-      { name: "Messages", href: "/messages", icon: MessageSquare }
+      { name: "Schedules", href: "/schedules", icon: Calendar }
     );
   } else {
     coreFunctions.push(
       { name: "My Actions", href: "/actions", icon: CheckSquare },
-      { name: "Teams", href: "/teams", icon: Users },
-      { name: "Messages", href: "/messages", icon: MessageSquare }
+      { name: "Teams", href: "/teams", icon: Users }
     );
   }
 
@@ -187,15 +186,18 @@ export default function Sidebar() {
               <p className="text-xs text-slate-600 font-medium capitalize">{user.role}</p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={logout}
-            className="text-slate-400 hover:text-red-500 transition-colors duration-200 p-1.5 rounded-lg hover:bg-red-50"
-            title="Logout"
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <MessagesButton />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={logout}
+              className="text-slate-400 hover:text-red-500 transition-colors duration-200 p-1.5 rounded-lg hover:bg-red-50"
+              title="Logout"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
