@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/components/auth/auth-provider";
-import { Bell, Plus, Edit2, Trash2, Shield, AlertTriangle, CheckCircle, Clock, Mail, MessageSquare } from "lucide-react";
+import { Settings, Plus, Edit2, Trash2, Shield, AlertTriangle, CheckCircle, Clock, Mail, MessageSquare } from "lucide-react";
 
 interface NotificationRule {
   id: number;
@@ -258,7 +258,7 @@ export default function NotificationRules() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
-              <Bell className="h-8 w-8 text-blue-600" />
+              <Settings className="h-8 w-8 text-blue-600" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Rules</p>
                 <p className="text-2xl font-bold text-gray-900">{rules.length}</p>
@@ -411,7 +411,7 @@ export default function NotificationRules() {
                   <div className="flex items-center space-x-2">
                     <Switch id="inApp" name="inApp" defaultChecked />
                     <Label htmlFor="inApp" className="flex items-center gap-2">
-                      <Bell className="w-4 h-4" />
+                      <Settings className="w-4 h-4" />
                       In-App
                     </Label>
                   </div>
@@ -460,14 +460,14 @@ export default function NotificationRules() {
           <div className="space-y-4">
             {rules.length === 0 ? (
               <div className="text-center p-8 text-gray-500">
-                <Bell className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <Settings className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                 <p>No notification rules configured.</p>
                 <p className="text-sm">Click "Create Rule" to set up your first notification rule.</p>
               </div>
             ) : (
               rules.map((rule) => {
                 const triggerInfo = getTriggerInfo(rule.trigger);
-                const TriggerIcon = triggerInfo?.icon || Bell;
+                const TriggerIcon = triggerInfo?.icon || Settings;
                 
                 return (
                   <div key={rule.id} className="border rounded-lg p-4 hover:bg-gray-50">
@@ -501,7 +501,7 @@ export default function NotificationRules() {
                           )}
                           {rule.actions.inApp && (
                             <Badge variant="outline" className="flex items-center gap-1">
-                              <Bell className="w-3 h-3" />
+                              <Settings className="w-3 h-3" />
                               In-App
                             </Badge>
                           )}
@@ -682,7 +682,7 @@ export default function NotificationRules() {
                         defaultChecked={editingRule.actions.inApp}
                       />
                       <Label htmlFor="edit-inApp" className="flex items-center gap-2">
-                        <Bell className="w-4 h-4" />
+                        <Settings className="w-4 h-4" />
                         In-App
                       </Label>
                     </div>

@@ -15,7 +15,6 @@ import { SuperAdminSettings } from "@/components/settings/super-admin-settings";
 import { 
   Settings as SettingsIcon, 
   User, 
-  Bell, 
   Globe, 
   Palette, 
   FileText, 
@@ -406,7 +405,7 @@ export default function Settings() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Bell className="w-5 h-5" />
+              <SettingsIcon className="w-5 h-5" />
               {t("notifications")}
             </CardTitle>
             <CardDescription>

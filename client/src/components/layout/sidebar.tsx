@@ -75,7 +75,7 @@ const getNavigationSections = (userRole: string) => {
         title: "System Administration",
         items: [
           { name: "User Management", href: "/user-management", icon: Users },
-          { name: "Notification Rules", href: "/notification-rules", icon: Bell },
+          { name: "Notification Rules", href: "/notification-rules", icon: Settings },
           { name: "Settings", href: "/settings", icon: Settings },
           { name: "Access Control", href: "/access-control", icon: Shield },
           { name: "System Logs", href: "/system-logs", icon: FileText },
