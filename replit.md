@@ -193,3 +193,21 @@ The application follows a monorepo structure with shared types and schemas, maki
     - Titanium: Lyn (leader), Adel, Anne
   - All features integrated with existing authentication and sidebar navigation
 - **Impact**: Provides comprehensive audit customization, enhanced action management, and accurate team structure for improved 5S audit operations
+
+### Audit System Enhancements & Cancel Functionality
+- **Date**: January 15, 2025
+- **Change**: Fixed audit creation errors and added comprehensive 5S questionnaire with user-friendly cancel functionality
+- **Details**:
+  - Fixed audit creation API to properly handle date conversion and auditor assignment
+  - Added comprehensive 5S questionnaire with 25 questions (5 per category):
+    - 1S (Sort): Remove unnecessary items - 5 questions
+    - 2S (Set in Order): Organize remaining items - 5 questions
+    - 3S (Shine): Clean and inspect - 5 questions
+    - 4S (Standardize): Maintain and improve - 5 questions
+    - 5S (Sustain): Maintain discipline - 5 questions
+  - Enhanced timestamp handling in audit update operations
+  - Added cancel button with confirmation dialog for audit sessions
+  - Cancel functionality preserves progress as draft and resets audit to scheduled status
+  - Improved error handling in API request client for better user experience
+  - All questions include detailed descriptions and are enabled for all zones
+- **Impact**: Provides reliable audit creation, structured 5S assessment, and flexible user experience allowing users to change plans without losing progress

@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Save, CheckCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Save, CheckCircle, X, AlertTriangle } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -21,6 +22,7 @@ interface AuditFormProps {
 export default function AuditForm({ audit, checklistItems, onClose }: AuditFormProps) {
   const [items, setItems] = useState<ChecklistItem[]>(checklistItems);
   const [activeTab, setActiveTab] = useState("1S");
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -87,6 +89,24 @@ export default function AuditForm({ audit, checklistItems, onClose }: AuditFormP
     onClose();
   };
 
+  const handleCancelAudit = () => {
+    // Reset audit to scheduled status if it was in progress
+    if (audit.status === "in_progress") {
+      updateAuditMutation.mutate({ 
+        status: "scheduled",
+        startedAt: null
+      });
+    }
+    setShowCancelDialog(false);
+    onClose();
+    
+    toast({
+      title: "Audit Cancelled",
+      description: "Your audit session has been cancelled and progress has been saved.",
+      variant: "default",
+    });
+  };
+
   const getItemsByCategory = (category: string) => {
     return items.filter(item => item.category === category);
   };
@@ -113,6 +133,48 @@ export default function AuditForm({ audit, checklistItems, onClose }: AuditFormP
             <Badge variant={audit.status === "completed" ? "default" : "secondary"}>
               {audit.status === "in_progress" ? "In Progress" : audit.status}
             </Badge>
+            
+            {/* Cancel Button with Dialog */}
+            <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                  disabled={updateAuditMutation.isPending}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-amber-500" />
+                    Cancel Audit Session
+                  </DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to cancel this audit session? Any progress will be saved as a draft, 
+                    and you can continue later. The audit will return to "scheduled" status.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowCancelDialog(false)}
+                  >
+                    Keep Working
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    onClick={handleCancelAudit}
+                    disabled={updateAuditMutation.isPending}
+                  >
+                    Yes, Cancel Audit
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
             <Button 
               variant="outline" 
               onClick={handleSaveDraft}
