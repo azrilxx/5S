@@ -55,8 +55,108 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
+  app.post("/api/users", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can create users
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const userData = {
+        ...req.body,
+        password: await bcrypt.hash('karisma123', 10) // Default password
+      };
+      
+      const user = await storage.createUser(userData);
+      const { password, ...safeUser } = user;
+      res.status(201).json(safeUser);
+    } catch (error) {
+      console.error("Create user error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.put("/api/users/:id", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can update users
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const user = await storage.updateUser(id, updates);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const { password, ...safeUser } = user;
+      res.json(safeUser);
+    } catch (error) {
+      console.error("Update user error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/users/:id/status", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can update user status
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const { isActive } = req.body;
+      const user = await storage.updateUser(id, { isActive });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const { password, ...safeUser } = user;
+      res.json(safeUser);
+    } catch (error) {
+      console.error("Update user status error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/users/:id/reset-password", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can reset passwords
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const hashedPassword = await bcrypt.hash('karisma123', 10);
+      const user = await storage.updateUser(id, { password: hashedPassword });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json({ message: "Password reset successfully" });
+    } catch (error) {
+      console.error("Reset password error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // REMOVED: /api/users/me endpoint - redundant with /api/auth/me
   // Use /api/auth/me instead for getting current user profile
+
+  // Audit logs route
+  app.get("/api/audit-logs", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can view audit logs
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const { getAuditLogs } = await import("./middleware/auditLogger");
+      const logs = getAuditLogs(1000); // Get last 1000 entries
+      res.json(logs);
+    } catch (error) {
+      console.error("Get audit logs error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
 
   // Zone routes
   app.get("/api/zones", authenticateToken, async (req, res) => {

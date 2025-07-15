@@ -15,6 +15,8 @@ import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
 import Zones from "@/pages/zones";
 import Teams from "@/pages/teams";
+import UserManagement from "@/pages/user-management";
+import SystemLogs from "@/pages/system-logs";
 import Learn from "@/pages/learn";
 import Trainings from "@/pages/trainings";
 import Feedback from "@/pages/feedback";
@@ -105,6 +107,16 @@ function Router() {
       <Route path="/teams">
         <ProtectedRoute>
           <Teams />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/user-management">
+        <ProtectedRoute>
+          <UserManagement />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/system-logs">
+        <ProtectedRoute>
+          <SystemLogs />
         </ProtectedRoute>
       </Route>
       <Route path="/learn">

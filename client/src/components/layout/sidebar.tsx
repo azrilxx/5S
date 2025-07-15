@@ -67,10 +67,12 @@ const getNavigationSections = (userRole: string) => {
         ]
       },
       {
-        title: "System",
+        title: "System Administration",
         items: [
+          { name: "User Management", href: "/user-management", icon: Users },
           { name: "Settings", href: "/settings", icon: Settings },
           { name: "Access Control", href: "/access-control", icon: Shield },
+          { name: "System Logs", href: "/system-logs", icon: FileText },
         ]
       }
     );
