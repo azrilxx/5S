@@ -21,6 +21,10 @@ export default function Header({
   return (
     <header className="bg-white shadow-sm border-b border-slate-200 px-6 py-4">
       <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
+          <p className="text-sm text-slate-600">{subtitle}</p>
+        </div>
         <div className="flex items-center space-x-4">
           {showHomeButton && (
             <Link href="/">
@@ -29,12 +33,6 @@ export default function Header({
               </Button>
             </Link>
           )}
-          <div>
-            <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
-            <p className="text-sm text-slate-600">{subtitle}</p>
-          </div>
-        </div>
-        <div className="flex items-center space-x-4">
           <Button variant="outline" size="sm">
             <Bell className="h-4 w-4 mr-2" />
             Notifications
