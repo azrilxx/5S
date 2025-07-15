@@ -16,14 +16,37 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Zones table
-export const zones = pgTable("zones", {
+// Buildings table
+export const buildings = pgTable("buildings", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
-  type: text("type").notNull(), // office, factory
-  floor: text("floor"),
+  address: text("address"),
   isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Floors table
+export const floors = pgTable("floors", {
+  id: serial("id").primaryKey(),
+  buildingId: integer("building_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  order: integer("order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Zones table (updated with building and floor references)
+export const zones = pgTable("zones", {
+  id: serial("id").primaryKey(),
+  buildingId: integer("building_id").notNull(),
+  floorId: integer("floor_id").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  type: text("type").notNull(), // office, factory
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Teams table
@@ -151,7 +174,9 @@ export const messages = pgTable("messages", {
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
-export const insertZoneSchema = createInsertSchema(zones).omit({ id: true });
+export const insertBuildingSchema = createInsertSchema(buildings).omit({ id: true, createdAt: true });
+export const insertFloorSchema = createInsertSchema(floors).omit({ id: true, createdAt: true });
+export const insertZoneSchema = createInsertSchema(zones).omit({ id: true, createdAt: true });
 export const insertTeamSchema = createInsertSchema(teams).omit({ id: true });
 export const insertAuditSchema = createInsertSchema(audits).omit({ id: true, createdAt: true });
 export const insertChecklistItemSchema = createInsertSchema(checklistItems).omit({ id: true });
@@ -165,6 +190,10 @@ export const insertMessageSchema = createInsertSchema(messages).omit({ id: true,
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type Building = typeof buildings.$inferSelect;
+export type InsertBuilding = z.infer<typeof insertBuildingSchema>;
+export type Floor = typeof floors.$inferSelect;
+export type InsertFloor = z.infer<typeof insertFloorSchema>;
 export type Zone = typeof zones.$inferSelect;
 export type InsertZone = z.infer<typeof insertZoneSchema>;
 export type Team = typeof teams.$inferSelect;

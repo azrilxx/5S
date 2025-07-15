@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { storage } from "./storage";
-import { insertUserSchema, insertAuditSchema, insertChecklistItemSchema, insertActionSchema, insertScheduleSchema, insertReportSchema, insertTeamSchema } from "@shared/schema";
+import { insertUserSchema, insertBuildingSchema, insertFloorSchema, insertZoneSchema, insertAuditSchema, insertChecklistItemSchema, insertActionSchema, insertScheduleSchema, insertReportSchema, insertTeamSchema } from "@shared/schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import multer from "multer";
@@ -259,6 +259,145 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Building routes
+  app.get("/api/buildings", authenticateToken, async (req, res) => {
+    try {
+      const buildings = await storage.getAllBuildings();
+      res.json(buildings);
+    } catch (error) {
+      console.error("Get buildings error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/buildings", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can create buildings
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const building = await storage.createBuilding(req.body);
+      res.status(201).json(building);
+    } catch (error) {
+      console.error("Create building error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.put("/api/buildings/:id", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can update buildings
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const building = await storage.updateBuilding(id, req.body);
+      if (!building) {
+        return res.status(404).json({ message: "Building not found" });
+      }
+      res.json(building);
+    } catch (error) {
+      console.error("Update building error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/buildings/:id", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can delete buildings
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteBuilding(id);
+      if (!success) {
+        return res.status(404).json({ message: "Building not found" });
+      }
+      res.json({ message: "Building deleted successfully" });
+    } catch (error) {
+      console.error("Delete building error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Floor routes
+  app.get("/api/floors", authenticateToken, async (req, res) => {
+    try {
+      const floors = await storage.getAllFloors();
+      res.json(floors);
+    } catch (error) {
+      console.error("Get floors error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/floors/building/:buildingId", authenticateToken, async (req, res) => {
+    try {
+      const buildingId = parseInt(req.params.buildingId);
+      const floors = await storage.getFloorsByBuilding(buildingId);
+      res.json(floors);
+    } catch (error) {
+      console.error("Get floors by building error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/floors", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can create floors
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const floor = await storage.createFloor(req.body);
+      res.status(201).json(floor);
+    } catch (error) {
+      console.error("Create floor error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.put("/api/floors/:id", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can update floors
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const floor = await storage.updateFloor(id, req.body);
+      if (!floor) {
+        return res.status(404).json({ message: "Floor not found" });
+      }
+      res.json(floor);
+    } catch (error) {
+      console.error("Update floor error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/floors/:id", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can delete floors
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteFloor(id);
+      if (!success) {
+        return res.status(404).json({ message: "Floor not found" });
+      }
+      res.json({ message: "Floor deleted successfully" });
+    } catch (error) {
+      console.error("Delete floor error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Zone routes
   app.get("/api/zones", authenticateToken, async (req, res) => {
     try {
@@ -266,6 +405,28 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
       res.json(zones);
     } catch (error) {
       console.error("Get zones error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/zones/building/:buildingId", authenticateToken, async (req, res) => {
+    try {
+      const buildingId = parseInt(req.params.buildingId);
+      const zones = await storage.getZonesByBuilding(buildingId);
+      res.json(zones);
+    } catch (error) {
+      console.error("Get zones by building error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/zones/floor/:floorId", authenticateToken, async (req, res) => {
+    try {
+      const floorId = parseInt(req.params.floorId);
+      const zones = await storage.getZonesByFloor(floorId);
+      res.json(zones);
+    } catch (error) {
+      console.error("Get zones by floor error:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });

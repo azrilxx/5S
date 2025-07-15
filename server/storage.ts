@@ -1,6 +1,7 @@
 import { 
-  users, zones, teams, audits, checklistItems, actions, schedules, reports, questions, notificationRules, messages,
-  type User, type InsertUser, type Zone, type InsertZone, type Team, type InsertTeam,
+  users, buildings, floors, zones, teams, audits, checklistItems, actions, schedules, reports, questions, notificationRules, messages,
+  type User, type InsertUser, type Building, type InsertBuilding, type Floor, type InsertFloor,
+  type Zone, type InsertZone, type Team, type InsertTeam,
   type Audit, type InsertAudit, type ChecklistItem, type InsertChecklistItem,
   type Action, type InsertAction, type Schedule, type InsertSchedule,
   type Report, type InsertReport, type Question, type InsertQuestion,
@@ -17,9 +18,26 @@ export interface IStorage {
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
 
+  // Building methods
+  getAllBuildings(): Promise<Building[]>;
+  getBuilding(id: number): Promise<Building | undefined>;
+  createBuilding(building: InsertBuilding): Promise<Building>;
+  updateBuilding(id: number, building: Partial<InsertBuilding>): Promise<Building | undefined>;
+  deleteBuilding(id: number): Promise<boolean>;
+
+  // Floor methods
+  getAllFloors(): Promise<Floor[]>;
+  getFloor(id: number): Promise<Floor | undefined>;
+  getFloorsByBuilding(buildingId: number): Promise<Floor[]>;
+  createFloor(floor: InsertFloor): Promise<Floor>;
+  updateFloor(id: number, floor: Partial<InsertFloor>): Promise<Floor | undefined>;
+  deleteFloor(id: number): Promise<boolean>;
+
   // Zone methods
   getAllZones(): Promise<Zone[]>;
   getZone(id: number): Promise<Zone | undefined>;
+  getZonesByFloor(floorId: number): Promise<Zone[]>;
+  getZonesByBuilding(buildingId: number): Promise<Zone[]>;
   createZone(zone: InsertZone): Promise<Zone>;
   updateZone(id: number, zone: Partial<InsertZone>): Promise<Zone | undefined>;
   deleteZone(id: number): Promise<boolean>;
@@ -570,6 +588,61 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(users);
   }
 
+  // Building methods
+  async getAllBuildings(): Promise<Building[]> {
+    return await db.select().from(buildings);
+  }
+
+  async getBuilding(id: number): Promise<Building | undefined> {
+    const [building] = await db.select().from(buildings).where(eq(buildings.id, id));
+    return building || undefined;
+  }
+
+  async createBuilding(insertBuilding: InsertBuilding): Promise<Building> {
+    const [building] = await db.insert(buildings).values(insertBuilding).returning();
+    return building;
+  }
+
+  async updateBuilding(id: number, updates: Partial<InsertBuilding>): Promise<Building | undefined> {
+    const [building] = await db.update(buildings).set(updates).where(eq(buildings.id, id)).returning();
+    return building || undefined;
+  }
+
+  async deleteBuilding(id: number): Promise<boolean> {
+    const result = await db.delete(buildings).where(eq(buildings.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Floor methods
+  async getAllFloors(): Promise<Floor[]> {
+    return await db.select().from(floors);
+  }
+
+  async getFloor(id: number): Promise<Floor | undefined> {
+    const [floor] = await db.select().from(floors).where(eq(floors.id, id));
+    return floor || undefined;
+  }
+
+  async getFloorsByBuilding(buildingId: number): Promise<Floor[]> {
+    return await db.select().from(floors).where(eq(floors.buildingId, buildingId));
+  }
+
+  async createFloor(insertFloor: InsertFloor): Promise<Floor> {
+    const [floor] = await db.insert(floors).values(insertFloor).returning();
+    return floor;
+  }
+
+  async updateFloor(id: number, updates: Partial<InsertFloor>): Promise<Floor | undefined> {
+    const [floor] = await db.update(floors).set(updates).where(eq(floors.id, id)).returning();
+    return floor || undefined;
+  }
+
+  async deleteFloor(id: number): Promise<boolean> {
+    const result = await db.delete(floors).where(eq(floors.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Zone methods
   async getAllZones(): Promise<Zone[]> {
     return await db.select().from(zones);
   }
@@ -579,12 +652,30 @@ export class DatabaseStorage implements IStorage {
     return zone || undefined;
   }
 
+  async getZonesByFloor(floorId: number): Promise<Zone[]> {
+    return await db.select().from(zones).where(eq(zones.floorId, floorId));
+  }
+
+  async getZonesByBuilding(buildingId: number): Promise<Zone[]> {
+    return await db.select().from(zones).where(eq(zones.buildingId, buildingId));
+  }
+
   async createZone(insertZone: InsertZone): Promise<Zone> {
     const [zone] = await db
       .insert(zones)
       .values(insertZone)
       .returning();
     return zone;
+  }
+
+  async updateZone(id: number, updates: Partial<InsertZone>): Promise<Zone | undefined> {
+    const [zone] = await db.update(zones).set(updates).where(eq(zones.id, id)).returning();
+    return zone || undefined;
+  }
+
+  async deleteZone(id: number): Promise<boolean> {
+    const result = await db.delete(zones).where(eq(zones.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
   }
 
   async getAllTeams(): Promise<Team[]> {
