@@ -89,6 +89,10 @@ export interface IStorage {
   getMessagesBySender(sender: string): Promise<Message[]>;
   getUnreadMessagesCount(recipient: string): Promise<number>;
   markMessageAsRead(id: number): Promise<boolean>;
+
+  // Settings methods
+  getSettings(key: string): Promise<any>;
+  setSettings(key: string, settings: any): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -206,6 +210,19 @@ export class MemStorage implements IStorage {
     return zone;
   }
 
+  async updateZone(id: number, updates: Partial<InsertZone>): Promise<Zone | undefined> {
+    const zone = this.zones.get(id);
+    if (!zone) return undefined;
+    
+    const updatedZone = { ...zone, ...updates };
+    this.zones.set(id, updatedZone);
+    return updatedZone;
+  }
+
+  async deleteZone(id: number): Promise<boolean> {
+    return this.zones.delete(id);
+  }
+
   // Team methods
   async getAllTeams(): Promise<Team[]> {
     return Array.from(this.teams.values());
@@ -226,6 +243,19 @@ export class MemStorage implements IStorage {
     };
     this.teams.set(team.id, team);
     return team;
+  }
+
+  async updateTeam(id: number, updates: Partial<InsertTeam>): Promise<Team | undefined> {
+    const team = this.teams.get(id);
+    if (!team) return undefined;
+    
+    const updatedTeam = { ...team, ...updates };
+    this.teams.set(id, updatedTeam);
+    return updatedTeam;
+  }
+
+  async deleteTeam(id: number): Promise<boolean> {
+    return this.teams.delete(id);
   }
 
   // Audit methods
@@ -415,6 +445,96 @@ export class MemStorage implements IStorage {
     };
     this.reports.set(report.id, report);
     return report;
+  }
+
+  // Question methods (placeholder - not implemented in MemStorage)
+  async getAllQuestions(): Promise<Question[]> {
+    return [];
+  }
+
+  async getQuestion(id: number): Promise<Question | undefined> {
+    return undefined;
+  }
+
+  async createQuestion(insertQuestion: InsertQuestion): Promise<Question> {
+    throw new Error("Questions not implemented in MemStorage");
+  }
+
+  async updateQuestion(id: number, updates: Partial<InsertQuestion>): Promise<Question | undefined> {
+    return undefined;
+  }
+
+  async deleteQuestion(id: number): Promise<boolean> {
+    return false;
+  }
+
+  // Notification rule methods (placeholder - not implemented in MemStorage)
+  async getAllNotificationRules(): Promise<NotificationRule[]> {
+    return [];
+  }
+
+  async getNotificationRule(id: number): Promise<NotificationRule | undefined> {
+    return undefined;
+  }
+
+  async createNotificationRule(insertRule: InsertNotificationRule): Promise<NotificationRule> {
+    throw new Error("Notification rules not implemented in MemStorage");
+  }
+
+  async updateNotificationRule(id: number, updates: Partial<InsertNotificationRule>): Promise<NotificationRule | undefined> {
+    return undefined;
+  }
+
+  async deleteNotificationRule(id: number): Promise<boolean> {
+    return false;
+  }
+
+  // Message methods (placeholder - not implemented in MemStorage)
+  async getAllMessages(): Promise<Message[]> {
+    return [];
+  }
+
+  async getMessage(id: number): Promise<Message | undefined> {
+    return undefined;
+  }
+
+  async createMessage(insertMessage: InsertMessage): Promise<Message> {
+    throw new Error("Messages not implemented in MemStorage");
+  }
+
+  async updateMessage(id: number, updates: Partial<InsertMessage>): Promise<Message | undefined> {
+    return undefined;
+  }
+
+  async deleteMessage(id: number): Promise<boolean> {
+    return false;
+  }
+
+  async getMessagesByRecipient(recipient: string): Promise<Message[]> {
+    return [];
+  }
+
+  async getMessagesBySender(sender: string): Promise<Message[]> {
+    return [];
+  }
+
+  async getUnreadMessagesCount(recipient: string): Promise<number> {
+    return 0;
+  }
+
+  async markMessageAsRead(id: number): Promise<boolean> {
+    return false;
+  }
+
+  // Settings methods
+  private settingsStore: Map<string, any> = new Map();
+
+  async getSettings(key: string): Promise<any> {
+    return this.settingsStore.get(key);
+  }
+
+  async setSettings(key: string, settings: any): Promise<void> {
+    this.settingsStore.set(key, settings);
   }
 }
 
@@ -765,6 +885,17 @@ export class DatabaseStorage implements IStorage {
       .set({ isRead: true })
       .where(eq(messages.id, id));
     return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Settings methods - using a simple in-memory store for now
+  private settingsStore: Map<string, any> = new Map();
+
+  async getSettings(key: string): Promise<any> {
+    return this.settingsStore.get(key);
+  }
+
+  async setSettings(key: string, settings: any): Promise<void> {
+    this.settingsStore.set(key, settings);
   }
 }
 

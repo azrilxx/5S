@@ -733,6 +733,149 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
+  // User Settings Routes
+  app.get("/api/settings", authenticateToken, async (req: Request & { user?: any }, res: Response) => {
+    try {
+      // Only allow non-admin users to access settings
+      if (req.user?.role === 'admin') {
+        return res.status(403).json({ message: "Settings are for regular users only" });
+      }
+
+      const settingsKey = `user:${req.user.username}:settings`;
+      const settings = await storage.getSettings(settingsKey);
+      
+      // Return default settings if none exist
+      const defaultSettings = {
+        language: "en",
+        notifications: {
+          assignedActions: true,
+          upcomingAudits: true,
+          overdueItems: true
+        },
+        theme: "light"
+      };
+
+      return res.json(settings || defaultSettings);
+    } catch (error) {
+      console.error("Error getting user settings:", error);
+      return res.status(500).json({ message: "Failed to get user settings" });
+    }
+  });
+
+  app.put("/api/settings", authenticateToken, async (req: Request & { user?: any }, res: Response) => {
+    try {
+      // Only allow non-admin users to update settings
+      if (req.user?.role === 'admin') {
+        return res.status(403).json({ message: "Settings are for regular users only" });
+      }
+
+      const settingsKey = `user:${req.user.username}:settings`;
+      const settings = req.body;
+      
+      // Validate settings structure
+      if (!settings.language || !settings.notifications || !settings.theme) {
+        return res.status(400).json({ message: "Invalid settings format" });
+      }
+
+      await storage.setSettings(settingsKey, settings);
+      return res.json({ success: true, message: "Settings updated successfully" });
+    } catch (error) {
+      console.error("Error updating user settings:", error);
+      return res.status(500).json({ message: "Failed to update user settings" });
+    }
+  });
+
+  // Change Password Route
+  app.post("/api/auth/change-password", authenticateToken, async (req: Request & { user?: any }, res: Response) => {
+    try {
+      const { oldPassword, newPassword } = req.body;
+      
+      if (!oldPassword || !newPassword) {
+        return res.status(400).json({ message: "Old password and new password are required" });
+      }
+
+      // Verify old password
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+      if (!isOldPasswordValid) {
+        return res.status(400).json({ message: "Old password is incorrect" });
+      }
+
+      // Hash new password
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+      
+      // Update password
+      await storage.updateUser(req.user.id, { password: hashedNewPassword });
+      
+      return res.json({ success: true, message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      return res.status(500).json({ message: "Failed to change password" });
+    }
+  });
+
+  // User Audit History Route
+  app.get("/api/audits/history", authenticateToken, async (req: Request & { user?: any }, res: Response) => {
+    try {
+      // Only allow non-admin users to view their own audit history
+      if (req.user?.role === 'admin') {
+        return res.status(403).json({ message: "Audit history is for regular users only" });
+      }
+
+      const userAudits = await storage.getAuditsByAuditor(req.user.username);
+      const completedAudits = userAudits.filter(audit => audit.status === 'completed');
+      
+      return res.json(completedAudits);
+    } catch (error) {
+      console.error("Error getting audit history:", error);
+      return res.status(500).json({ message: "Failed to get audit history" });
+    }
+  });
+
+  // Download Audit PDF Route
+  app.get("/api/audits/:id/pdf", authenticateToken, async (req: Request & { user?: any }, res: Response) => {
+    try {
+      const auditId = parseInt(req.params.id);
+      const audit = await storage.getAudit(auditId);
+      
+      if (!audit) {
+        return res.status(404).json({ message: "Audit not found" });
+      }
+
+      // Only allow users to download their own audits
+      if (req.user?.role !== 'admin' && audit.auditor !== req.user.username) {
+        return res.status(403).json({ message: "You can only download your own audits" });
+      }
+
+      // For now, return a simple text response
+      // In a real implementation, you would generate a PDF here
+      const pdfContent = `
+        Audit Report
+        ============
+        
+        Title: ${audit.title}
+        Zone: ${audit.zone}
+        Auditor: ${audit.auditor}
+        Status: ${audit.status}
+        Overall Score: ${audit.overallScore}%
+        Completed: ${audit.completedAt}
+        
+        Notes: ${audit.notes || 'No notes available'}
+      `;
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="audit-${auditId}.pdf"`);
+      res.send(pdfContent);
+    } catch (error) {
+      console.error("Error downloading audit PDF:", error);
+      return res.status(500).json({ message: "Failed to download audit PDF" });
+    }
+  });
+
   // Dashboard statistics
   app.get("/api/dashboard/stats", authenticateToken, async (req, res) => {
     try {

@@ -1,0 +1,95 @@
+Implement a fully functional **User Settings Page** for normal users.
+
+The Settings page must:
+- Be accessible to logged-in non-admin users only
+- Be built with the existing design system (TailwindCSS + shadcn/ui)
+- Be stored and fetched from Replit DB using key pattern: `user:<username>:settings`
+
+---
+
+## ✅ Functional Requirements
+
+### 1. 🔐 Account Info
+- Display name and username (read-only)
+- Allow password update:
+  - Old password verification required
+  - New password confirmation
+
+### 2. 🔔 Notifications
+- Enable/disable email alerts for:
+  - Assigned actions
+  - Upcoming audits
+  - Overdue items
+
+### 3. 🌐 Language Preferences
+- Language dropdown (default: English)
+  - Options: English, Malay, Mandarin
+- UI labels should respect this setting (prepare basic i18n structure)
+
+### 4. 🎨 Theme Preferences (Optional)
+- Add toggle for Light/Dark mode using local storage or app theme context
+
+### 5. 📆 Audit History
+- Show logged-in user’s completed audits (summary view)
+- Button to download selected audit as PDF
+
+---
+
+## 🚫 Restrictions
+- Do NOT expose admin-only functions
+- Do NOT allow direct access to system zones, other users, or configuration
+- Keep all user settings self-contained per user keyspace
+
+---
+
+## 💾 Data Model (Replit DB)
+
+Example key: `user:azril:settings`
+```json
+{
+  "language": "en",
+  "notifications": {
+    "assignedActions": true,
+    "upcomingAudits": true,
+    "overdueItems": true
+  },
+  "theme": "dark"
+}
+
+📚 i18n Stub Data (Start with static dictionary)
+
+export const translations = {
+  en: { settings: "Settings", language: "Language", ... },
+  ms: { settings: "Tetapan", language: "Bahasa", ... },
+  zh: { settings: "设定", language: "语言", ... }
+}
+
+🔄 Tasks
+
+    Create Settings.tsx page/component with Tailwind + shadcn/ui
+
+    Read/write settings from Replit DB
+
+    Update Navbar to link to Settings page (for normal users only)
+
+    Implement i18n context or local translation function
+
+    Hook audit history to display audit keys that belong to current user
+
+    Ensure app does not crash if settings key not yet created
+
+🧪 Validation
+
+    Log in as normal user → Visit Settings
+
+    Change language → UI reflects selected language
+
+    Toggle email notifications → Persist and recall from DB
+
+    Update password → Login requires new password
+
+    View past audits → Downloadable as PDF
+
+    No access to admin functions
+
+All changes must retain full app functionality and not affect admin dashboard or Replit deployment.

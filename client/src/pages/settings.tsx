@@ -1,608 +1,546 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { User, Settings as SettingsIcon, Bell, Shield, Plus, Edit, Trash2 } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { ZONES, TEAMS, USER_ROLES } from "@/lib/constants";
+import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/components/auth/auth-provider";
-import Layout from "@/components/layout/layout";
+import { 
+  Settings as SettingsIcon, 
+  User, 
+  Bell, 
+  Globe, 
+  Palette, 
+  FileText, 
+  Download,
+  Eye,
+  EyeOff,
+  Shield
+} from "lucide-react";
+
+interface UserSettings {
+  language: string;
+  notifications: {
+    assignedActions: boolean;
+    upcomingAudits: boolean;
+    overdueItems: boolean;
+  };
+  theme: string;
+}
+
+interface Audit {
+  id: number;
+  title: string;
+  zone: string;
+  auditor: string;
+  status: string;
+  completedAt: string;
+  overallScore: number;
+}
+
+// Basic i18n translations
+const translations = {
+  en: {
+    settings: "Settings",
+    language: "Language",
+    notifications: "Notifications",
+    theme: "Theme",
+    accountInfo: "Account Information",
+    auditHistory: "Audit History",
+    assignedActions: "Assigned Actions",
+    upcomingAudits: "Upcoming Audits",
+    overdueItems: "Overdue Items",
+    changePassword: "Change Password",
+    oldPassword: "Old Password",
+    newPassword: "New Password",
+    confirmPassword: "Confirm Password",
+    updatePassword: "Update Password",
+    light: "Light",
+    dark: "Dark",
+    saveSettings: "Save Settings",
+    downloadPdf: "Download PDF",
+    completed: "Completed",
+    score: "Score"
+  },
+  ms: {
+    settings: "Tetapan",
+    language: "Bahasa",
+    notifications: "Pemberitahuan",
+    theme: "Tema",
+    accountInfo: "Maklumat Akaun",
+    auditHistory: "Sejarah Audit",
+    assignedActions: "Tindakan Ditugaskan",
+    upcomingAudits: "Audit Akan Datang",
+    overdueItems: "Item Tertunggak",
+    changePassword: "Tukar Kata Laluan",
+    oldPassword: "Kata Laluan Lama",
+    newPassword: "Kata Laluan Baru",
+    confirmPassword: "Sahkan Kata Laluan",
+    updatePassword: "Kemaskini Kata Laluan",
+    light: "Cerah",
+    dark: "Gelap",
+    saveSettings: "Simpan Tetapan",
+    downloadPdf: "Muat Turun PDF",
+    completed: "Selesai",
+    score: "Skor"
+  },
+  zh: {
+    settings: "设定",
+    language: "语言",
+    notifications: "通知",
+    theme: "主题",
+    accountInfo: "账户信息",
+    auditHistory: "审计历史",
+    assignedActions: "分配的任务",
+    upcomingAudits: "即将到来的审计",
+    overdueItems: "逾期项目",
+    changePassword: "更改密码",
+    oldPassword: "旧密码",
+    newPassword: "新密码",
+    confirmPassword: "确认密码",
+    updatePassword: "更新密码",
+    light: "亮色",
+    dark: "暗色",
+    saveSettings: "保存设置",
+    downloadPdf: "下载PDF",
+    completed: "已完成",
+    score: "分数"
+  }
+};
 
 export default function Settings() {
-  const [showNewUserDialog, setShowNewUserDialog] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [newUserData, setNewUserData] = useState({
-    username: "",
-    password: "",
-    name: "",
-    email: "",
-    role: "auditor",
-    team: "",
-    zones: [] as string[],
-  });
-  const [systemSettings, setSystemSettings] = useState({
-    auditDuration: 60,
-    emailNotifications: true,
-    smsNotifications: false,
-    autoAssignment: true,
-    reminderDays: 1,
-  });
-
   const { user } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  const { data: users, isLoading: usersLoading } = useQuery({
-    queryKey: ["/api/users"],
+  
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: ""
   });
-
-  const { data: zones } = useQuery({
-    queryKey: ["/api/zones"],
-  });
-
-  const { data: teams } = useQuery({
-    queryKey: ["/api/teams"],
-  });
-
-  const createUserMutation = useMutation({
-    mutationFn: (userData: any) => apiRequest("POST", "/api/auth/register", userData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      setShowNewUserDialog(false);
-      setNewUserData({
-        username: "",
-        password: "",
-        name: "",
-        email: "",
-        role: "auditor",
-        team: "",
-        zones: [],
-      });
-      toast({
-        title: "Success",
-        description: "User created successfully",
-      });
+  
+  const [settings, setSettings] = useState<UserSettings>({
+    language: "en",
+    notifications: {
+      assignedActions: true,
+      upcomingAudits: true,
+      overdueItems: true
     },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create user",
-        variant: "destructive",
-      });
-    },
+    theme: "light"
   });
 
-  const updateUserMutation = useMutation({
-    mutationFn: ({ id, updates }: { id: number; updates: any }) =>
-      apiRequest("PUT", `/api/users/${id}`, updates),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      setSelectedUser(null);
-      toast({
-        title: "Success",
-        description: "User updated successfully",
+  // Fetch user settings
+  const { data: userSettings, isLoading: settingsLoading } = useQuery<UserSettings>({
+    queryKey: ["/api/settings"],
+    enabled: !!user && user.role !== 'admin',
+  });
+
+  // Fetch user's audit history
+  const { data: auditHistory = [], isLoading: auditsLoading } = useQuery<Audit[]>({
+    queryKey: ["/api/audits/history"],
+    enabled: !!user && user.role !== 'admin',
+  });
+
+  // Update local settings when data is loaded
+  useEffect(() => {
+    if (userSettings) {
+      setSettings(userSettings);
+    }
+  }, [userSettings]);
+
+  // Save settings mutation
+  const saveSettingsMutation = useMutation({
+    mutationFn: async (newSettings: UserSettings) => {
+      const response = await fetch("/api/settings", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(newSettings),
       });
+      if (!response.ok) throw new Error("Failed to save settings");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/settings"] });
+      toast({ title: t("saveSettings") + " successful" });
     },
     onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to update user",
-        variant: "destructive",
-      });
+      toast({ title: "Failed to save settings", variant: "destructive" });
     },
   });
 
-  const handleCreateUser = () => {
-    if (!newUserData.username || !newUserData.password || !newUserData.name || !newUserData.email) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
+  // Change password mutation
+  const changePasswordMutation = useMutation({
+    mutationFn: async (passwords: { oldPassword: string; newPassword: string }) => {
+      const response = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(passwords),
       });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to change password");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      setPasswordForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
+      toast({ title: "Password updated successfully" });
+    },
+    onError: (error) => {
+      toast({ title: error.message, variant: "destructive" });
+    },
+  });
+
+  // Download audit PDF
+  const downloadAuditPdf = async (auditId: number) => {
+    try {
+      const response = await fetch(`/api/audits/${auditId}/pdf`, {
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to download PDF");
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `audit-${auditId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      toast({ title: "Failed to download PDF", variant: "destructive" });
+    }
+  };
+
+  // Translation helper
+  const t = (key: string) => {
+    return (translations as any)[settings.language]?.[key] || key;
+  };
+
+  const handleSettingsChange = (key: keyof UserSettings, value: any) => {
+    setSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const handleNotificationChange = (key: keyof UserSettings['notifications'], value: boolean) => {
+    setSettings(prev => ({
+      ...prev,
+      notifications: {
+        ...prev.notifications,
+        [key]: value
+      }
+    }));
+  };
+
+  const handlePasswordChange = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast({ title: "Passwords do not match", variant: "destructive" });
       return;
     }
-
-    createUserMutation.mutate(newUserData);
-  };
-
-  const handleUpdateUser = (updates: any) => {
-    if (!selectedUser) return;
-    
-    updateUserMutation.mutate({
-      id: selectedUser.id,
-      updates,
-    });
-  };
-
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case "admin":
-        return "bg-red-100 text-red-800";
-      case "supervisor":
-        return "bg-blue-100 text-blue-800";
-      case "auditor":
-        return "bg-green-100 text-green-800";
-      case "viewer":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+    if (passwordForm.newPassword.length < 6) {
+      toast({ title: "Password must be at least 6 characters", variant: "destructive" });
+      return;
     }
-  };
-
-  const handleSystemSettingsChange = (key: string, value: any) => {
-    setSystemSettings(prev => ({ ...prev, [key]: value }));
-    // In a real app, you would save these to the backend
-    toast({
-      title: "Settings Updated",
-      description: `${key} has been updated`,
+    changePasswordMutation.mutate({
+      oldPassword: passwordForm.oldPassword,
+      newPassword: passwordForm.newPassword
     });
   };
 
-  const canManageUsers = user?.role === "admin";
+  const handleSaveSettings = () => {
+    saveSettingsMutation.mutate(settings);
+  };
+
+  // Only allow access to non-admin users
+  if (!user || user.role === 'admin') {
+    return (
+      <div className="p-6">
+        <div className="text-center">
+          <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
+          <p className="text-gray-600">User settings are available to regular users only.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (settingsLoading) {
+    return <div className="p-6">Loading settings...</div>;
+  }
 
   return (
-    <Layout
-      title="Settings"
-      subtitle="Manage system configuration"
-      showNewAuditButton={false}
-    >
-      <div className="space-y-6">
-        <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="zones">Zones & Teams</TabsTrigger>
-            <TabsTrigger value="system">System</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          </TabsList>
+    <div className="p-6 max-w-4xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">{t("settings")}</h1>
+        <p className="text-gray-600">
+          Manage your account preferences and notification settings
+        </p>
+      </div>
 
-          {/* Users Tab */}
-          <TabsContent value="users" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>User Management</CardTitle>
-                  {canManageUsers && (
-                    <Button onClick={() => setShowNewUserDialog(true)}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add User
-                    </Button>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                {usersLoading ? (
-                  <div className="space-y-4">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className="animate-pulse">
-                        <div className="h-16 bg-slate-200 rounded-lg"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>User</TableHead>
-                          <TableHead>Role</TableHead>
-                          <TableHead>Team</TableHead>
-                          <TableHead>Zones</TableHead>
-                          <TableHead>Status</TableHead>
-                          {canManageUsers && <TableHead>Actions</TableHead>}
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {(users as any[])?.map((userData: any) => (
-                          <TableRow key={userData.id}>
-                            <TableCell>
-                              <div className="flex items-center">
-                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                                  <User className="h-4 w-4 text-primary" />
-                                </div>
-                                <div>
-                                  <p className="font-medium text-slate-900">{userData.name}</p>
-                                  <p className="text-sm text-slate-600">{userData.email}</p>
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge className={getRoleColor(userData.role)}>
-                                {userData.role}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <span className="text-sm text-slate-900">
-                                {userData.team || "Not assigned"}
-                              </span>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex flex-wrap gap-1">
-                                {userData.zones?.slice(0, 2).map((zone: string) => (
-                                  <Badge key={zone} variant="outline" className="text-xs">
-                                    {zone}
-                                  </Badge>
-                                ))}
-                                {userData.zones?.length > 2 && (
-                                  <Badge variant="outline" className="text-xs">
-                                    +{userData.zones.length - 2} more
-                                  </Badge>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={userData.isActive ? "default" : "secondary"}>
-                                {userData.isActive ? "Active" : "Inactive"}
-                              </Badge>
-                            </TableCell>
-                            {canManageUsers && (
-                              <TableCell>
-                                <div className="flex items-center space-x-2">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setSelectedUser(userData)}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            )}
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Zones & Teams Tab */}
-          <TabsContent value="zones" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Zones</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {(zones as any[])?.map((zone: any) => (
-                      <div key={zone.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                        <div>
-                          <p className="font-medium text-slate-900">{zone.name}</p>
-                          <p className="text-sm text-slate-600">{zone.description}</p>
-                          <p className="text-xs text-slate-500">
-                            {zone.type} • {zone.floor} Floor
-                          </p>
-                        </div>
-                        <Badge variant={zone.isActive ? "default" : "secondary"}>
-                          {zone.isActive ? "Active" : "Inactive"}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Teams</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {(teams as any[])?.map((team: any) => (
-                      <div key={team.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                        <div>
-                          <p className="font-medium text-slate-900">{team.name}</p>
-                          <p className="text-sm text-slate-600">Leader: {team.leader}</p>
-                          <p className="text-xs text-slate-500">
-                            {team.members?.length || 0} members
-                          </p>
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {team.assignedZones?.slice(0, 2).map((zone: string) => (
-                            <Badge key={zone} variant="outline" className="text-xs">
-                              {zone}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+      <div className="grid gap-6">
+        {/* Account Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="w-5 h-5" />
+              {t("accountInfo")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Display Name</Label>
+                <Input value={user.name} disabled className="bg-gray-50" />
+              </div>
+              <div>
+                <Label>Username</Label>
+                <Input value={user.username} disabled className="bg-gray-50" />
+              </div>
             </div>
-          </TabsContent>
-
-          {/* System Tab */}
-          <TabsContent value="system" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>System Configuration</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <Separator />
+            
+            <div>
+              <h3 className="font-medium text-gray-900 mb-4">{t("changePassword")}</h3>
+              <form onSubmit={handlePasswordChange} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <Label htmlFor="auditDuration">Default Audit Duration (minutes)</Label>
-                    <Select
-                      value={systemSettings.auditDuration.toString()}
-                      onValueChange={(value) => handleSystemSettingsChange("auditDuration", parseInt(value))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="30">30 minutes</SelectItem>
-                        <SelectItem value="45">45 minutes</SelectItem>
-                        <SelectItem value="60">60 minutes</SelectItem>
-                        <SelectItem value="90">90 minutes</SelectItem>
-                        <SelectItem value="120">120 minutes</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="oldPassword">{t("oldPassword")}</Label>
+                    <div className="relative">
+                      <Input
+                        id="oldPassword"
+                        type={showOldPassword ? "text" : "password"}
+                        value={passwordForm.oldPassword}
+                        onChange={(e) => setPasswordForm(prev => ({ ...prev, oldPassword: e.target.value }))}
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                        onClick={() => setShowOldPassword(!showOldPassword)}
+                      >
+                        {showOldPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </Button>
+                    </div>
                   </div>
-
                   <div>
-                    <Label htmlFor="reminderDays">Reminder Days Before Due</Label>
-                    <Select
-                      value={systemSettings.reminderDays.toString()}
-                      onValueChange={(value) => handleSystemSettingsChange("reminderDays", parseInt(value))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">1 day</SelectItem>
-                        <SelectItem value="2">2 days</SelectItem>
-                        <SelectItem value="3">3 days</SelectItem>
-                        <SelectItem value="7">1 week</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="newPassword">{t("newPassword")}</Label>
+                    <div className="relative">
+                      <Input
+                        id="newPassword"
+                        type={showNewPassword ? "text" : "password"}
+                        value={passwordForm.newPassword}
+                        onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                      >
+                        {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={passwordForm.confirmPassword}
+                        onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </Button>
+                    </div>
                   </div>
                 </div>
+                <Button type="submit" disabled={changePasswordMutation.isPending}>
+                  {changePasswordMutation.isPending ? "Updating..." : t("updatePassword")}
+                </Button>
+              </form>
+            </div>
+          </CardContent>
+        </Card>
 
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label htmlFor="autoAssignment">Auto Assignment</Label>
-                      <p className="text-sm text-slate-600">
-                        Automatically assign audits to teams based on zones
+        {/* Notifications */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5" />
+              {t("notifications")}
+            </CardTitle>
+            <CardDescription>
+              Choose what notifications you want to receive
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-sm font-medium">{t("assignedActions")}</Label>
+                <p className="text-sm text-gray-600">Get notified when new actions are assigned to you</p>
+              </div>
+              <Switch
+                checked={settings.notifications.assignedActions}
+                onCheckedChange={(checked) => handleNotificationChange('assignedActions', checked)}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-sm font-medium">{t("upcomingAudits")}</Label>
+                <p className="text-sm text-gray-600">Get reminded about upcoming audits</p>
+              </div>
+              <Switch
+                checked={settings.notifications.upcomingAudits}
+                onCheckedChange={(checked) => handleNotificationChange('upcomingAudits', checked)}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-sm font-medium">{t("overdueItems")}</Label>
+                <p className="text-sm text-gray-600">Get alerted when items become overdue</p>
+              </div>
+              <Switch
+                checked={settings.notifications.overdueItems}
+                onCheckedChange={(checked) => handleNotificationChange('overdueItems', checked)}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Language and Theme */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="w-5 h-5" />
+                {t("language")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Select value={settings.language} onValueChange={(value) => handleSettingsChange('language', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="ms">Bahasa Malaysia</SelectItem>
+                  <SelectItem value="zh">中文</SelectItem>
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Palette className="w-5 h-5" />
+                {t("theme")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Select value={settings.theme} onValueChange={(value) => handleSettingsChange('theme', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select theme" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="light">{t("light")}</SelectItem>
+                  <SelectItem value="dark">{t("dark")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Audit History */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              {t("auditHistory")}
+            </CardTitle>
+            <CardDescription>
+              Your completed audits and their results
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {auditsLoading ? (
+              <div className="text-center py-4">Loading audit history...</div>
+            ) : auditHistory.length === 0 ? (
+              <div className="text-center py-4 text-gray-500">No completed audits found</div>
+            ) : (
+              <div className="space-y-3">
+                {auditHistory.map((audit) => (
+                  <div key={audit.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium">{audit.title}</h4>
+                        <Badge variant="outline">{audit.zone}</Badge>
+                        <Badge variant="secondary">{t("completed")}</Badge>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {t("score")}: {audit.overallScore}% | {new Date(audit.completedAt).toLocaleDateString()}
                       </p>
                     </div>
-                    <Switch
-                      id="autoAssignment"
-                      checked={systemSettings.autoAssignment}
-                      onCheckedChange={(checked) => handleSystemSettingsChange("autoAssignment", checked)}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Notifications Tab */}
-          <TabsContent value="notifications" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Notification Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Bell className="h-5 w-5 text-slate-400" />
-                      <div>
-                        <Label htmlFor="emailNotifications">Email Notifications</Label>
-                        <p className="text-sm text-slate-600">
-                          Receive audit reminders and updates via email
-                        </p>
-                      </div>
-                    </div>
-                    <Switch
-                      id="emailNotifications"
-                      checked={systemSettings.emailNotifications}
-                      onCheckedChange={(checked) => handleSystemSettingsChange("emailNotifications", checked)}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Bell className="h-5 w-5 text-slate-400" />
-                      <div>
-                        <Label htmlFor="smsNotifications">SMS Notifications</Label>
-                        <p className="text-sm text-slate-600">
-                          Receive urgent alerts via SMS
-                        </p>
-                      </div>
-                    </div>
-                    <Switch
-                      id="smsNotifications"
-                      checked={systemSettings.smsNotifications}
-                      onCheckedChange={(checked) => handleSystemSettingsChange("smsNotifications", checked)}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* New User Dialog */}
-        <Dialog open={showNewUserDialog} onOpenChange={setShowNewUserDialog}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Add New User</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="username">Username</Label>
-                  <Input
-                    id="username"
-                    value={newUserData.username}
-                    onChange={(e) => setNewUserData({ ...newUserData, username: e.target.value })}
-                    placeholder="Enter username"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={newUserData.password}
-                    onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
-                    placeholder="Enter password"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    value={newUserData.name}
-                    onChange={(e) => setNewUserData({ ...newUserData, name: e.target.value })}
-                    placeholder="Enter full name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={newUserData.email}
-                    onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
-                    placeholder="Enter email"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="role">Role</Label>
-                  <Select
-                    value={newUserData.role}
-                    onValueChange={(value) => setNewUserData({ ...newUserData, role: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="auditor">Auditor</SelectItem>
-                      <SelectItem value="supervisor">Supervisor</SelectItem>
-                      <SelectItem value="viewer">Viewer</SelectItem>
-                      {user?.role === "admin" && (
-                        <SelectItem value="admin">Admin</SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="team">Team</Label>
-                  <Select
-                    value={newUserData.team}
-                    onValueChange={(value) => setNewUserData({ ...newUserData, team: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select team" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TEAMS.map((team) => (
-                        <SelectItem key={team} value={team}>
-                          {team}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setShowNewUserDialog(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleCreateUser} disabled={createUserMutation.isPending}>
-                  {createUserMutation.isPending ? "Creating..." : "Create User"}
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Edit User Dialog */}
-        {selectedUser && (
-          <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Edit User</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label>Username</Label>
-                  <p className="text-sm text-slate-900">{selectedUser.username}</p>
-                </div>
-                <div>
-                  <Label>Name</Label>
-                  <p className="text-sm text-slate-900">{selectedUser.name}</p>
-                </div>
-                <div>
-                  <Label>Email</Label>
-                  <p className="text-sm text-slate-900">{selectedUser.email}</p>
-                </div>
-                <div>
-                  <Label>Role</Label>
-                  <div className="flex items-center space-x-2 mt-2">
-                    <Select
-                      value={selectedUser.role}
-                      onValueChange={(value) => handleUpdateUser({ role: value })}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => downloadAuditPdf(audit.id)}
                     >
-                      <SelectTrigger className="w-48">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="auditor">Auditor</SelectItem>
-                        <SelectItem value="supervisor">Supervisor</SelectItem>
-                        <SelectItem value="viewer">Viewer</SelectItem>
-                        {user?.role === "admin" && (
-                          <SelectItem value="admin">Admin</SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
+                      <Download className="w-4 h-4 mr-1" />
+                      {t("downloadPdf")}
+                    </Button>
                   </div>
-                </div>
-                <div>
-                  <Label>Status</Label>
-                  <div className="flex items-center space-x-2 mt-2">
-                    <Select
-                      value={selectedUser.isActive ? "active" : "inactive"}
-                      onValueChange={(value) => handleUpdateUser({ isActive: value === "active" })}
-                    >
-                      <SelectTrigger className="w-48">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={() => setSelectedUser(null)}>
-                    Close
-                  </Button>
-                </div>
+                ))}
               </div>
-            </DialogContent>
-          </Dialog>
-        )}
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Save Settings Button */}
+        <div className="flex justify-end">
+          <Button 
+            onClick={handleSaveSettings}
+            disabled={saveSettingsMutation.isPending}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            {saveSettingsMutation.isPending ? "Saving..." : t("saveSettings")}
+          </Button>
+        </div>
       </div>
-    </Layout>
+    </div>
   );
 }

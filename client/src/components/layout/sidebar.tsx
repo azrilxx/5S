@@ -46,7 +46,8 @@ const getNavigationSections = (userRole: string) => {
   } else {
     coreFunctions.push(
       { name: "My Actions", href: "/actions", icon: CheckSquare },
-      { name: "Teams", href: "/teams", icon: Users }
+      { name: "Teams", href: "/teams", icon: Users },
+      { name: "Settings", href: "/settings", icon: Settings }
     );
   }
 
