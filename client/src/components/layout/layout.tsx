@@ -7,6 +7,7 @@ interface LayoutProps {
   title: string;
   subtitle: string;
   showNewAuditButton?: boolean;
+  showHomeButton?: boolean;
   onNewAudit?: () => void;
 }
 
@@ -15,6 +16,7 @@ export default function Layout({
   title, 
   subtitle, 
   showNewAuditButton, 
+  showHomeButton,
   onNewAudit 
 }: LayoutProps) {
   const { user } = useAuth();
@@ -31,6 +33,7 @@ export default function Layout({
           title={title}
           subtitle={subtitle}
           showNewAuditButton={showNewAuditButton}
+          showHomeButton={showHomeButton}
           onNewAudit={onNewAudit}
         />
         <main className="p-6">

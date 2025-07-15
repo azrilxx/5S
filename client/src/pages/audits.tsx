@@ -146,6 +146,7 @@ export default function Audits() {
     <Layout
       title="5S Audits"
       subtitle="Manage and execute 5S audits"
+      showHomeButton={true}
       onNewAudit={() => setShowNewAuditDialog(true)}
     >
       <div className="space-y-6">

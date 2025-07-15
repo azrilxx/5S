@@ -1,26 +1,38 @@
-import { Bell, Plus } from "lucide-react";
+import { Bell, Plus, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 
 interface HeaderProps {
   title: string;
   subtitle: string;
   showNewAuditButton?: boolean;
+  showHomeButton?: boolean;
   onNewAudit?: () => void;
 }
 
 export default function Header({ 
   title, 
   subtitle, 
-  showNewAuditButton = true, 
+  showNewAuditButton = true,
+  showHomeButton = false,
   onNewAudit 
 }: HeaderProps) {
   return (
     <header className="bg-white shadow-sm border-b border-slate-200 px-6 py-4">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
-          <p className="text-sm text-slate-600">{subtitle}</p>
+        <div className="flex items-center space-x-4">
+          {showHomeButton && (
+            <Link href="/">
+              <Button variant="ghost" size="sm" className="px-2">
+                <Home className="h-4 w-4" />
+              </Button>
+            </Link>
+          )}
+          <div>
+            <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
+            <p className="text-sm text-slate-600">{subtitle}</p>
+          </div>
         </div>
         <div className="flex items-center space-x-4">
           <Button variant="outline" size="sm">
