@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/components/auth/auth-provider";
+import { SuperAdminSettings } from "@/components/settings/super-admin-settings";
 import { 
   Settings as SettingsIcon, 
   User, 
@@ -271,14 +272,19 @@ export default function Settings() {
     saveSettingsMutation.mutate(settings);
   };
 
-  // Only allow access to non-admin users
-  if (!user || user.role === 'admin') {
+  // Show super admin settings for admin users
+  if (user?.role === 'admin') {
+    return <SuperAdminSettings />;
+  }
+
+  // Only allow access to authenticated users
+  if (!user) {
     return (
       <div className="p-6">
         <div className="text-center">
           <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
-          <p className="text-gray-600">User settings are available to regular users only.</p>
+          <p className="text-gray-600">Please log in to access settings.</p>
         </div>
       </div>
     );

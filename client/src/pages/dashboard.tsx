@@ -324,16 +324,6 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-        
-        {/* Notification Test Panel */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Test Notification System</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <NotificationTrigger onTrigger={handleNotificationTrigger} />
-          </CardContent>
-        </Card>
       </div>
     </Layout>
   );

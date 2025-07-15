@@ -1,7 +1,13 @@
-import { Bell, Plus, Home } from "lucide-react";
+import { Bell, Plus, Home, Calendar, Users, Settings, BarChart3, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface HeaderProps {
   title: string;
@@ -41,10 +47,38 @@ export default function Header({
             </Badge>
           </Button>
           {showNewAuditButton && (
-            <Button onClick={onNewAudit} size="sm" className="bg-primary hover:bg-primary/90 shadow-sm">
-              <Plus className="h-4 w-4 mr-2" />
-              New Audit
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" className="bg-primary hover:bg-primary/90 shadow-sm">
+                  <Menu className="h-4 w-4 mr-2" />
+                  Quick Actions
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem onClick={onNewAudit}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Audit
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/schedules" className="flex items-center w-full">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Schedule Audit
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/teams" className="flex items-center w-full">
+                    <Users className="h-4 w-4 mr-2" />
+                    Manage Teams
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/analytics" className="flex items-center w-full">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    View Analytics
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </div>
