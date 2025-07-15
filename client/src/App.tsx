@@ -9,6 +9,9 @@ import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import Audits from "@/pages/audits";
+import AuditNew from "@/pages/audit-new";
+import AuditForm from "@/pages/audit-form";
+import AuditHistory from "@/pages/audit-history";
 import Actions from "@/pages/actions";
 import Schedules from "@/pages/schedules";
 import Reports from "@/pages/reports";
@@ -81,6 +84,21 @@ function Router() {
       <Route path="/audits">
         <ProtectedRoute>
           <Audits />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/audits/new">
+        <ProtectedRoute>
+          <AuditNew />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/audits/new/:zone">
+        <ProtectedRoute>
+          <AuditForm />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/audits/history">
+        <ProtectedRoute>
+          <AuditHistory />
         </ProtectedRoute>
       </Route>
       <Route path="/actions">

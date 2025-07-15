@@ -649,8 +649,36 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
         requestData.scheduledDate = new Date(requestData.scheduledDate);
       }
       
+      // Convert completedAt string to Date object if provided
+      if (requestData.completedAt) {
+        requestData.completedAt = new Date(requestData.completedAt);
+      }
+      
+      // Extract answers from the request for checklist items
+      const answers = requestData.answers || [];
+      delete requestData.answers; // Remove answers from audit data
+      
       const auditData = insertAuditSchema.parse(requestData);
       const audit = await storage.createAudit(auditData);
+      
+      // Create checklist items if answers are provided
+      if (answers.length > 0) {
+        for (const answer of answers) {
+          const checklistItemData = {
+            auditId: audit.id,
+            category: answer.category,
+            question: answer.question,
+            response: answer.response,
+            comments: answer.note || null,
+            photoUrl: answer.photo || null,
+            requiresAction: answer.response === '✗',
+            order: 0
+          };
+          
+          await storage.createChecklistItem(checklistItemData);
+        }
+      }
+      
       res.status(201).json(audit);
     } catch (error) {
       console.error("Create audit error:", error);

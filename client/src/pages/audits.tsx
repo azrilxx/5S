@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Filter, Search } from "lucide-react";
+import { Plus, Filter, Search, CheckCircle, History, BarChart } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ZONES, FIVE_S_QUESTIONS, AUDIT_STATUS } from "@/lib/constants";
@@ -150,6 +150,51 @@ export default function Audits() {
       onNewAudit={() => setShowNewAuditDialog(true)}
     >
       <div className="space-y-8">
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/audits/new'}>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="bg-blue-100 p-3 rounded-full">
+                  <Plus className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">New Audit</h3>
+                  <p className="text-sm text-slate-600">Start a new 5S audit</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/audits/history'}>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="bg-green-100 p-3 rounded-full">
+                  <History className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">Audit History</h3>
+                  <p className="text-sm text-slate-600">View completed audits</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/analytics'}>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="bg-purple-100 p-3 rounded-full">
+                  <BarChart className="h-6 w-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">Analytics</h3>
+                  <p className="text-sm text-slate-600">View audit trends</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Filters */}
         <Card className="border-slate-200/60 shadow-sm">
           <CardHeader className="pb-6">

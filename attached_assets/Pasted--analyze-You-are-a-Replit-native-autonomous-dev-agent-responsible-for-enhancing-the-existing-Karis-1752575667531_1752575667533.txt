@@ -1,0 +1,89 @@
+/analyze
+You are a Replit-native autonomous dev agent responsible for enhancing the existing **Karisma 5S Audit Web App**.
+This build already contains routing, login/logout, dashboard, and user management based on prior development. You must not overwrite existing working components.
+
+---
+
+### 🧩 Objective
+Implement **Stage 2: Audit Engine Enhancements**, aligning to GoAudit enterprise-grade standards and MCP-assisted suggestions. Enable full audit cycle and real-time scoring.
+
+---
+
+### ✅ Existing Stack
+- React + TypeScript
+- TailwindCSS + shadcn/ui
+- React Router
+- Replit DB (latest integration confirmed)
+- Working login with role-based access (admin/user)
+- Zones, Teams, and Corrective Actions are scaffolded
+
+---
+
+### 🚧 Task Scope
+Implement the following **Stage 2 features** into the live Karisma 5S Audit Web App:
+
+#### 1. 📋 **Audit Form**
+- Dynamically load 5S categories (Sort, Set in Order, Shine, Standardize, Sustain)
+- Load questions based on selected zone
+- Allow options: `✓`, `✗`, `N/A`
+- Enable notes and image upload per question (use base64 or Replit DB blob-safe approach)
+
+#### 2. 🧑‍💼 **Create Audit Page**
+- New route: `/audits/new`
+- Logged-in users can create audits by selecting:
+  - Zone
+  - Date (default: today)
+  - Optional: Team
+
+#### 3. 💾 **Submit Audit + Save to Replit DB**
+- Store audit entry with structure:
+```ts
+{
+  id: string;
+  user: string;
+  zone: string;
+  date: string;
+  answers: Array<{
+    question: string;
+    response: '✓' | '✗' | 'N/A';
+    note?: string;
+    photo?: string; // base64 or blob
+  }>;
+  score: number; // percentage
+  submittedAt: ISODateString;
+}
+```
+
+#### 4. 📊 **Scoring Function**
+- Auto-calculate % score = number of `✓` / total valid questions (exclude N/A)
+- Store compliance rate by 5S category (1S–5S)
+
+#### 5. 📖 **Audit History Page**
+- Route: `/audits/history`
+- For admins: show all audits with filters (user, zone, date)
+- For normal users: only show their own audits
+
+---
+
+### 📌 Requirements
+- Do **not** break any existing routes or login system
+- Follow latest UX best practices (mobile-friendly)
+- Use MCP to generate questions if none exist (e.g., use seed fallback for Sort–Sustain)
+- Apply shadcn/ui components consistently
+- Dummy placeholder questions may be hardcoded per category if no live editing is implemented yet
+
+---
+
+### 🧠 Final Checks
+- Role-based routing must persist
+- Zone IDs must be consistent when filtering
+- All DB keys must be normalized to avoid overwrite
+- Validate images on upload (JPEG/PNG < 2MB)
+- Confirm score is correctly computed before storing
+
+---
+
+/output
+Implement and test `/audits/new` and `/audits/history`. Store audit data in Replit DB. Allow scoring per 5S category. Maintain user role restrictions.
+
+Prompt ends.
