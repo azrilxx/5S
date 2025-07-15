@@ -1,0 +1,141 @@
+import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+// Users table
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  role: text("role").notNull().default("auditor"), // admin, auditor, supervisor, viewer
+  team: text("team"), // A, B, C, D, E, F, G, H, I
+  zones: text("zones").array().default([]), // assigned zones
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Zones table
+export const zones = pgTable("zones", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  type: text("type").notNull(), // office, factory
+  floor: text("floor"),
+  isActive: boolean("is_active").default(true),
+});
+
+// Teams table
+export const teams = pgTable("teams", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(), // Team A, Team B, etc.
+  leader: text("leader"),
+  members: text("members").array().default([]),
+  assignedZones: text("assigned_zones").array().default([]),
+  responsibilities: text("responsibilities").array().default([]),
+});
+
+// Audits table
+export const audits = pgTable("audits", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  zone: text("zone").notNull(),
+  auditor: text("auditor").notNull(),
+  status: text("status").notNull().default("scheduled"), // scheduled, in_progress, completed, draft
+  scheduledDate: timestamp("scheduled_date"),
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  overallScore: integer("overall_score").default(0),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Checklist items table
+export const checklistItems = pgTable("checklist_items", {
+  id: serial("id").primaryKey(),
+  auditId: integer("audit_id").notNull(),
+  category: text("category").notNull(), // 1S, 2S, 3S, 4S, 5S
+  question: text("question").notNull(),
+  response: text("response"), // yes, no, na
+  comments: text("comments"),
+  photoUrl: text("photo_url"),
+  requiresAction: boolean("requires_action").default(false),
+  order: integer("order").default(0),
+});
+
+// Actions table
+export const actions = pgTable("actions", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  auditId: integer("audit_id"),
+  checklistItemId: integer("checklist_item_id"),
+  assignedTo: text("assigned_to").notNull(),
+  assignedBy: text("assigned_by").notNull(),
+  zone: text("zone").notNull(),
+  priority: text("priority").notNull().default("medium"), // low, medium, high
+  status: text("status").notNull().default("open"), // open, in_progress, closed
+  dueDate: timestamp("due_date"),
+  completedAt: timestamp("completed_at"),
+  proofPhotoUrl: text("proof_photo_url"),
+  comments: text("comments"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Schedules table
+export const schedules = pgTable("schedules", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  zone: text("zone").notNull(),
+  assignedTo: text("assigned_to").notNull(),
+  frequency: text("frequency").notNull(), // daily, weekly, monthly
+  dayOfWeek: integer("day_of_week"), // 0-6 for weekly
+  dayOfMonth: integer("day_of_month"), // 1-31 for monthly
+  time: text("time").notNull(), // HH:MM format
+  duration: integer("duration").default(60), // minutes
+  isActive: boolean("is_active").default(true),
+  nextRun: timestamp("next_run"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Reports table
+export const reports = pgTable("reports", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  auditId: integer("audit_id"),
+  generatedBy: text("generated_by").notNull(),
+  type: text("type").notNull(), // audit, compliance, trend
+  format: text("format").notNull().default("pdf"), // pdf, csv
+  fileUrl: text("file_url"),
+  metadata: json("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Insert schemas
+export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
+export const insertZoneSchema = createInsertSchema(zones).omit({ id: true });
+export const insertTeamSchema = createInsertSchema(teams).omit({ id: true });
+export const insertAuditSchema = createInsertSchema(audits).omit({ id: true, createdAt: true });
+export const insertChecklistItemSchema = createInsertSchema(checklistItems).omit({ id: true });
+export const insertActionSchema = createInsertSchema(actions).omit({ id: true, createdAt: true });
+export const insertScheduleSchema = createInsertSchema(schedules).omit({ id: true, createdAt: true });
+export const insertReportSchema = createInsertSchema(reports).omit({ id: true, createdAt: true });
+
+// Types
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type Zone = typeof zones.$inferSelect;
+export type InsertZone = z.infer<typeof insertZoneSchema>;
+export type Team = typeof teams.$inferSelect;
+export type InsertTeam = z.infer<typeof insertTeamSchema>;
+export type Audit = typeof audits.$inferSelect;
+export type InsertAudit = z.infer<typeof insertAuditSchema>;
+export type ChecklistItem = typeof checklistItems.$inferSelect;
+export type InsertChecklistItem = z.infer<typeof insertChecklistItemSchema>;
+export type Action = typeof actions.$inferSelect;
+export type InsertAction = z.infer<typeof insertActionSchema>;
+export type Schedule = typeof schedules.$inferSelect;
+export type InsertSchedule = z.infer<typeof insertScheduleSchema>;
+export type Report = typeof reports.$inferSelect;
+export type InsertReport = z.infer<typeof insertReportSchema>;
