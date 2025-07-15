@@ -10,11 +10,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Mail, Send, Trash2, MailOpen, Plus, User, Clock, CheckCircle } from "lucide-react";
+import { Mail, Send, Trash2, MailOpen, Plus, User, Clock, CheckCircle, Home } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/components/auth/auth-provider";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "wouter";
 
 type Message = {
   id: number;
@@ -256,9 +257,17 @@ export default function Messages() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Messages</h1>
-          <p className="text-gray-600">Team communication and announcements</p>
+        <div className="flex items-center gap-4">
+          <Link href="/">
+            <Button variant="outline" size="sm">
+              <Home className="w-4 h-4 mr-2" />
+              Dashboard
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold">Messages</h1>
+            <p className="text-gray-600">Team communication and announcements</p>
+          </div>
         </div>
         <Dialog open={composeOpen} onOpenChange={setComposeOpen}>
           <DialogTrigger asChild>
@@ -283,7 +292,7 @@ export default function Messages() {
                       .filter((u: any) => u.username !== user?.username)
                       .map((u: any) => (
                         <SelectItem key={u.username} value={u.username}>
-                          {u.name} ({u.username})
+                          {u.name}
                         </SelectItem>
                       ))}
                   </SelectContent>
