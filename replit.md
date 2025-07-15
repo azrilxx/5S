@@ -310,3 +310,20 @@ The application follows a monorepo structure with shared types and schemas, maki
   - Zones properly mapped to correct buildings and floors in hierarchical structure
   - All audit creation dropdowns, dashboard summaries, and admin panels now use official zone list
 - **Impact**: Ensures audit system uses officially approved zone locations, maintaining consistency with organizational 5S planning standards
+
+### Complete Zone-to-Team Assignment System
+- **Date**: January 15, 2025
+- **Change**: Implemented comprehensive zone-to-team assignments ensuring full coverage of all 16 zones
+- **Details**:
+  - Preserved Galvanize team (Azril, Afiq, Joanne) as requested - assigned Factory Zone 1, Main Door, Receptionist
+  - Distributed all 16 zones across 6 teams with balanced workloads:
+    - **Galvanize** (3 zones): Factory Zone 1, Main Door, Receptionist
+    - **Chrome** (3 zones): Factory Zone 2, Meeting Room (Ground Floor), Shoes Area
+    - **Steel** (3 zones): Common Area (Second Floor), Account, Filing Room
+    - **Aluminum** (3 zones): Surau Area (In), Surau Area (Out), Admin
+    - **Copper** (3 zones): Meeting Room (First Floor), Pantry, Sales 1
+    - **Titanium** (1 zone): Sales 2
+  - Added unassigned users to appropriate teams: Aemey→Chrome, Candy→Steel, Sherene→Aluminum
+  - Updated both teams and users tables with synchronized zone assignments
+  - Refreshed frontend constants to reflect actual team structure
+- **Impact**: Provides complete zone coverage with clear team responsibility, enabling accurate audit assignments, dashboard metrics, and reporting throughout the system

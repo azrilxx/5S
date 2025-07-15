@@ -68,8 +68,7 @@ export const ZONES = [
 ];
 
 export const TEAMS = [
-  'Team A', 'Team B', 'Team C', 'Team D', 'Team E',
-  'Team F', 'Team G', 'Team H', 'Team I'
+  'Galvanize', 'Chrome', 'Steel', 'Aluminum', 'Copper', 'Titanium'
 ];
 
 export const PRIORITIES = ['Low', 'Medium', 'High'];
