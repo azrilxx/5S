@@ -7,6 +7,7 @@ This is a full-stack web application for managing 5S workplace organization audi
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Data Guidelines: Use realistic names from existing team members (Calvin, Shukri, May, Azril, Chin, Alice, Joanne, Afiq, Jenn, Jennifer, Suzi, Poh_Chin, Jack, Hema, Maz, Lyn, Adel, Anne) for all dummy data instead of placeholder names. This ensures consistency and realism before full deployment.
 
 ## System Architecture
 
@@ -281,3 +282,19 @@ The application follows a monorepo structure with shared types and schemas, maki
   - Added modern super admin features following latest enterprise trends
   - Fixed database notification generation errors
 - **Impact**: Cleaner UI without notification clutter, improved admin experience with comprehensive system management capabilities, and enhanced Quick Actions menu for better workflow
+
+### Hierarchical Zone Management & Realistic Data Implementation
+- **Date**: January 15, 2025
+- **Change**: Implemented hierarchical zone management with building > floor > zone structure and updated all dummy data to use realistic team member names
+- **Details**:
+  - Created PostgreSQL database tables for buildings and floors with proper foreign key relationships
+  - Added buildings: "Karisma Main Factory", "Karisma Office Complex", "Karisma Warehouse"
+  - Added floors: Ground Floor, First Floor, Second Floor, Mezzanine with realistic descriptions
+  - Updated zones with Karisma-specific names: "Production Line A/B", "Reception & Customer Service", "Sales & Marketing Office", etc.
+  - Created comprehensive API endpoints for building and floor management (GET, POST, PUT, DELETE)
+  - Enhanced zones page with three view modes: Hierarchy View, Buildings, and All Zones
+  - Fixed database schema inconsistency with floors table (order vs level column)
+  - Updated storage layer with building and floor methods supporting hierarchical queries
+  - Replaced all dummy names in feedback system with real team member names (Chin, Calvin, May)
+  - Updated user preference guidelines to always use existing team member names for dummy data
+- **Impact**: Provides complete organizational structure for zone management with realistic data that matches actual team composition, making the system ready for production deployment

@@ -31,8 +31,8 @@ export const floors = pgTable("floors", {
   id: serial("id").primaryKey(),
   buildingId: integer("building_id").notNull(),
   name: text("name").notNull(),
+  level: integer("level").notNull(),
   description: text("description"),
-  order: integer("order").default(0),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });

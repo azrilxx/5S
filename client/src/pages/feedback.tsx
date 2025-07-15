@@ -9,7 +9,7 @@ import Layout from "@/components/layout/layout";
 const feedbacks = [
   {
     id: 1,
-    user: "Alice Johnson",
+    user: "Chin",
     role: "Auditor",
     message: "The new audit interface is much more intuitive. Great improvement!",
     rating: 5,
@@ -18,7 +18,7 @@ const feedbacks = [
   },
   {
     id: 2,
-    user: "Bob Smith",
+    user: "Calvin",
     role: "Supervisor",
     message: "Would love to see more detailed analytics in the reports section.",
     rating: 4,
@@ -27,7 +27,7 @@ const feedbacks = [
   },
   {
     id: 3,
-    user: "Carol Davis",
+    user: "May",
     role: "Team Lead",
     message: "The mobile responsiveness could be improved for tablet users.",
     rating: 3,
