@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,11 +31,30 @@ export default function AuditNew() {
   });
 
   // Filter zones based on user's team assignments (admins see all zones)
-  const zones = currentUser?.role === 'admin' ? allZones : 
-    allZones?.filter((zone: any) => {
-      const userTeam = teams?.find((team: any) => team.name === currentUser?.team);
-      return userTeam?.assigned_zones?.includes(zone.name);
-    });
+  const zones = React.useMemo(() => {
+    // Show all zones if data is still loading
+    if (!allZones || !currentUser || !teams) return allZones;
+    
+    // Admins see all zones
+    if (currentUser.role === 'admin') {
+      return allZones;
+    }
+    
+    // If user has no team, show all zones (fallback)
+    if (!currentUser.team) {
+      return allZones;
+    }
+    
+    // Find user's team and filter zones
+    const userTeam = teams.find((team: any) => team.name === currentUser.team);
+    if (!userTeam?.assigned_zones) {
+      return allZones;
+    }
+    
+    return allZones.filter((zone: any) => 
+      userTeam.assigned_zones.includes(zone.name)
+    );
+  }, [allZones, currentUser, teams]);
 
   const { data: buildings } = useQuery({
     queryKey: ["/api/buildings"],
