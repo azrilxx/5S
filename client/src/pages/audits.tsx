@@ -14,6 +14,7 @@ import { ZONES, FIVE_S_QUESTIONS, AUDIT_STATUS } from "@/lib/constants";
 import { useAuth } from "@/components/auth/auth-provider";
 import Layout from "@/components/layout/layout";
 import AuditForm from "@/components/audit/audit-form";
+import { useLocation } from "wouter";
 
 export default function Audits() {
   const [selectedZone, setSelectedZone] = useState<string>("all");
@@ -29,6 +30,7 @@ export default function Audits() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [location, navigate] = useLocation();
 
   const { data: audits, isLoading } = useQuery({
     queryKey: ["/api/audits"],
@@ -152,7 +154,7 @@ export default function Audits() {
       <div className="space-y-8">
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/audits/new'}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/audits/new')}>
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <div className="bg-blue-100 p-3 rounded-full">
@@ -166,7 +168,7 @@ export default function Audits() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/audits/history'}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/audits/history')}>
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <div className="bg-green-100 p-3 rounded-full">
@@ -180,7 +182,7 @@ export default function Audits() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => window.location.href = '/analytics'}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/analytics')}>
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <div className="bg-purple-100 p-3 rounded-full">
