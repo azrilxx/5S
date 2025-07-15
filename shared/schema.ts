@@ -138,6 +138,17 @@ export const notificationRules = pgTable("notification_rules", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Messages table
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  sender: text("sender").notNull(),
+  recipient: text("recipient").notNull(),
+  subject: text("subject"),
+  body: text("body").notNull(),
+  isRead: boolean("is_read").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertZoneSchema = createInsertSchema(zones).omit({ id: true });
@@ -149,6 +160,7 @@ export const insertScheduleSchema = createInsertSchema(schedules).omit({ id: tru
 export const insertReportSchema = createInsertSchema(reports).omit({ id: true, createdAt: true });
 export const insertQuestionSchema = createInsertSchema(questions).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertNotificationRuleSchema = createInsertSchema(notificationRules).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertMessageSchema = createInsertSchema(messages).omit({ id: true, createdAt: true });
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -171,3 +183,5 @@ export type Question = typeof questions.$inferSelect;
 export type InsertQuestion = z.infer<typeof insertQuestionSchema>;
 export type NotificationRule = typeof notificationRules.$inferSelect;
 export type InsertNotificationRule = z.infer<typeof insertNotificationRuleSchema>;
+export type Message = typeof messages.$inferSelect;
+export type InsertMessage = z.infer<typeof insertMessageSchema>;

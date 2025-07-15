@@ -40,12 +40,14 @@ const getNavigationSections = (userRole: string) => {
     coreFunctions.push(
       { name: "Corrective Actions", href: "/actions", icon: CheckSquare },
       { name: "Teams", href: "/teams", icon: Users },
-      { name: "Schedules", href: "/schedules", icon: Calendar }
+      { name: "Schedules", href: "/schedules", icon: Calendar },
+      { name: "Messages", href: "/messages", icon: MessageSquare }
     );
   } else {
     coreFunctions.push(
       { name: "My Actions", href: "/actions", icon: CheckSquare },
-      { name: "Teams", href: "/teams", icon: Users }
+      { name: "Teams", href: "/teams", icon: Users },
+      { name: "Messages", href: "/messages", icon: MessageSquare }
     );
   }
 

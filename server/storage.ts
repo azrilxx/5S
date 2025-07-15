@@ -1,13 +1,13 @@
 import { 
-  users, zones, teams, audits, checklistItems, actions, schedules, reports, questions, notificationRules,
+  users, zones, teams, audits, checklistItems, actions, schedules, reports, questions, notificationRules, messages,
   type User, type InsertUser, type Zone, type InsertZone, type Team, type InsertTeam,
   type Audit, type InsertAudit, type ChecklistItem, type InsertChecklistItem,
   type Action, type InsertAction, type Schedule, type InsertSchedule,
   type Report, type InsertReport, type Question, type InsertQuestion,
-  type NotificationRule, type InsertNotificationRule
+  type NotificationRule, type InsertNotificationRule, type Message, type InsertMessage
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, sql, desc, and } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -78,6 +78,17 @@ export interface IStorage {
   createNotificationRule(rule: InsertNotificationRule): Promise<NotificationRule>;
   updateNotificationRule(id: number, rule: Partial<InsertNotificationRule>): Promise<NotificationRule | undefined>;
   deleteNotificationRule(id: number): Promise<boolean>;
+
+  // Message methods
+  getAllMessages(): Promise<Message[]>;
+  getMessage(id: number): Promise<Message | undefined>;
+  createMessage(message: InsertMessage): Promise<Message>;
+  updateMessage(id: number, message: Partial<InsertMessage>): Promise<Message | undefined>;
+  deleteMessage(id: number): Promise<boolean>;
+  getMessagesByRecipient(recipient: string): Promise<Message[]>;
+  getMessagesBySender(sender: string): Promise<Message[]>;
+  getUnreadMessagesCount(recipient: string): Promise<number>;
+  markMessageAsRead(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -695,6 +706,64 @@ export class DatabaseStorage implements IStorage {
 
   async deleteZone(id: number): Promise<boolean> {
     const result = await db.delete(zones).where(eq(zones.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Message methods
+  async getAllMessages(): Promise<Message[]> {
+    return await db.select().from(messages);
+  }
+
+  async getMessage(id: number): Promise<Message | undefined> {
+    const [message] = await db.select().from(messages).where(eq(messages.id, id));
+    return message || undefined;
+  }
+
+  async createMessage(insertMessage: InsertMessage): Promise<Message> {
+    const [message] = await db.insert(messages).values(insertMessage).returning();
+    return message;
+  }
+
+  async updateMessage(id: number, updates: Partial<InsertMessage>): Promise<Message | undefined> {
+    const [message] = await db
+      .update(messages)
+      .set(updates)
+      .where(eq(messages.id, id))
+      .returning();
+    return message || undefined;
+  }
+
+  async deleteMessage(id: number): Promise<boolean> {
+    const result = await db.delete(messages).where(eq(messages.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  async getMessagesByRecipient(recipient: string): Promise<Message[]> {
+    return await db.select().from(messages)
+      .where(eq(messages.recipient, recipient))
+      .orderBy(desc(messages.createdAt));
+  }
+
+  async getMessagesBySender(sender: string): Promise<Message[]> {
+    return await db.select().from(messages)
+      .where(eq(messages.sender, sender))
+      .orderBy(desc(messages.createdAt));
+  }
+
+  async getUnreadMessagesCount(recipient: string): Promise<number> {
+    const result = await db.select({ count: messages.id }).from(messages)
+      .where(and(
+        eq(messages.recipient, recipient),
+        eq(messages.isRead, false)
+      ));
+    return result.length;
+  }
+
+  async markMessageAsRead(id: number): Promise<boolean> {
+    const result = await db
+      .update(messages)
+      .set({ isRead: true })
+      .where(eq(messages.id, id));
     return result.rowCount !== null && result.rowCount > 0;
   }
 }

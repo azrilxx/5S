@@ -577,6 +577,92 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Message routes
+  app.get("/api/messages", authenticateToken, async (req: any, res) => {
+    try {
+      const messages = await storage.getMessagesByRecipient(req.user.username);
+      res.json(messages);
+    } catch (error) {
+      console.error("Get messages error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/messages/sent", authenticateToken, async (req: any, res) => {
+    try {
+      const messages = await storage.getMessagesBySender(req.user.username);
+      res.json(messages);
+    } catch (error) {
+      console.error("Get sent messages error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/messages/unread-count", authenticateToken, async (req: any, res) => {
+    try {
+      const count = await storage.getUnreadMessagesCount(req.user.username);
+      res.json({ count });
+    } catch (error) {
+      console.error("Get unread messages count error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/messages", authenticateToken, async (req: any, res) => {
+    try {
+      const { recipient, subject, body } = req.body;
+      
+      if (!recipient || !body) {
+        return res.status(400).json({ message: "Recipient and body are required" });
+      }
+
+      const message = await storage.createMessage({
+        sender: req.user.username,
+        recipient,
+        subject: subject || null,
+        body,
+        isRead: false
+      });
+
+      res.status(201).json(message);
+    } catch (error) {
+      console.error("Create message error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.put("/api/messages/:id/read", authenticateToken, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.markMessageAsRead(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+
+      res.json({ message: "Message marked as read" });
+    } catch (error) {
+      console.error("Mark message as read error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/messages/:id", authenticateToken, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteMessage(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+
+      res.json({ message: "Message deleted successfully" });
+    } catch (error) {
+      console.error("Delete message error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Dashboard statistics
   app.get("/api/dashboard/stats", authenticateToken, async (req, res) => {
     try {
