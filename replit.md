@@ -174,3 +174,22 @@ The application follows a monorepo structure with shared types and schemas, maki
     - Real-time monitoring dashboard
   - Enhanced API security with role-based endpoint protection
 - **Impact**: Provides complete administrative control with security monitoring and user management capabilities
+
+### Enhanced Super Admin Features & Team Management
+- **Date**: January 15, 2025
+- **Change**: Added GoAudit-inspired super admin capabilities and corrected team member data
+- **Details**:
+  - Added Question Editor for audit customization with CRUD operations
+  - Added Action Tracker for enhanced corrective action management
+  - Added Notification Rules for automated alerts and notifications
+  - Created PostgreSQL schemas for questions and notification_rules tables
+  - Implemented role-based API endpoints for all new features
+  - Updated team member data with correct names:
+    - Galvanize: Azril (leader), Joanne, Afiq
+    - Chrome: Calvin (leader), Jenn, Jennifer
+    - Steel: Maz (leader), Suzi, Poh_Chin
+    - Aluminum: Jack (leader), Hema, May
+    - Copper: Shukri (leader), Chin, Alice
+    - Titanium: Lyn (leader), Adel, Anne
+  - All features integrated with existing authentication and sidebar navigation
+- **Impact**: Provides comprehensive audit customization, enhanced action management, and accurate team structure for improved 5S audit operations
