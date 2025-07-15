@@ -25,6 +25,8 @@ export interface IStorage {
   getAllTeams(): Promise<Team[]>;
   getTeam(id: number): Promise<Team | undefined>;
   createTeam(team: InsertTeam): Promise<Team>;
+  updateTeam(id: number, team: Partial<InsertTeam>): Promise<Team | undefined>;
+  deleteTeam(id: number): Promise<boolean>;
 
   // Audit methods
   getAllAudits(): Promise<Audit[]>;
@@ -437,6 +439,20 @@ export class DatabaseStorage implements IStorage {
       .values(insertTeam)
       .returning();
     return team;
+  }
+
+  async updateTeam(id: number, updates: Partial<InsertTeam>): Promise<Team | undefined> {
+    const [team] = await db
+      .update(teams)
+      .set(updates)
+      .where(eq(teams.id, id))
+      .returning();
+    return team || undefined;
+  }
+
+  async deleteTeam(id: number): Promise<boolean> {
+    const result = await db.delete(teams).where(eq(teams.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
   }
 
   async getAllAudits(): Promise<Audit[]> {

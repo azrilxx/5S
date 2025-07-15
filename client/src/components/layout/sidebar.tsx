@@ -37,11 +37,13 @@ const getNavigationSections = (userRole: string) => {
   if (userRole === "admin") {
     coreFunctions.push(
       { name: "Corrective Actions", href: "/actions", icon: CheckSquare },
+      { name: "Teams", href: "/teams", icon: Users },
       { name: "Schedules", href: "/schedules", icon: Calendar }
     );
   } else {
     coreFunctions.push(
-      { name: "My Actions", href: "/actions", icon: CheckSquare }
+      { name: "My Actions", href: "/actions", icon: CheckSquare },
+      { name: "Teams", href: "/teams", icon: Users }
     );
   }
 
@@ -59,7 +61,6 @@ const getNavigationSections = (userRole: string) => {
         title: "Management",
         items: [
           { name: "Zones", href: "/zones", icon: MapPin },
-          { name: "Teams", href: "/teams", icon: Users },
           { name: "Reports", href: "/reports", icon: BarChart3 },
           { name: "Analytics", href: "/analytics", icon: TrendingUp },
           { name: "KPI Tracking", href: "/kpi", icon: Target },
