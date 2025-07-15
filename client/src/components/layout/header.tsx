@@ -19,9 +19,9 @@ export default function Header({
   onNewAudit 
 }: HeaderProps) {
   return (
-    <header className="bg-white shadow-sm border-b border-slate-200 px-6 py-4">
+    <header className="bg-white shadow-sm border-b border-slate-200 pl-6 pr-6 py-4">
       <div className="flex items-center justify-between">
-        <div>
+        <div className="flex-1">
           <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
           <p className="text-sm text-slate-600">{subtitle}</p>
         </div>
