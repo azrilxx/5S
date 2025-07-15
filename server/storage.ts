@@ -717,6 +717,10 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(actions).where(eq(actions.assignee, assignee));
   }
 
+  async getAuditsByAuditor(auditor: string): Promise<Audit[]> {
+    return await db.select().from(audits).where(eq(audits.auditor, auditor));
+  }
+
   async getActionsByZone(zone: string): Promise<Action[]> {
     return await db.select().from(actions).where(eq(actions.zone, zone));
   }

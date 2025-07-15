@@ -29,6 +29,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useState } from "react";
 import MessagesButton from "@/components/messages/messages-button";
+import { NotificationSystem } from "@/components/notifications/notification-system";
 
 const getNavigationSections = (userRole: string) => {
   const coreFunctions = [
@@ -188,6 +189,7 @@ export default function Sidebar() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <NotificationSystem />
             <MessagesButton />
             <Button
               variant="ghost"

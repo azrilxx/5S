@@ -29,6 +29,7 @@ import Documentation from "@/pages/documentation";
 import AccessControl from "@/pages/access-control";
 import { useEffect } from "react";
 import { apiRequest } from "@/lib/queryClient";
+import { NotificationToastContainer } from "@/components/notifications/notification-toast";
 
 // Setup token interceptor for API requests
 const setupTokenInterceptor = () => {
@@ -188,6 +189,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Router />
+          <NotificationToastContainer />
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>

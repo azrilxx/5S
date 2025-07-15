@@ -55,6 +55,92 @@ const authenticateToken = (req: Request & { user?: any }, res: Response, next: F
   });
 };
 
+// Notification generation function
+async function generateNotificationsForUser(username: string, userRole: string) {
+  const notifications = [];
+  
+  try {
+    // Get user's actions
+    const userActions = await storage.getActionsByAssignee(username);
+    const overdueActions = userActions.filter(action => {
+      if (!action.dueDate) return false;
+      return new Date(action.dueDate) < new Date() && action.status !== 'closed';
+    });
+    
+    // Generate overdue action notifications
+    overdueActions.forEach(action => {
+      notifications.push({
+        id: `action-overdue-${action.id}`,
+        type: 'action_overdue',
+        title: 'Action Item Overdue',
+        message: `Action "${action.title}" is overdue. Please complete it as soon as possible.`,
+        timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+        isRead: false,
+        priority: 'high',
+        actionUrl: '/actions',
+        actionText: 'View Actions'
+      });
+    });
+    
+    // Get user's assigned audits
+    const userAudits = await storage.getAuditsByAuditor(username);
+    const todayAudits = userAudits.filter(audit => {
+      if (!audit.scheduledDate) return false;
+      const auditDate = new Date(audit.scheduledDate).toDateString();
+      const today = new Date().toDateString();
+      return auditDate === today && audit.status === 'scheduled';
+    });
+    
+    // Generate audit notifications
+    todayAudits.forEach(audit => {
+      notifications.push({
+        id: `audit-today-${audit.id}`,
+        type: 'audit_assigned',
+        title: 'Audit Scheduled Today',
+        message: `You have an audit scheduled for ${audit.zone} today. Please ensure you're prepared.`,
+        timestamp: new Date(Date.now() - 60 * 60 * 1000), // 1 hour ago
+        isRead: false,
+        priority: 'medium',
+        actionUrl: '/audits',
+        actionText: 'View Audits'
+      });
+    });
+    
+    // Generate sample system notifications
+    if (userRole === 'admin') {
+      notifications.push({
+        id: 'system-update-1',
+        type: 'system_update',
+        title: 'System Update Available',
+        message: 'A new system update is available. Please review and apply when convenient.',
+        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+        isRead: false,
+        priority: 'low',
+        actionUrl: '/user-management',
+        actionText: 'View System'
+      });
+    }
+    
+    // Add a welcome notification for new users
+    if (notifications.length === 0) {
+      notifications.push({
+        id: 'welcome-1',
+        type: 'system_update',
+        title: 'Welcome to Karisma 5S Audit System',
+        message: 'Welcome! You can now receive real-time notifications about your audits and actions.',
+        timestamp: new Date(Date.now() - 10 * 60 * 1000), // 10 minutes ago
+        isRead: false,
+        priority: 'low'
+      });
+    }
+    
+    return notifications;
+  } catch (error) {
+    console.error('Error generating notifications:', error);
+    return [];
+  }
+}
+
 export async function registerLegacyRoutes(app: Express): Promise<void> {
   // Note: Authentication routes moved to /server/routes/authRoutes.ts
 
@@ -873,6 +959,28 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     } catch (error) {
       console.error("Error downloading audit PDF:", error);
       return res.status(500).json({ message: "Failed to download audit PDF" });
+    }
+  });
+
+  // Notification endpoints
+  app.get("/api/notifications", authenticateToken, async (req: Request & { user?: any }, res: Response) => {
+    try {
+      const notifications = await generateNotificationsForUser(req.user.username, req.user.role);
+      return res.json(notifications);
+    } catch (error) {
+      console.error("Error getting notifications:", error);
+      return res.status(500).json({ message: "Failed to get notifications" });
+    }
+  });
+
+  app.post("/api/notifications/mark-read", authenticateToken, async (req: Request & { user?: any }, res: Response) => {
+    try {
+      const { notificationId } = req.body;
+      // In a real implementation, you would update the notification status in the database
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      return res.status(500).json({ message: "Failed to mark notification as read" });
     }
   });
 
