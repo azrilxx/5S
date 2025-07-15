@@ -27,43 +27,67 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/components/auth/auth-provider";
 import { useState } from "react";
 
-const navigationSections = [
-  {
-    title: "Core Functions",
-    items: [
-      { name: "Dashboard", href: "/", icon: LayoutDashboard },
-      { name: "Audits", href: "/audits", icon: ClipboardList },
+const getNavigationSections = (userRole: string) => {
+  const coreFunctions = [
+    { name: "Dashboard", href: "/", icon: LayoutDashboard },
+    { name: "Audits", href: "/audits", icon: ClipboardList },
+  ];
+
+  // Users can only see their own actions, admins can see all actions
+  if (userRole === "admin") {
+    coreFunctions.push(
       { name: "Corrective Actions", href: "/actions", icon: CheckSquare },
-      { name: "Schedules", href: "/schedules", icon: Calendar },
-    ]
-  },
-  {
-    title: "Management",
-    items: [
-      { name: "Zones", href: "/zones", icon: MapPin },
-      { name: "Teams", href: "/teams", icon: Users },
-      { name: "Reports", href: "/reports", icon: BarChart3 },
-      { name: "Analytics", href: "/analytics", icon: TrendingUp },
-      { name: "KPI Tracking", href: "/kpi", icon: Target },
-    ]
-  },
-  {
+      { name: "Schedules", href: "/schedules", icon: Calendar }
+    );
+  } else {
+    coreFunctions.push(
+      { name: "My Actions", href: "/actions", icon: CheckSquare }
+    );
+  }
+
+  const sections = [
+    {
+      title: "Core Functions",
+      items: coreFunctions
+    }
+  ];
+
+  // Admin-only sections
+  if (userRole === "admin") {
+    sections.push(
+      {
+        title: "Management",
+        items: [
+          { name: "Zones", href: "/zones", icon: MapPin },
+          { name: "Teams", href: "/teams", icon: Users },
+          { name: "Reports", href: "/reports", icon: BarChart3 },
+          { name: "Analytics", href: "/analytics", icon: TrendingUp },
+          { name: "KPI Tracking", href: "/kpi", icon: Target },
+        ]
+      },
+      {
+        title: "System",
+        items: [
+          { name: "Settings", href: "/settings", icon: Settings },
+          { name: "Access Control", href: "/access-control", icon: Shield },
+        ]
+      }
+    );
+  }
+
+  // Learning section for all users
+  sections.push({
     title: "Learning & Development",
     items: [
       { name: "Learn 5S", href: "/learn", icon: BookOpen },
       { name: "Trainings", href: "/trainings", icon: GraduationCap },
       { name: "Documentation", href: "/documentation", icon: FileText },
-    ]
-  },
-  {
-    title: "System",
-    items: [
       { name: "Feedback", href: "/feedback", icon: MessageSquare },
-      { name: "Settings", href: "/settings", icon: Settings },
-      { name: "Access Control", href: "/access-control", icon: Shield },
     ]
-  }
-];
+  });
+
+  return sections;
+};
 
 export default function Sidebar() {
   const [location] = useLocation();
@@ -72,6 +96,8 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!user) return null;
+
+  const navigationSections = getNavigationSections(user.role);
 
   const sidebarContent = (
     <div className="flex flex-col h-full">

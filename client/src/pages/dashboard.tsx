@@ -18,9 +18,11 @@ import {
 } from "lucide-react";
 import Layout from "@/components/layout/layout";
 import { useLocation } from "wouter";
+import { useAuth } from "@/components/auth/auth-provider";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
 
   const { data: dashboardStats, isLoading } = useQuery({
     queryKey: ["/api/dashboard/stats"],
@@ -70,19 +72,30 @@ export default function Dashboard() {
     return auditDate === today;
   }) || [];
 
-  const pendingActions = (actions as any[])?.filter((action: any) => 
+  // Filter actions based on user role
+  const filteredActions = user?.role === 'admin' 
+    ? (actions as any[]) || []
+    : (actions as any[])?.filter((action: any) => action.assignedTo === user?.username) || [];
+
+  const pendingActions = filteredActions.filter((action: any) => 
     action.status === 'open' || action.status === 'in_progress'
-  ) || [];
+  );
 
   const overdueActions = (actions as any[])?.filter((action: any) => {
     if (!action.dueDate) return false;
     return new Date(action.dueDate) < new Date() && action.status !== 'closed';
   }) || [];
 
+  const isAdmin = user?.role === 'admin';
+  const dashboardTitle = isAdmin ? "Admin Dashboard" : "My Dashboard";
+  const dashboardSubtitle = isAdmin 
+    ? "Monitor all 5S audit activities and manage system" 
+    : "View your audit activities and assigned actions";
+
   return (
     <Layout
-      title="Dashboard"
-      subtitle="Monitor your 5S audit activities"
+      title={dashboardTitle}
+      subtitle={dashboardSubtitle}
       showNewAuditButton={true}
       onNewAudit={handleNewAudit}
     >

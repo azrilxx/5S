@@ -38,6 +38,11 @@ export default function Actions() {
     queryKey: ["/api/actions"],
   });
 
+  // Filter actions based on user role
+  const filteredActions = user?.role === 'admin' 
+    ? (actions as any[]) || []
+    : (actions as any[])?.filter((action: any) => action.assignedTo === user?.username) || [];
+
   const createActionMutation = useMutation({
     mutationFn: (actionData: any) => apiRequest("POST", "/api/actions", actionData),
     onSuccess: () => {
@@ -85,13 +90,13 @@ export default function Actions() {
     },
   });
 
-  const filteredActions = (actions as any[])?.filter((action: any) => {
+  const filteredData = filteredActions.filter((action: any) => {
     const matchesStatus = selectedStatus === "all" || action.status === selectedStatus;
     const matchesSearch = action.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          action.zone.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          action.assignedTo.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesStatus && matchesSearch;
-  }) || [];
+  });
 
   const handleCreateAction = () => {
     if (!newActionData.title || !newActionData.assignedTo || !newActionData.zone) {
@@ -150,10 +155,16 @@ export default function Actions() {
     return new Date(dueDate) < new Date();
   };
 
+  const isAdmin = user?.role === 'admin';
+  const actionsTitle = isAdmin ? "All Corrective Actions" : "My Assigned Actions";
+  const actionsSubtitle = isAdmin 
+    ? "Manage all corrective actions from audits" 
+    : "View and update your assigned corrective actions";
+
   return (
     <Layout
-      title="Corrective Actions"
-      subtitle="Track and manage action items"
+      title={actionsTitle}
+      subtitle={actionsSubtitle}
       showNewAuditButton={false}
     >
       <div className="space-y-6">
@@ -162,10 +173,12 @@ export default function Actions() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Filters</CardTitle>
-              <Button onClick={() => setShowNewActionDialog(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                New Action
-              </Button>
+              {isAdmin && (
+                <Button onClick={() => setShowNewActionDialog(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Action
+                </Button>
+              )}
             </div>
           </CardHeader>
           <CardContent>
