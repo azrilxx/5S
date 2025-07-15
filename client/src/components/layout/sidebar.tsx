@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   LayoutDashboard, 
   ClipboardList, 
@@ -16,9 +17,15 @@ import {
   Shield,
   TrendingUp,
   FileText,
-  Target
+  Target,
+  Menu,
+  X
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/components/auth/auth-provider";
+import { useState } from "react";
 
 const navigationSections = [
   {
@@ -61,30 +68,42 @@ const navigationSections = [
 export default function Sidebar() {
   const [location] = useLocation();
   const { user, logout } = useAuth();
+  const isMobile = useIsMobile();
+  const [isOpen, setIsOpen] = useState(false);
 
   if (!user) return null;
 
-  return (
-    <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg border-r border-slate-200">
-      <div className="flex flex-col h-full">
-        {/* Logo/Brand */}
-        <div className="flex items-center px-6 py-4 border-b border-slate-200">
-          <div className="flex items-center">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <ClipboardList className="text-white h-5 w-5" />
-            </div>
-            <div className="ml-3">
-              <h1 className="text-lg font-semibold text-slate-900">Karisma 5S</h1>
-              <p className="text-xs text-slate-500">Audit System</p>
-            </div>
+  const sidebarContent = (
+    <div className="flex flex-col h-full">
+      {/* Logo/Brand */}
+      <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200/80 bg-gradient-to-r from-primary/5 to-primary/10">
+        <div className="flex items-center">
+          <div className="w-11 h-11 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg">
+            <ClipboardList className="text-white h-6 w-6" />
+          </div>
+          <div className="ml-3">
+            <h1 className="text-lg font-bold text-slate-900 tracking-tight">Karisma 5S</h1>
+            <p className="text-xs text-slate-600 font-medium">Audit System</p>
           </div>
         </div>
+        {isMobile && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsOpen(false)}
+            className="lg:hidden"
+          >
+            <X className="h-5 w-5" />
+          </Button>
+        )}
+      </div>
 
-        {/* Navigation Menu */}
-        <nav className="flex-1 px-6 py-4 space-y-6 overflow-y-auto">
+      {/* Navigation Menu */}
+      <ScrollArea className="flex-1 px-6 py-6">
+        <nav className="space-y-8">
           {navigationSections.map((section) => (
             <div key={section.title}>
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 px-1">
                 {section.title}
               </h3>
               <div className="space-y-1">
@@ -96,15 +115,19 @@ export default function Sidebar() {
                     <Link
                       key={item.name}
                       href={item.href}
+                      onClick={() => isMobile && setIsOpen(false)}
                       className={cn(
-                        "flex items-center px-0 py-2 text-sm font-medium rounded-lg transition-colors",
+                        "flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out group",
                         isActive
-                          ? "bg-primary text-white"
-                          : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+                          ? "bg-gradient-to-r from-primary to-primary/90 text-white shadow-lg shadow-primary/25"
+                          : "text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:shadow-sm"
                       )}
                     >
-                      <Icon className="mr-3 h-4 w-4" />
-                      <span>{item.name}</span>
+                      <Icon className={cn(
+                        "mr-3 h-4 w-4 transition-transform duration-200",
+                        isActive ? "scale-110" : "group-hover:scale-105"
+                      )} />
+                      <span className="font-medium">{item.name}</span>
                     </Link>
                   );
                 })}
@@ -112,30 +135,71 @@ export default function Sidebar() {
             </div>
           ))}
         </nav>
+      </ScrollArea>
 
-        {/* User Profile */}
-        <div className="px-6 py-4 border-t border-slate-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-slate-400 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">
-                  {user.username ? user.username.charAt(0).toUpperCase() : 'U'}
-                </span>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-slate-900">{user.username || 'Unknown'}</p>
-                <p className="text-xs text-slate-500">{user.role}</p>
-              </div>
+      {/* User Profile */}
+      <div className="px-6 py-5 border-t border-slate-200/80 bg-slate-50/50">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="w-9 h-9 bg-gradient-to-br from-slate-400 to-slate-500 rounded-xl flex items-center justify-center shadow-sm">
+              <span className="text-white text-sm font-bold">
+                {user.username ? user.username.charAt(0).toUpperCase() : 'U'}
+              </span>
             </div>
-            <button
-              onClick={logout}
-              className="text-slate-400 hover:text-slate-600 transition-colors"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
+            <div className="ml-3">
+              <p className="text-sm font-semibold text-slate-900">{user.username || 'Unknown'}</p>
+              <p className="text-xs text-slate-600 font-medium capitalize">{user.role}</p>
+            </div>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={logout}
+            className="text-slate-400 hover:text-red-500 transition-colors duration-200 p-1.5 rounded-lg hover:bg-red-50"
+            title="Logout"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
         </div>
       </div>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        {/* Mobile Menu Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsOpen(true)}
+          className="fixed top-4 left-4 z-50 lg:hidden bg-white shadow-md hover:shadow-lg"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+
+        {/* Mobile Overlay */}
+        {isOpen && (
+          <div
+            className="fixed inset-0 z-40 bg-black/20 lg:hidden"
+            onClick={() => setIsOpen(false)}
+          />
+        )}
+
+        {/* Mobile Sidebar */}
+        <div className={cn(
+          "fixed inset-y-0 left-0 z-50 w-80 bg-white shadow-2xl border-r border-slate-200 transition-transform duration-300 lg:hidden",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}>
+          {sidebarContent}
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl border-r border-slate-200/80 backdrop-blur-sm hidden lg:block">
+      {sidebarContent}
     </div>
   );
 }

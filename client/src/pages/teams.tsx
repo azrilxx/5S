@@ -26,7 +26,7 @@ export default function Teams() {
               </Card>
             ))
           ) : (
-            teams?.map((team: any) => (
+            (teams as any[])?.map((team: any) => (
               <Card key={team.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">

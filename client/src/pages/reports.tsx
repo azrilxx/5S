@@ -128,12 +128,12 @@ export default function Reports() {
       subtitle="View audit trends and compliance metrics"
       showNewAuditButton={false}
     >
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Report Controls */}
-        <Card>
-          <CardHeader>
+        <Card className="border-slate-200/60 shadow-sm">
+          <CardHeader className="pb-6">
             <div className="flex items-center justify-between">
-              <CardTitle>Report Generation</CardTitle>
+              <CardTitle className="text-xl font-bold text-slate-900">Report Generation</CardTitle>
               <div className="flex items-center space-x-3">
                 <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
                   <SelectTrigger className="w-40">
@@ -169,12 +169,12 @@ export default function Reports() {
         </Card>
 
         {/* Analytics Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Compliance Trend */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Compliance Trends</CardTitle>
-              <p className="text-sm text-slate-600">Overall 5S compliance over time</p>
+          <Card className="border-slate-200/60 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-bold text-slate-900">Compliance Trends</CardTitle>
+              <p className="text-sm text-slate-600 font-medium">Overall 5S compliance over time</p>
             </CardHeader>
             <CardContent>
               <div className="h-64">
@@ -206,10 +206,10 @@ export default function Reports() {
           </Card>
 
           {/* Zone Performance */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Zone Performance</CardTitle>
-              <p className="text-sm text-slate-600">Compliance by zone comparison</p>
+          <Card className="border-slate-200/60 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-bold text-slate-900">Zone Performance</CardTitle>
+              <p className="text-sm text-slate-600 font-medium">Compliance by zone comparison</p>
             </CardHeader>
             <CardContent>
               <div className="h-64">
@@ -228,28 +228,28 @@ export default function Reports() {
         </div>
 
         {/* 5S Category Performance */}
-        <Card>
-          <CardHeader>
-            <CardTitle>5S Category Performance</CardTitle>
-            <p className="text-sm text-slate-600">Detailed breakdown by 5S category</p>
+        <Card className="border-slate-200/60 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardHeader className="pb-6">
+            <CardTitle className="text-xl font-bold text-slate-900">5S Category Performance</CardTitle>
+            <p className="text-sm text-slate-600 font-medium">Detailed breakdown by 5S category</p>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
               {categoryPerformance.map((category, index) => (
-                <div key={index} className="text-center">
-                  <div className="w-16 h-16 bg-slate-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <div key={index} className="text-center group hover:scale-105 transition-transform duration-200">
+                  <div className="w-18 h-18 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:shadow-md transition-shadow">
                     <span className="text-xl font-bold text-slate-700">{index + 1}S</span>
                   </div>
-                  <h4 className="text-sm font-medium text-slate-900 mb-2">{category.category}</h4>
-                  <div className="flex items-center justify-center space-x-2 mb-2">
-                    <p className="text-2xl font-semibold text-slate-900">{category.score}%</p>
+                  <h4 className="text-sm font-semibold text-slate-900 mb-3 leading-tight">{category.category}</h4>
+                  <div className="flex items-center justify-center space-x-2 mb-3">
+                    <p className="text-2xl font-bold text-slate-900">{category.score}%</p>
                     {category.trend === 'up' ? (
-                      <TrendingUp className="h-4 w-4 text-green-600" />
+                      <TrendingUp className="h-5 w-5 text-green-600" />
                     ) : (
-                      <TrendingDown className="h-4 w-4 text-red-600" />
+                      <TrendingDown className="h-5 w-5 text-red-600" />
                     )}
                   </div>
-                  <Progress value={category.score} className="h-2" />
+                  <Progress value={category.score} className="h-3 shadow-inner" />
                 </div>
               ))}
             </div>
@@ -258,61 +258,61 @@ export default function Reports() {
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
+          <Card className="border-slate-200/60 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600">Total Audits</p>
-                  <p className="text-2xl font-semibold text-slate-900">
+                  <p className="text-sm text-slate-600 font-medium">Total Audits</p>
+                  <p className="text-3xl font-bold text-slate-900 mt-1">
                     {(audits as any[])?.length || 0}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Activity className="text-primary h-6 w-6" />
+                <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center shadow-sm">
+                  <Activity className="text-primary h-7 w-7" />
                 </div>
               </div>
-              <div className="mt-4">
-                <span className="text-sm text-slate-600">
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <span className="text-sm text-slate-600 font-medium">
                   {(audits as any[])?.filter((audit: any) => audit.status === 'completed').length || 0} completed
                 </span>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-slate-200/60 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600">Action Items</p>
-                  <p className="text-2xl font-semibold text-slate-900">
+                  <p className="text-sm text-slate-600 font-medium">Action Items</p>
+                  <p className="text-3xl font-bold text-slate-900 mt-1">
                     {(actions as any[])?.length || 0}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <FileText className="text-orange-600 h-6 w-6" />
+                <div className="w-14 h-14 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center shadow-sm">
+                  <FileText className="text-orange-600 h-7 w-7" />
                 </div>
               </div>
-              <div className="mt-4">
-                <span className="text-sm text-slate-600">
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <span className="text-sm text-slate-600 font-medium">
                   {(actions as any[])?.filter((action: any) => action.status === 'closed').length || 0} resolved
                 </span>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-slate-200/60 shadow-sm hover:shadow-md transition-shadow duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600">Improvement Rate</p>
-                  <p className="text-2xl font-semibold text-slate-900">+15%</p>
+                  <p className="text-sm text-slate-600 font-medium">Improvement Rate</p>
+                  <p className="text-3xl font-bold text-slate-900 mt-1">+15%</p>
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="text-green-600 h-6 w-6" />
+                <div className="w-14 h-14 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center shadow-sm">
+                  <TrendingUp className="text-green-600 h-7 w-7" />
                 </div>
               </div>
-              <div className="mt-4">
-                <span className="text-sm text-green-600">
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <span className="text-sm text-green-600 font-medium">
                   Month over month
                 </span>
               </div>
@@ -321,10 +321,10 @@ export default function Reports() {
         </div>
 
         {/* Generated Reports */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Generated Reports</CardTitle>
-            <p className="text-sm text-slate-600">Recent audit reports</p>
+        <Card className="border-slate-200/60 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardHeader className="pb-6">
+            <CardTitle className="text-xl font-bold text-slate-900">Generated Reports</CardTitle>
+            <p className="text-sm text-slate-600 font-medium">Recent audit reports</p>
           </CardHeader>
           <CardContent>
             {reportsLoading ? (

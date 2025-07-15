@@ -149,31 +149,34 @@ export default function Audits() {
       showHomeButton={true}
       onNewAudit={() => setShowNewAuditDialog(true)}
     >
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Filters */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Filters</CardTitle>
+        <Card className="border-slate-200/60 shadow-sm">
+          <CardHeader className="pb-6">
+            <CardTitle className="text-xl font-bold text-slate-900 flex items-center">
+              <Filter className="h-5 w-5 mr-2 text-slate-600" />
+              Filters
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-6">
               <div className="flex-1">
-                <Label htmlFor="search">Search</Label>
-                <div className="relative">
+                <Label htmlFor="search" className="text-sm font-semibold text-slate-700">Search</Label>
+                <div className="relative mt-2">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                   <Input
                     id="search"
                     placeholder="Search audits..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 border-slate-300 focus:border-primary"
                   />
                 </div>
               </div>
               <div className="w-full sm:w-48">
-                <Label htmlFor="zone">Zone</Label>
+                <Label htmlFor="zone" className="text-sm font-semibold text-slate-700">Zone</Label>
                 <Select value={selectedZone} onValueChange={setSelectedZone}>
-                  <SelectTrigger>
+                  <SelectTrigger className="mt-2 border-slate-300 focus:border-primary">
                     <SelectValue placeholder="Select zone" />
                   </SelectTrigger>
                   <SelectContent>
@@ -191,36 +194,37 @@ export default function Audits() {
         </Card>
 
         {/* Audits List */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Audits</CardTitle>
+        <Card className="border-slate-200/60 shadow-sm">
+          <CardHeader className="pb-6">
+            <CardTitle className="text-xl font-bold text-slate-900">Audits</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <div className="space-y-4">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="animate-pulse">
-                    <div className="h-16 bg-slate-200 rounded-lg"></div>
+                    <div className="h-20 bg-slate-200 rounded-xl"></div>
                   </div>
                 ))}
               </div>
             ) : filteredAudits.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-slate-500">No audits found</p>
+              <div className="text-center py-12">
+                <p className="text-slate-500 font-medium">No audits found</p>
+                <p className="text-sm text-slate-400 mt-1">Try adjusting your filters or create a new audit</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {filteredAudits.map((audit: any) => (
-                  <div key={audit.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50">
+                  <div key={audit.id} className="flex items-center justify-between p-6 border border-slate-200/80 rounded-xl hover:bg-slate-50 hover:shadow-md transition-all duration-200 group">
                     <div className="flex-1">
-                      <h3 className="font-medium text-slate-900">{audit.title}</h3>
-                      <p className="text-sm text-slate-600">{audit.zone}</p>
-                      <p className="text-xs text-slate-500">
+                      <h3 className="font-bold text-slate-900 text-lg group-hover:text-primary transition-colors">{audit.title}</h3>
+                      <p className="text-sm text-slate-600 font-medium mt-1">{audit.zone}</p>
+                      <p className="text-xs text-slate-500 mt-2">
                         Scheduled: {audit.scheduledDate ? new Date(audit.scheduledDate).toLocaleString() : 'Not scheduled'}
                       </p>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <Badge className={getStatusColor(audit.status)}>
+                    <div className="flex items-center space-x-4">
+                      <Badge className={`${getStatusColor(audit.status)} font-medium px-3 py-1`}>
                         {audit.status}
                       </Badge>
                       <div className="flex space-x-2">
@@ -228,11 +232,12 @@ export default function Audits() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleStartAudit(audit)}
+                          className="hover:bg-primary hover:text-white transition-colors"
                         >
                           {audit.status === AUDIT_STATUS.IN_PROGRESS ? 'Continue' : 'Start'}
                         </Button>
                         {audit.status === AUDIT_STATUS.COMPLETED && (
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" className="hover:bg-green-500 hover:text-white transition-colors">
                             View Report
                           </Button>
                         )}

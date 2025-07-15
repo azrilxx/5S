@@ -15,7 +15,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { data: userData, isLoading: isUserLoading } = useQuery({
+  const { data: userData, isLoading: isUserLoading, error } = useQuery({
     queryKey: ["/api/users/me"],
     enabled: !!tokenStorage.get(),
     retry: false,
@@ -24,9 +24,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (userData) {
       setUser(userData as User);
+      setIsLoading(false);
+    } else if (error) {
+      // If there's an error, clear the token and mark as not loading
+      tokenStorage.remove();
+      setUser(null);
+      setIsLoading(false);
+    } else {
+      setIsLoading(isUserLoading);
     }
-    setIsLoading(isUserLoading);
-  }, [userData, isUserLoading]);
+  }, [userData, isUserLoading, error]);
 
   const login = async (username: string, password: string) => {
     try {

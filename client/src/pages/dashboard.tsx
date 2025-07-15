@@ -86,24 +86,24 @@ export default function Dashboard() {
       showNewAuditButton={true}
       onNewAudit={handleNewAudit}
     >
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <Card className="hover:shadow-lg transition-all duration-300 border-slate-200/60">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600">Today's Audits</p>
-                  <p className="text-2xl font-semibold text-slate-900">
+                  <p className="text-sm text-slate-600 font-medium">Today's Audits</p>
+                  <p className="text-3xl font-bold text-slate-900 mt-1">
                     {stats.todaysAudits || 0}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <ClipboardCheck className="text-primary h-6 w-6" />
+                <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center shadow-sm">
+                  <ClipboardCheck className="text-primary h-7 w-7" />
                 </div>
               </div>
-              <div className="mt-4">
-                <span className="text-sm text-green-600 flex items-center">
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <span className="text-sm text-green-600 flex items-center font-medium">
                   <ArrowUp className="h-4 w-4 mr-1" />
                   12% from yesterday
                 </span>
@@ -111,21 +111,21 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hover:shadow-lg transition-all duration-300 border-slate-200/60">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600">Pending Actions</p>
-                  <p className="text-2xl font-semibold text-slate-900">
+                  <p className="text-sm text-slate-600 font-medium">Pending Actions</p>
+                  <p className="text-3xl font-bold text-slate-900 mt-1">
                     {stats.pendingActions || 0}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <AlertTriangle className="text-orange-600 h-6 w-6" />
+                <div className="w-14 h-14 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center shadow-sm">
+                  <AlertTriangle className="text-orange-600 h-7 w-7" />
                 </div>
               </div>
-              <div className="mt-4">
-                <span className="text-sm text-orange-600 flex items-center">
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <span className="text-sm text-orange-600 flex items-center font-medium">
                   <ArrowDown className="h-4 w-4 mr-1" />
                   {stats.overdueActions || 0} overdue
                 </span>
@@ -133,21 +133,21 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hover:shadow-lg transition-all duration-300 border-slate-200/60">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600">Compliance Rate</p>
-                  <p className="text-2xl font-semibold text-slate-900">
+                  <p className="text-sm text-slate-600 font-medium">Compliance Rate</p>
+                  <p className="text-3xl font-bold text-slate-900 mt-1">
                     {stats.complianceRate || 0}%
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <CheckCircle className="text-green-600 h-6 w-6" />
+                <div className="w-14 h-14 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center shadow-sm">
+                  <CheckCircle className="text-green-600 h-7 w-7" />
                 </div>
               </div>
-              <div className="mt-4">
-                <span className="text-sm text-green-600 flex items-center">
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <span className="text-sm text-green-600 flex items-center font-medium">
                   <TrendingUp className="h-4 w-4 mr-1" />
                   5% improvement
                 </span>
@@ -155,21 +155,21 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hover:shadow-lg transition-all duration-300 border-slate-200/60">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600">Active Zones</p>
-                  <p className="text-2xl font-semibold text-slate-900">
+                  <p className="text-sm text-slate-600 font-medium">Active Zones</p>
+                  <p className="text-3xl font-bold text-slate-900 mt-1">
                     {stats.activeZones || 0}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <MapPin className="text-purple-600 h-6 w-6" />
+                <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center shadow-sm">
+                  <MapPin className="text-purple-600 h-7 w-7" />
                 </div>
               </div>
-              <div className="mt-4">
-                <span className="text-sm text-slate-600 flex items-center">
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <span className="text-sm text-slate-600 flex items-center font-medium">
                   <Clock className="h-4 w-4 mr-1" />
                   Last updated 10 min ago
                 </span>
@@ -179,11 +179,11 @@ export default function Dashboard() {
         </div>
 
         {/* Today's Plan and Action Items */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Today's Plan</CardTitle>
-              <p className="text-sm text-slate-600">Scheduled audits for today</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <Card className="border-slate-200/60 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-bold text-slate-900">Today's Plan</CardTitle>
+              <p className="text-sm text-slate-600 font-medium">Scheduled audits for today</p>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -224,10 +224,10 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Action Items</CardTitle>
-              <p className="text-sm text-slate-600">Pending corrective actions</p>
+          <Card className="border-slate-200/60 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-bold text-slate-900">Action Items</CardTitle>
+              <p className="text-sm text-slate-600 font-medium">Pending corrective actions</p>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -271,13 +271,13 @@ export default function Dashboard() {
         </div>
 
         {/* 5S Compliance Overview */}
-        <Card>
-          <CardHeader>
-            <CardTitle>5S Compliance Overview</CardTitle>
-            <p className="text-sm text-slate-600">Current status across all zones</p>
+        <Card className="border-slate-200/60 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <CardHeader className="pb-6">
+            <CardTitle className="text-xl font-bold text-slate-900">5S Compliance Overview</CardTitle>
+            <p className="text-sm text-slate-600 font-medium">Current status across all zones</p>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
               {[
                 { name: '1S - Sort', score: 92, color: 'bg-blue-500' },
                 { name: '2S - Set in Order', score: 88, color: 'bg-green-500' },
@@ -285,15 +285,15 @@ export default function Dashboard() {
                 { name: '4S - Standardize', score: 90, color: 'bg-purple-500' },
                 { name: '5S - Sustain', score: 82, color: 'bg-red-500' }
               ].map((item, index) => (
-                <div key={index} className="text-center">
-                  <div className="w-16 h-16 bg-slate-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <div key={index} className="text-center group hover:scale-105 transition-transform duration-200">
+                  <div className="w-18 h-18 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:shadow-md transition-shadow">
                     <span className="text-2xl font-bold text-slate-700">{index + 1}S</span>
                   </div>
-                  <h4 className="text-sm font-medium text-slate-900">{item.name}</h4>
-                  <p className="text-2xl font-semibold text-slate-900 mt-1">{item.score}%</p>
-                  <div className="w-full bg-slate-200 rounded-full h-2 mt-2">
+                  <h4 className="text-sm font-semibold text-slate-900 mb-2">{item.name}</h4>
+                  <p className="text-2xl font-bold text-slate-900 mb-3">{item.score}%</p>
+                  <div className="w-full bg-slate-200 rounded-full h-3 shadow-inner">
                     <div 
-                      className={`${item.color} h-2 rounded-full transition-all duration-300`}
+                      className={`${item.color} h-3 rounded-full transition-all duration-500 ease-out shadow-sm`}
                       style={{ width: `${item.score}%` }}
                     />
                   </div>

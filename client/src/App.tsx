@@ -26,16 +26,18 @@ import { useEffect } from "react";
 import { apiRequest } from "@/lib/queryClient";
 
 // Setup token interceptor for API requests
-const originalFetch = window.fetch;
-window.fetch = async (input, init = {}) => {
-  const token = tokenStorage.get();
-  if (token && typeof input === 'string' && input.startsWith('/api')) {
-    init.headers = {
-      ...init.headers,
-      Authorization: `Bearer ${token}`,
-    };
-  }
-  return originalFetch(input, init);
+const setupTokenInterceptor = () => {
+  const originalFetch = window.fetch;
+  window.fetch = async (input, init = {}) => {
+    const token = tokenStorage.get();
+    if (token && typeof input === 'string' && input.startsWith('/api')) {
+      init.headers = {
+        ...init.headers,
+        Authorization: `Bearer ${token}`,
+      };
+    }
+    return originalFetch(input, init);
+  };
 };
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -141,6 +143,10 @@ function Router() {
 }
 
 function App() {
+  useEffect(() => {
+    setupTokenInterceptor();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
