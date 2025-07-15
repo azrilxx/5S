@@ -5,10 +5,12 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import multer from "multer";
 import path from "path";
+import fs from "fs";
+import { extractQuestionsFromText } from "./deepseek";
 
 const JWT_SECRET = process.env.JWT_SECRET || "karisma-5s-secret-key";
 
-// File upload configuration
+// File upload configuration for images
 const upload = multer({
   dest: 'uploads/',
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
@@ -18,6 +20,19 @@ const upload = multer({
       cb(null, true);
     } else {
       cb(new Error('Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.'));
+    }
+  }
+});
+
+// PDF upload configuration
+const pdfUpload = multer({
+  dest: 'uploads/pdf/',
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit for PDFs
+  fileFilter: (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only PDF files are allowed.'));
     }
   }
 });
@@ -660,6 +675,61 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     } catch (error) {
       console.error("Delete message error:", error);
       res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // PDF question extraction route
+  app.post("/api/questions/extract-pdf", authenticateToken, pdfUpload.single('pdf'), async (req: Request & { user?: any; file?: Express.Multer.File }, res: Response) => {
+    try {
+      // Only admin users can extract questions from PDFs
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied. Admin privileges required." });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "No PDF file uploaded" });
+      }
+
+      // Read and parse PDF using dynamic import
+      const pdfBuffer = fs.readFileSync(req.file.path);
+      const pdfParse = await import('pdf-parse');
+      const pdfData = await pdfParse.default(pdfBuffer);
+      
+      // Clean up uploaded file
+      fs.unlinkSync(req.file.path);
+
+      if (!pdfData.text || pdfData.text.trim().length === 0) {
+        return res.status(400).json({ message: "No text could be extracted from the PDF" });
+      }
+
+      // Extract questions using DeepSeek AI
+      const questions = await extractQuestionsFromText(pdfData.text);
+      
+      if (questions.length === 0) {
+        return res.status(400).json({ message: "No valid questions could be extracted from the PDF" });
+      }
+
+      res.json({ 
+        questions,
+        extractedText: pdfData.text.substring(0, 1000) + (pdfData.text.length > 1000 ? "..." : ""),
+        totalQuestions: questions.length
+      });
+    } catch (error) {
+      console.error("PDF extraction error:", error);
+      
+      // Clean up file if it exists
+      if (req.file?.path) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (cleanupError) {
+          console.error("File cleanup error:", cleanupError);
+        }
+      }
+      
+      res.status(500).json({ 
+        message: "Failed to extract questions from PDF",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 

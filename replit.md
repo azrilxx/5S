@@ -225,3 +225,19 @@ The application follows a monorepo structure with shared types and schemas, maki
   - Streamlined UI with smaller form inputs and condensed message list
   - All messaging functionality (send, read, delete) maintained in popup format
 - **Impact**: Provides seamless team communication without navigation disruption, making messaging more accessible and interactive throughout the application
+
+### AI-Powered PDF Question Extraction System
+- **Date**: January 15, 2025
+- **Change**: Added AI-powered PDF question extraction functionality to the 5S Question Editor using DeepSeek API
+- **Details**:
+  - Integrated DeepSeek API for intelligent text analysis and question extraction
+  - Added PDF upload functionality with file validation (PDF only, 10MB limit)
+  - Created comprehensive PDF text extraction using pdf-parse library
+  - Implemented AI prompt engineering specifically for 5S methodology questions
+  - Added interactive question selection interface with checkboxes
+  - Questions are automatically categorized and assigned to all zones by default
+  - Extracted questions show preview of source text and total count
+  - Admin-only feature with proper role-based access control
+  - PDF files are automatically cleaned up after processing
+  - Real-time processing feedback with loading states and error handling
+- **Impact**: Dramatically reduces manual effort in creating audit questions by automatically extracting and formatting questions from existing 5S documentation, training materials, and industry standards
