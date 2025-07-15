@@ -31,7 +31,7 @@ export default function AuditNew() {
   });
 
   const selectedZoneDetails = zones?.find((z: any) => z.name === selectedZone);
-  const selectedTeamDetails = teams?.find((t: any) => t.name === selectedTeam);
+  const selectedTeamDetails = selectedTeam && selectedTeam !== 'none' ? teams?.find((t: any) => t.name === selectedTeam) : null;
   const buildingDetails = buildings?.find((b: any) => b.id === selectedZoneDetails?.buildingId);
 
   const handleStartAudit = () => {
@@ -72,12 +72,7 @@ export default function AuditNew() {
                     ) : (
                       zones?.map((zone: any) => (
                         <SelectItem key={zone.id} value={zone.name}>
-                          <div className="flex items-center justify-between w-full">
-                            <span>{zone.name}</span>
-                            <Badge variant="outline" className="ml-2">
-                              {zone.type}
-                            </Badge>
-                          </div>
+                          {zone.name} ({zone.type})
                         </SelectItem>
                       ))
                     )}
@@ -176,15 +171,10 @@ export default function AuditNew() {
                     <SelectValue placeholder="Choose a team (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No team assignment</SelectItem>
+                    <SelectItem value="none">No team assignment</SelectItem>
                     {teams?.map((team: any) => (
                       <SelectItem key={team.id} value={team.name}>
-                        <div className="flex items-center justify-between w-full">
-                          <span>{team.name}</span>
-                          <Badge variant="outline" className="ml-2">
-                            {team.leader}
-                          </Badge>
-                        </div>
+                        {team.name} (Leader: {team.leader})
                       </SelectItem>
                     ))}
                   </SelectContent>
