@@ -39,7 +39,13 @@ export const authApi = {
 };
 
 export const tokenStorage = {
-  set: (token: string) => localStorage.setItem("auth_token", token),
-  get: () => localStorage.getItem("auth_token"),
-  remove: () => localStorage.removeItem("auth_token"),
+  set: (token: string) => {
+    localStorage.setItem("auth_token", token);
+  },
+  get: () => {
+    return localStorage.getItem("auth_token");
+  },
+  remove: () => {
+    localStorage.removeItem("auth_token");
+  },
 };

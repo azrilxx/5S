@@ -41,6 +41,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.success && response.data) {
         tokenStorage.set(response.data.accessToken);
         setUser(response.data.user);
+        setIsLoading(false);
+        // Force a page refresh to ensure clean state
+        window.location.href = "/";
       } else {
         throw new Error("Login failed");
       }
