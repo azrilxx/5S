@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(node:*)",
+      "Bash(pkill:*)",
+      "Bash(ss:*)",
+      "Bash(kill:*)",
+      "Bash(npm run dev:*)",
+      "Bash(grep:*)",
+      "Bash(npm install:*)",
+      "Bash(npm test)",
+      "Bash(for i in {1..6})",
+      "Bash(do echo \"Attempt $i:\")",
+      "Bash(done)",
+      "Bash(npm run build:*)"
+    ],
+    "deny": []
+  }
+}

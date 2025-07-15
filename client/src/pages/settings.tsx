@@ -201,7 +201,7 @@ export default function Settings() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {users?.map((userData: any) => (
+                        {(users as any[])?.map((userData: any) => (
                           <TableRow key={userData.id}>
                             <TableCell>
                               <div className="flex items-center">
@@ -275,7 +275,7 @@ export default function Settings() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {zones?.map((zone: any) => (
+                    {(zones as any[])?.map((zone: any) => (
                       <div key={zone.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                         <div>
                           <p className="font-medium text-slate-900">{zone.name}</p>
@@ -299,7 +299,7 @@ export default function Settings() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {teams?.map((team: any) => (
+                    {(teams as any[])?.map((team: any) => (
                       <div key={team.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                         <div>
                           <p className="font-medium text-slate-900">{team.name}</p>

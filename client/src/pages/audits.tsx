@@ -80,7 +80,7 @@ export default function Audits() {
     enabled: !!selectedAudit,
   });
 
-  const filteredAudits = audits?.filter((audit: any) => {
+  const filteredAudits = (audits as any[])?.filter((audit: any) => {
     const matchesZone = selectedZone === "all" || audit.zone === selectedZone;
     const matchesSearch = audit.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          audit.zone.toLowerCase().includes(searchTerm.toLowerCase());
@@ -135,7 +135,7 @@ export default function Audits() {
       >
         <AuditForm
           audit={selectedAudit}
-          checklistItems={selectedAuditItems}
+          checklistItems={selectedAuditItems as any[]}
           onClose={() => setSelectedAudit(null)}
         />
       </Layout>

@@ -62,18 +62,18 @@ export default function Dashboard() {
     );
   }
 
-  const stats = dashboardStats || {};
-  const todayAudits = audits?.filter((audit: any) => {
+  const stats = (dashboardStats as any) || {};
+  const todayAudits = (audits as any[])?.filter((audit: any) => {
     const today = new Date().toISOString().split('T')[0];
     const auditDate = audit.scheduledDate ? new Date(audit.scheduledDate).toISOString().split('T')[0] : null;
     return auditDate === today;
   }) || [];
 
-  const pendingActions = actions?.filter((action: any) => 
+  const pendingActions = (actions as any[])?.filter((action: any) => 
     action.status === 'open' || action.status === 'in_progress'
   ) || [];
 
-  const overdueActions = actions?.filter((action: any) => {
+  const overdueActions = (actions as any[])?.filter((action: any) => {
     if (!action.dueDate) return false;
     return new Date(action.dueDate) < new Date() && action.status !== 'closed';
   }) || [];

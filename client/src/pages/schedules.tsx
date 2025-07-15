@@ -91,7 +91,7 @@ export default function Schedules() {
   const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
   const getSchedulesForDay = (day: Date) => {
-    return schedules?.filter((schedule: any) => {
+    return (schedules as any[])?.filter((schedule: any) => {
       if (schedule.frequency === "weekly") {
         return schedule.dayOfWeek === day.getDay();
       }
@@ -231,13 +231,13 @@ export default function Schedules() {
                   </div>
                 ))}
               </div>
-            ) : schedules?.length === 0 ? (
+            ) : (schedules as any[])?.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-slate-500">No schedules found</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {schedules?.map((schedule: any) => (
+                {(schedules as any[])?.map((schedule: any) => (
                   <div key={schedule.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50">
                     <div className="flex-1">
                       <h3 className="font-medium text-slate-900">{schedule.title}</h3>

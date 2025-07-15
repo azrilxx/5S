@@ -85,7 +85,7 @@ export default function Actions() {
     },
   });
 
-  const filteredActions = actions?.filter((action: any) => {
+  const filteredActions = (actions as any[])?.filter((action: any) => {
     const matchesStatus = selectedStatus === "all" || action.status === selectedStatus;
     const matchesSearch = action.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          action.zone.toLowerCase().includes(searchTerm.toLowerCase()) ||

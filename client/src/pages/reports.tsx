@@ -57,7 +57,7 @@ export default function Reports() {
 
   // Generate compliance trend data
   const generateComplianceTrend = () => {
-    const completed = audits?.filter((audit: any) => audit.status === 'completed') || [];
+    const completed = (audits as any[])?.filter((audit: any) => audit.status === 'completed') || [];
     const monthlyData = [];
     
     for (let i = 5; i >= 0; i--) {
@@ -80,7 +80,7 @@ export default function Reports() {
   // Generate zone performance data
   const generateZonePerformance = () => {
     return ZONES.map((zone) => {
-      const zoneAudits = audits?.filter((audit: any) => audit.zone === zone) || [];
+      const zoneAudits = (audits as any[])?.filter((audit: any) => audit.zone === zone) || [];
       const completedAudits = zoneAudits.filter((audit: any) => audit.status === 'completed');
       const compliance = zoneAudits.length > 0 ? (completedAudits.length / zoneAudits.length) * 100 : 0;
       
@@ -198,7 +198,7 @@ export default function Reports() {
                 <div className="flex items-center justify-center space-x-2">
                   <TrendingUp className="h-4 w-4 text-green-600" />
                   <span className="text-sm text-green-600">
-                    {dashboardStats?.complianceRate || 87}% average compliance
+                    {(dashboardStats as any)?.complianceRate || 87}% average compliance
                   </span>
                 </div>
               </div>
@@ -264,7 +264,7 @@ export default function Reports() {
                 <div>
                   <p className="text-sm text-slate-600">Total Audits</p>
                   <p className="text-2xl font-semibold text-slate-900">
-                    {audits?.length || 0}
+                    {(audits as any[])?.length || 0}
                   </p>
                 </div>
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -273,7 +273,7 @@ export default function Reports() {
               </div>
               <div className="mt-4">
                 <span className="text-sm text-slate-600">
-                  {audits?.filter((audit: any) => audit.status === 'completed').length || 0} completed
+                  {(audits as any[])?.filter((audit: any) => audit.status === 'completed').length || 0} completed
                 </span>
               </div>
             </CardContent>
@@ -285,7 +285,7 @@ export default function Reports() {
                 <div>
                   <p className="text-sm text-slate-600">Action Items</p>
                   <p className="text-2xl font-semibold text-slate-900">
-                    {actions?.length || 0}
+                    {(actions as any[])?.length || 0}
                   </p>
                 </div>
                 <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
@@ -294,7 +294,7 @@ export default function Reports() {
               </div>
               <div className="mt-4">
                 <span className="text-sm text-slate-600">
-                  {actions?.filter((action: any) => action.status === 'closed').length || 0} resolved
+                  {(actions as any[])?.filter((action: any) => action.status === 'closed').length || 0} resolved
                 </span>
               </div>
             </CardContent>
@@ -335,7 +335,7 @@ export default function Reports() {
                   </div>
                 ))}
               </div>
-            ) : reports?.length === 0 ? (
+            ) : (reports as any[])?.length === 0 ? (
               <div className="text-center py-8">
                 <FileText className="h-12 w-12 text-slate-400 mx-auto mb-4" />
                 <p className="text-slate-500">No reports generated yet</p>
@@ -345,7 +345,7 @@ export default function Reports() {
               </div>
             ) : (
               <div className="divide-y divide-slate-200">
-                {reports?.map((report: any) => (
+                {(reports as any[])?.map((report: any) => (
                   <div key={report.id} className="py-4 hover:bg-slate-50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">

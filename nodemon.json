@@ -1,0 +1,24 @@
+{
+  "watch": [
+    "server/**/*",
+    "shared/**/*",
+    ".env"
+  ],
+  "ext": "ts,js,json",
+  "ignore": [
+    "server/**/*.test.ts",
+    "server/__tests__/**/*",
+    "node_modules/**/*",
+    "dist/**/*",
+    "coverage/**/*"
+  ],
+  "exec": "tsx server/index.ts",
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "delay": 1000,
+  "restartable": "rs",
+  "colours": true,
+  "legacyWatch": false,
+  "verbose": false
+}

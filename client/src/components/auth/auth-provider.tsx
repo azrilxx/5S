@@ -23,7 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (userData) {
-      setUser(userData);
+      setUser(userData as User);
     }
     setIsLoading(isUserLoading);
   }, [userData, isUserLoading]);

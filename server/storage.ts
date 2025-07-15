@@ -86,7 +86,7 @@ export class MemStorage implements IStorage {
     const adminUser: User = {
       id: this.currentUserIds++,
       username: "admin",
-      password: "$2b$10$8KvY7vIQZFqXQCgAKtPfAuaZjlvE6yHGmOzMCjUCgQFu0J2yYJGKm", // password: admin123
+      password: "$argon2id$v=19$m=19456,t=2,p=1$713b8Be8s/r8rUZnSFqVqw$8lT8NOLCqmGFlF9fCTrJEpsxJTNq5m1wsqsTJMShjEM", // password: admin123
       name: "System Administrator",
       email: "admin@karisma.com",
       role: "admin",
@@ -129,6 +129,10 @@ export class MemStorage implements IStorage {
     const user: User = {
       ...insertUser,
       id: this.currentUserIds++,
+      role: insertUser.role ?? "auditor",
+      team: insertUser.team ?? null,
+      zones: insertUser.zones ?? null,
+      isActive: insertUser.isActive ?? true,
       createdAt: new Date(),
     };
     this.users.set(user.id, user);
@@ -161,6 +165,9 @@ export class MemStorage implements IStorage {
     const zone: Zone = {
       ...insertZone,
       id: this.currentZoneIds++,
+      description: insertZone.description ?? null,
+      floor: insertZone.floor ?? null,
+      isActive: insertZone.isActive ?? true,
     };
     this.zones.set(zone.id, zone);
     return zone;
@@ -179,6 +186,10 @@ export class MemStorage implements IStorage {
     const team: Team = {
       ...insertTeam,
       id: this.currentTeamIds++,
+      leader: insertTeam.leader ?? null,
+      members: insertTeam.members ?? null,
+      assignedZones: insertTeam.assignedZones ?? null,
+      responsibilities: insertTeam.responsibilities ?? null,
     };
     this.teams.set(team.id, team);
     return team;
@@ -197,6 +208,12 @@ export class MemStorage implements IStorage {
     const audit: Audit = {
       ...insertAudit,
       id: this.currentAuditIds++,
+      status: insertAudit.status ?? "scheduled",
+      scheduledDate: insertAudit.scheduledDate ?? null,
+      startedAt: insertAudit.startedAt ?? null,
+      completedAt: insertAudit.completedAt ?? null,
+      overallScore: insertAudit.overallScore ?? null,
+      notes: insertAudit.notes ?? null,
       createdAt: new Date(),
     };
     this.audits.set(audit.id, audit);
@@ -229,6 +246,11 @@ export class MemStorage implements IStorage {
     const item: ChecklistItem = {
       ...insertItem,
       id: this.currentChecklistItemIds++,
+      order: insertItem.order ?? null,
+      response: insertItem.response ?? null,
+      comments: insertItem.comments ?? null,
+      photoUrl: insertItem.photoUrl ?? null,
+      requiresAction: insertItem.requiresAction ?? null,
     };
     this.checklistItems.set(item.id, item);
     return item;
@@ -256,6 +278,15 @@ export class MemStorage implements IStorage {
     const action: Action = {
       ...insertAction,
       id: this.currentActionIds++,
+      status: insertAction.status ?? "open",
+      priority: insertAction.priority ?? "medium",
+      description: insertAction.description ?? null,
+      completedAt: insertAction.completedAt ?? null,
+      auditId: insertAction.auditId ?? null,
+      checklistItemId: insertAction.checklistItemId ?? null,
+      dueDate: insertAction.dueDate ?? null,
+      proofPhotoUrl: insertAction.proofPhotoUrl ?? null,
+      comments: insertAction.comments ?? null,
       createdAt: new Date(),
     };
     this.actions.set(action.id, action);
@@ -292,6 +323,11 @@ export class MemStorage implements IStorage {
     const schedule: Schedule = {
       ...insertSchedule,
       id: this.currentScheduleIds++,
+      duration: insertSchedule.duration ?? null,
+      isActive: insertSchedule.isActive ?? true,
+      dayOfWeek: insertSchedule.dayOfWeek ?? null,
+      dayOfMonth: insertSchedule.dayOfMonth ?? null,
+      nextRun: insertSchedule.nextRun ?? null,
       createdAt: new Date(),
     };
     this.schedules.set(schedule.id, schedule);
@@ -324,6 +360,10 @@ export class MemStorage implements IStorage {
     const report: Report = {
       ...insertReport,
       id: this.currentReportIds++,
+      metadata: insertReport.metadata ?? {},
+      format: insertReport.format ?? "pdf",
+      auditId: insertReport.auditId ?? null,
+      fileUrl: insertReport.fileUrl ?? null,
       createdAt: new Date(),
     };
     this.reports.set(report.id, report);
