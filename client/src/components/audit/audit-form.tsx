@@ -89,22 +89,30 @@ export default function AuditForm({ audit, checklistItems, onClose }: AuditFormP
     onClose();
   };
 
-  const handleCancelAudit = () => {
-    // Reset audit to scheduled status if it was in progress
-    if (audit.status === "in_progress") {
-      updateAuditMutation.mutate({ 
-        status: "scheduled",
-        startedAt: null
+  const deleteAuditMutation = useMutation({
+    mutationFn: () => apiRequest("DELETE", `/api/audits/${audit.id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/audits"] });
+      setShowCancelDialog(false);
+      onClose();
+      
+      toast({
+        title: "Audit Deleted",
+        description: "The audit has been completely removed from the system.",
+        variant: "default",
       });
-    }
-    setShowCancelDialog(false);
-    onClose();
-    
-    toast({
-      title: "Audit Cancelled",
-      description: "Your audit session has been cancelled and progress has been saved.",
-      variant: "default",
-    });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete audit. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCancelAudit = () => {
+    deleteAuditMutation.mutate();
   };
 
   const getItemsByCategory = (category: string) => {
@@ -153,8 +161,8 @@ export default function AuditForm({ audit, checklistItems, onClose }: AuditFormP
                     Cancel Audit Session
                   </DialogTitle>
                   <DialogDescription>
-                    Are you sure you want to cancel this audit session? Any progress will be saved as a draft, 
-                    and you can continue later. The audit will return to "scheduled" status.
+                    Are you sure you want to cancel this audit session? This will permanently delete the audit 
+                    and all associated checklist items. This action cannot be undone.
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
@@ -167,9 +175,9 @@ export default function AuditForm({ audit, checklistItems, onClose }: AuditFormP
                   <Button 
                     variant="destructive" 
                     onClick={handleCancelAudit}
-                    disabled={updateAuditMutation.isPending}
+                    disabled={deleteAuditMutation.isPending}
                   >
-                    Yes, Cancel Audit
+                    {deleteAuditMutation.isPending ? "Deleting..." : "Yes, Delete Audit"}
                   </Button>
                 </DialogFooter>
               </DialogContent>

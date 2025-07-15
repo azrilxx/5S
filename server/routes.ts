@@ -423,6 +423,20 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
+  app.delete("/api/audits/:id", authenticateToken, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteAudit(id);
+      if (!success) {
+        return res.status(404).json({ message: "Audit not found" });
+      }
+      res.json({ message: "Audit deleted successfully" });
+    } catch (error) {
+      console.error("Delete audit error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Checklist item routes
   app.get("/api/audits/:auditId/checklist-items", authenticateToken, async (req, res) => {
     try {

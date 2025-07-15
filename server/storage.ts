@@ -36,6 +36,7 @@ export interface IStorage {
   getAudit(id: number): Promise<Audit | undefined>;
   createAudit(audit: InsertAudit): Promise<Audit>;
   updateAudit(id: number, audit: Partial<InsertAudit>): Promise<Audit | undefined>;
+  deleteAudit(id: number): Promise<boolean>;
   getAuditsByZone(zone: string): Promise<Audit[]>;
   getAuditsByAuditor(auditor: string): Promise<Audit[]>;
 
@@ -248,6 +249,20 @@ export class MemStorage implements IStorage {
     const updatedAudit = { ...audit, ...updates };
     this.audits.set(id, updatedAudit);
     return updatedAudit;
+  }
+
+  async deleteAudit(id: number): Promise<boolean> {
+    const audit = this.audits.get(id);
+    if (!audit) return false;
+    
+    // Delete associated checklist items
+    const checklistItems = Array.from(this.checklistItems.values())
+      .filter(item => item.auditId === id);
+    checklistItems.forEach(item => this.checklistItems.delete(item.id));
+    
+    // Delete the audit
+    this.audits.delete(id);
+    return true;
   }
 
   async getAuditsByZone(zone: string): Promise<Audit[]> {
@@ -496,6 +511,20 @@ export class DatabaseStorage implements IStorage {
       .where(eq(audits.id, id))
       .returning();
     return audit || undefined;
+  }
+
+  async deleteAudit(id: number): Promise<boolean> {
+    try {
+      // First delete associated checklist items
+      await db.delete(checklistItems).where(eq(checklistItems.auditId, id));
+      
+      // Then delete the audit
+      const result = await db.delete(audits).where(eq(audits.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error("Error deleting audit:", error);
+      return false;
+    }
   }
 
   async getAuditsByZone(zone: string): Promise<Audit[]> {
