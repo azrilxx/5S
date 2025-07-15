@@ -30,6 +30,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       tokenStorage.remove();
       setUser(null);
       setIsLoading(false);
+    } else if (!tokenStorage.get()) {
+      // No token, not loading
+      setUser(null);
+      setIsLoading(false);
     } else {
       setIsLoading(isUserLoading);
     }
@@ -38,16 +42,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (username: string, password: string) => {
     try {
       const response = await authApi.login(username, password);
+      console.log("Login response:", response);
       if (response.success && response.data) {
         tokenStorage.set(response.data.accessToken);
         setUser(response.data.user);
         setIsLoading(false);
-        // Force a page refresh to ensure clean state
-        window.location.href = "/";
+        console.log("Login successful, user set:", response.data.user);
+        // Don't force page refresh, just redirect
+        return;
       } else {
         throw new Error("Login failed");
       }
     } catch (error) {
+      console.error("Login error:", error);
       throw error;
     }
   };

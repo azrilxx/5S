@@ -23,9 +23,11 @@ export default function Login() {
 
     try {
       await login(username, password);
-      // Navigation is handled in the login function
+      // Redirect after successful login
+      setLocation("/");
     } catch (err: any) {
       setError(err.message || "Login failed");
+    } finally {
       setIsLoading(false);
     }
   };

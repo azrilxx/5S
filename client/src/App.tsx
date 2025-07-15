@@ -43,6 +43,11 @@ const setupTokenInterceptor = () => {
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
 
+  // If no token exists, show login immediately
+  if (!tokenStorage.get()) {
+    return <Login />;
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
