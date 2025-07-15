@@ -1,0 +1,49 @@
+/project KarismaAudit
+
+/goal
+Enhance Stage 4 to align fully with the reporting and action tracking expectations from GoAudit-inspired functionality. This includes improving UI and wiring backend logic for better data export, filtering, and reassignment workflows.
+
+/context
+- The `reports.tsx` and `action-tracker.tsx` pages exist.
+- Action items can be viewed but cannot be reassigned.
+- Reports table has filters, but no export options (PDF/CSV).
+- No bulk filtering for unresolved actions is implemented.
+- Project uses React + TypeScript + Tanstack Query + Replit DB.
+
+/tasks
+1. ✅ **Reporting Enhancements**
+   - Add `Export to CSV` and `Export to PDF` buttons to `reports.tsx` using:
+     - [x] `react-csv` or `papaparse` for CSV export
+     - [x] `jspdf` for basic PDF export with audit metadata and table
+   - Support export for filtered results only.
+
+2. ✅ **Action Tracker Enhancements**
+   - Add filter option for "Only show unresolved actions" based on `status !== 'Completed'`.
+   - Add a dropdown or modal component to allow:
+     - Reassigning action items to other users
+     - Updating due dates inline
+
+3. ✅ **Reassign Action Backend Logic**
+   - Extend existing mutation logic to:
+     - Accept `assignedTo` and `dueDate` update requests
+     - Persist changes to Replit DB
+   - Add loading and error states for the reassignment form.
+
+4. ✅ **Refactor Shared Types**
+   - Extract shared types for `ActionItem`, `AuditReport`, `User` into `/types/index.ts` if not already structured.
+
+5. ✅ **System-wide Consistency Check**
+   - Ensure assigned users in action tracker are valid
+   - Reflect updates immediately in UI after reassignment using React Query’s `invalidateQueries`
+
+/notes
+- Maintain compatibility with existing team zones.
+- Use dummy data if required for showcasing reassignment and export functionality.
+- Align UI components with existing design — prioritize functional clarity over advanced styling.
+
+/done_when
+- Reports can be filtered and exported to PDF or CSV
+- Action items can be reassigned and have updated due dates
+- All updates are saved in Replit DB and reflected in UI
+- Admin or assigned users can perform actions seamlessly
+

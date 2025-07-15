@@ -6,16 +6,20 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
-import { Download, FileText, Eye, TrendingUp, TrendingDown, Activity } from "lucide-react";
+import { Download, FileText, Eye, TrendingUp, TrendingDown, Activity, FileSpreadsheet } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ZONES } from "@/lib/constants";
 import { useAuth } from "@/components/auth/auth-provider";
 import Layout from "@/components/layout/layout";
+import { CSVLink } from "react-csv";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default function Reports() {
   const [selectedPeriod, setSelectedPeriod] = useState<string>("30");
   const [selectedZone, setSelectedZone] = useState<string>("all");
+  const [showExportOptions, setShowExportOptions] = useState(false);
 
   const { user } = useAuth();
   const { toast } = useToast();
@@ -118,6 +122,84 @@ export default function Reports() {
     generateReportMutation.mutate(reportData);
   };
 
+  // Enhanced export functions
+  const getFilteredData = () => {
+    const completed = (audits as any[])?.filter((audit: any) => audit.status === 'completed') || [];
+    const selectedPeriodDays = parseInt(selectedPeriod);
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - selectedPeriodDays);
+    
+    return completed.filter((audit: any) => {
+      const auditDate = new Date(audit.completedAt || audit.createdAt);
+      const matchesPeriod = auditDate >= cutoffDate;
+      const matchesZone = selectedZone === "all" || audit.zone === selectedZone;
+      return matchesPeriod && matchesZone;
+    });
+  };
+
+  const prepareCSVData = () => {
+    const filteredData = getFilteredData();
+    return filteredData.map((audit: any) => ({
+      'Audit ID': audit.id,
+      'Zone': audit.zone,
+      'Status': audit.status,
+      'Score': audit.score || 'N/A',
+      'Auditor': audit.auditor,
+      'Completion Date': new Date(audit.completedAt || audit.createdAt).toLocaleDateString(),
+      'Compliance Rate': audit.complianceRate || 'N/A',
+      'Issues Found': audit.issuesFound || 0,
+      'Actions Created': audit.actionsCreated || 0,
+    }));
+  };
+
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    const filteredData = getFilteredData();
+    
+    // Add title
+    doc.setFontSize(20);
+    doc.text('5S Compliance Report', 14, 22);
+    
+    // Add metadata
+    doc.setFontSize(12);
+    doc.text(`Period: Last ${selectedPeriod} days`, 14, 32);
+    doc.text(`Zone: ${selectedZone === 'all' ? 'All Zones' : selectedZone}`, 14, 40);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 48);
+    doc.text(`Total Records: ${filteredData.length}`, 14, 56);
+    
+    // Add table
+    const tableData = filteredData.map((audit: any) => [
+      audit.id,
+      audit.zone,
+      audit.status,
+      audit.score || 'N/A',
+      audit.auditor,
+      new Date(audit.completedAt || audit.createdAt).toLocaleDateString(),
+    ]);
+    
+    autoTable(doc, {
+      head: [['ID', 'Zone', 'Status', 'Score', 'Auditor', 'Date']],
+      body: tableData,
+      startY: 65,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [41, 128, 185] },
+    });
+    
+    doc.save(`5S_Compliance_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+    
+    toast({
+      title: "Export Success",
+      description: "PDF report has been downloaded",
+    });
+  };
+
+  const handleExportCSV = () => {
+    toast({
+      title: "Export Success", 
+      description: "CSV data is being prepared for download",
+    });
+  };
+
   const complianceTrend = generateComplianceTrend();
   const zonePerformance = generateZonePerformance();
   const categoryPerformance = generate5SPerformance();
@@ -159,10 +241,22 @@ export default function Reports() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button onClick={handleGenerateReport} disabled={generateReportMutation.isPending}>
-                  <Download className="h-4 w-4 mr-2" />
-                  {generateReportMutation.isPending ? "Generating..." : "Export PDF"}
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <Button onClick={handleExportPDF}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Export PDF
+                  </Button>
+                  <CSVLink
+                    data={prepareCSVData()}
+                    filename={`5S_Compliance_Report_${new Date().toISOString().split('T')[0]}.csv`}
+                    onClick={handleExportCSV}
+                  >
+                    <Button variant="outline">
+                      <FileSpreadsheet className="h-4 w-4 mr-2" />
+                      Export CSV
+                    </Button>
+                  </CSVLink>
+                </div>
               </div>
             </div>
           </CardHeader>

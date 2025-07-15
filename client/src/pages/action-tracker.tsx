@@ -10,7 +10,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/components/auth/auth-provider";
-import { AlertTriangle, Calendar, User, MapPin, Edit2, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { AlertTriangle, Calendar, User, MapPin, Edit2, Clock, CheckCircle, XCircle, AlertCircle, Filter, RefreshCw, Download, FileText, FileSpreadsheet, Users } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
+import { CSVLink } from "react-csv";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface Action {
   id: number;
@@ -46,6 +51,9 @@ export default function ActionTracker() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [zoneFilter, setZoneFilter] = useState<string>("all");
+  const [showUnresolvedOnly, setShowUnresolvedOnly] = useState(false);
+  const [selectedActions, setSelectedActions] = useState<number[]>([]);
+  const [showBulkActions, setShowBulkActions] = useState(false);
 
   const { data: actions = [], isLoading: actionsLoading } = useQuery<Action[]>({
     queryKey: ["/api/actions"],
@@ -67,7 +75,7 @@ export default function ActionTracker() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          "Authorization": `Bearer ${localStorage.getItem("auth_token")}`,
         },
         body: JSON.stringify(actionData),
       });
@@ -76,11 +84,49 @@ export default function ActionTracker() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/actions"] });
-      toast({ title: "Action updated successfully" });
+      toast({ 
+        title: "Action Updated",
+        description: "The action has been successfully updated." 
+      });
       setSelectedAction(null);
     },
     onError: () => {
-      toast({ title: "Failed to update action", variant: "destructive" });
+      toast({ 
+        title: "Update Failed",
+        description: "Failed to update action. Please try again.",
+        variant: "destructive" 
+      });
+    },
+  });
+
+  const bulkUpdateMutation = useMutation({
+    mutationFn: async (bulkData: { actionIds: number[], updates: any }) => {
+      const response = await fetch("/api/actions/bulk", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("auth_token")}`,
+        },
+        body: JSON.stringify(bulkData),
+      });
+      if (!response.ok) throw new Error("Failed to bulk update actions");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/actions"] });
+      toast({ 
+        title: "Bulk Update Success",
+        description: "Selected actions have been updated successfully." 
+      });
+      setSelectedActions([]);
+      setShowBulkActions(false);
+    },
+    onError: () => {
+      toast({ 
+        title: "Bulk Update Failed",
+        description: "Failed to update selected actions. Please try again.",
+        variant: "destructive" 
+      });
     },
   });
 
@@ -101,6 +147,93 @@ export default function ActionTracker() {
     };
     
     updateActionMutation.mutate(actionData);
+  };
+
+  const handleBulkUpdate = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (selectedActions.length === 0) return;
+    
+    const formData = new FormData(e.currentTarget);
+    const updates: any = {};
+    
+    const assignee = formData.get("bulkAssignee") as string;
+    const status = formData.get("bulkStatus") as string;
+    const priority = formData.get("bulkPriority") as string;
+    const dueDate = formData.get("bulkDueDate") as string;
+    
+    if (assignee && assignee !== "no-change") updates.assignee = assignee;
+    if (status && status !== "no-change") updates.status = status;
+    if (priority && priority !== "no-change") updates.priority = priority;
+    if (dueDate) updates.dueDate = dueDate;
+    
+    bulkUpdateMutation.mutate({ actionIds: selectedActions, updates });
+  };
+
+  const handleSelectAction = (actionId: number, checked: boolean) => {
+    setSelectedActions(prev => 
+      checked 
+        ? [...prev, actionId]
+        : prev.filter(id => id !== actionId)
+    );
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    setSelectedActions(checked ? filteredActions.map(a => a.id) : []);
+  };
+
+  const prepareCSVData = () => {
+    return filteredActions.map(action => ({
+      'Action ID': action.id,
+      'Title': action.title,
+      'Description': action.description,
+      'Assignee': action.assignee,
+      'Zone': action.zone,
+      'Priority': action.priority,
+      'Status': action.status,
+      'Due Date': new Date(action.dueDate).toLocaleDateString(),
+      'Created At': new Date(action.createdAt).toLocaleDateString(),
+      'Updated At': new Date(action.updatedAt).toLocaleDateString(),
+    }));
+  };
+
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(20);
+    doc.text('Action Tracker Report', 14, 22);
+    
+    // Add metadata
+    doc.setFontSize(12);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 32);
+    doc.text(`Total Actions: ${filteredActions.length}`, 14, 40);
+    doc.text(`Filters Applied: ${showUnresolvedOnly ? 'Unresolved Only' : 'All Actions'}`, 14, 48);
+    
+    // Add table
+    const tableData = filteredActions.map(action => [
+      action.id,
+      action.title.substring(0, 30) + (action.title.length > 30 ? '...' : ''),
+      action.assignee,
+      action.zone,
+      action.priority,
+      action.status,
+      new Date(action.dueDate).toLocaleDateString(),
+    ]);
+    
+    autoTable(doc, {
+      head: [['ID', 'Title', 'Assignee', 'Zone', 'Priority', 'Status', 'Due Date']],
+      body: tableData,
+      startY: 55,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [41, 128, 185] },
+    });
+    
+    doc.save(`Action_Tracker_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+    
+    toast({
+      title: "Export Success",
+      description: "PDF report has been downloaded",
+    });
   };
 
   const getPriorityColor = (priority: string) => {
@@ -144,8 +277,9 @@ export default function ActionTracker() {
     const matchesStatus = statusFilter === "all" || action.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || action.priority === priorityFilter;
     const matchesZone = zoneFilter === "all" || action.zone === zoneFilter;
+    const matchesUnresolved = !showUnresolvedOnly || action.status !== "completed";
     
-    return matchesSearch && matchesStatus && matchesPriority && matchesZone;
+    return matchesSearch && matchesStatus && matchesPriority && matchesZone && matchesUnresolved;
   });
 
   const openActions = actions.filter(action => action.status !== "completed");
@@ -214,51 +348,97 @@ export default function ActionTracker() {
         </Card>
       </div>
 
-      {/* Filters */}
-      <div className="mb-6 flex flex-col sm:flex-row gap-4 items-center">
-        <Input
-          placeholder="Search actions..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="max-w-sm">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="in_progress">In Progress</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="overdue">Overdue</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-          <SelectTrigger className="max-w-sm">
-            <SelectValue placeholder="Filter by priority" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Priority</SelectItem>
-            <SelectItem value="critical">Critical</SelectItem>
-            <SelectItem value="high">High</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="low">Low</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={zoneFilter} onValueChange={setZoneFilter}>
-          <SelectTrigger className="max-w-sm">
-            <SelectValue placeholder="Filter by zone" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Zones</SelectItem>
-            {zones.map((zone) => (
-              <SelectItem key={zone.id} value={zone.name}>
-                {zone.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Filters and Export */}
+      <div className="mb-6 space-y-4">
+        <div className="flex flex-col sm:flex-row gap-4 items-center">
+          <Input
+            placeholder="Search actions..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-sm"
+          />
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="max-w-sm">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="overdue">Overdue</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+            <SelectTrigger className="max-w-sm">
+              <SelectValue placeholder="Filter by priority" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Priority</SelectItem>
+              <SelectItem value="critical">Critical</SelectItem>
+              <SelectItem value="high">High</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="low">Low</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={zoneFilter} onValueChange={setZoneFilter}>
+            <SelectTrigger className="max-w-sm">
+              <SelectValue placeholder="Filter by zone" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Zones</SelectItem>
+              {zones.map((zone) => (
+                <SelectItem key={zone.id} value={zone.name}>
+                  {zone.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="unresolved-only"
+              checked={showUnresolvedOnly}
+              onCheckedChange={setShowUnresolvedOnly}
+            />
+            <Label htmlFor="unresolved-only" className="text-sm font-medium">
+              Show unresolved only
+            </Label>
+          </div>
+        </div>
+        
+        {/* Export and Bulk Actions */}
+        <div className="flex flex-wrap gap-2 items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Button onClick={handleExportPDF} variant="outline" size="sm">
+              <FileText className="h-4 w-4 mr-2" />
+              Export PDF
+            </Button>
+            <CSVLink
+              data={prepareCSVData()}
+              filename={`Action_Tracker_Report_${new Date().toISOString().split('T')[0]}.csv`}
+            >
+              <Button variant="outline" size="sm">
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+            </CSVLink>
+          </div>
+          
+          {user?.role === 'admin' && (
+            <div className="flex items-center space-x-2">
+              {selectedActions.length > 0 && (
+                <Button
+                  onClick={() => setShowBulkActions(true)}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Bulk Actions ({selectedActions.length})
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Actions Table */}
@@ -274,6 +454,14 @@ export default function ActionTracker() {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b">
+                  {user?.role === 'admin' && (
+                    <th className="text-left p-3 w-12">
+                      <Checkbox
+                        checked={selectedActions.length === filteredActions.length && filteredActions.length > 0}
+                        onCheckedChange={handleSelectAll}
+                      />
+                    </th>
+                  )}
                   <th className="text-left p-3">Action</th>
                   <th className="text-left p-3">Assignee</th>
                   <th className="text-left p-3">Zone</th>
@@ -286,13 +474,21 @@ export default function ActionTracker() {
               <tbody>
                 {filteredActions.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center p-8 text-gray-500">
+                    <td colSpan={user?.role === 'admin' ? 8 : 7} className="text-center p-8 text-gray-500">
                       No actions found matching your filters
                     </td>
                   </tr>
                 ) : (
                   filteredActions.map((action) => (
                     <tr key={action.id} className="border-b hover:bg-gray-50">
+                      {user?.role === 'admin' && (
+                        <td className="p-3">
+                          <Checkbox
+                            checked={selectedActions.includes(action.id)}
+                            onCheckedChange={(checked) => handleSelectAction(action.id, checked as boolean)}
+                          />
+                        </td>
+                      )}
                       <td className="p-3">
                         <div>
                           <div className="font-medium">{action.title}</div>
@@ -459,6 +655,91 @@ export default function ActionTracker() {
                     {updateActionMutation.isPending ? "Updating..." : "Update Action"}
                   </Button>
                   <Button type="button" variant="outline" onClick={() => setSelectedAction(null)}>
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Bulk Actions Modal */}
+      {showBulkActions && user?.role === 'admin' && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-2xl">
+            <CardHeader>
+              <CardTitle>Bulk Update Actions ({selectedActions.length} selected)</CardTitle>
+              <CardDescription>
+                Update multiple actions at once. Leave fields unchanged to keep current values.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleBulkUpdate} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="bulkAssignee">Assignee</Label>
+                    <Select name="bulkAssignee" defaultValue="no-change">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="no-change">No Change</SelectItem>
+                        {users.map((user) => (
+                          <SelectItem key={user.id} value={user.name}>
+                            {user.name} ({user.username})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="bulkStatus">Status</Label>
+                    <Select name="bulkStatus" defaultValue="no-change">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="no-change">No Change</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="overdue">Overdue</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="bulkPriority">Priority</Label>
+                    <Select name="bulkPriority" defaultValue="no-change">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="no-change">No Change</SelectItem>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="critical">Critical</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="bulkDueDate">Due Date</Label>
+                    <Input
+                      id="bulkDueDate"
+                      name="bulkDueDate"
+                      type="date"
+                      placeholder="Leave blank to keep current dates"
+                    />
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <Button type="submit" disabled={bulkUpdateMutation.isPending}>
+                    {bulkUpdateMutation.isPending ? "Updating..." : "Update Actions"}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => setShowBulkActions(false)}>
                     Cancel
                   </Button>
                 </div>

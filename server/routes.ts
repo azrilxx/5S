@@ -828,6 +828,40 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Bulk update actions
+  app.put("/api/actions/bulk", authenticateToken, async (req: any, res) => {
+    try {
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const { actionIds, updates } = req.body;
+      
+      if (!Array.isArray(actionIds) || actionIds.length === 0) {
+        return res.status(400).json({ message: "Action IDs are required" });
+      }
+      
+      const updatedActions = [];
+      for (const actionId of actionIds) {
+        const action = await storage.updateAction(actionId, {
+          ...updates,
+          updatedAt: new Date().toISOString()
+        });
+        if (action) {
+          updatedActions.push(action);
+        }
+      }
+      
+      res.json({ 
+        message: `Successfully updated ${updatedActions.length} actions`,
+        updatedActions 
+      });
+    } catch (error) {
+      console.error("Bulk update actions error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Schedule routes
   app.get("/api/schedules", authenticateToken, async (req, res) => {
     try {
