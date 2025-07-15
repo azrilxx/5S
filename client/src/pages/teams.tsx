@@ -147,7 +147,7 @@ export default function Teams() {
   };
 
   // Get current user's team for regular users
-  const currentUserTeam = user?.role !== 'admin' ? teams.find(team => team.members.includes(user?.username || '')) : null;
+  const currentUserTeam = user?.role !== 'admin' ? teams.find(team => team.members.includes(user?.name || '')) : null;
 
   if (teamsLoading || usersLoading || zonesLoading) {
     return <div className="p-6">Loading teams...</div>;
