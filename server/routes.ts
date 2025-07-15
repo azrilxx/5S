@@ -399,7 +399,19 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
   app.put("/api/audits/:id", authenticateToken, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const updates = req.body;
+      const updates = { ...req.body };
+      
+      // Convert date fields to Date objects if they exist
+      if (updates.scheduledDate && typeof updates.scheduledDate === 'string') {
+        updates.scheduledDate = new Date(updates.scheduledDate);
+      }
+      if (updates.startedAt && typeof updates.startedAt === 'string') {
+        updates.startedAt = new Date(updates.startedAt);
+      }
+      if (updates.completedAt && typeof updates.completedAt === 'string') {
+        updates.completedAt = new Date(updates.completedAt);
+      }
+      
       const audit = await storage.updateAudit(id, updates);
       if (!audit) {
         return res.status(404).json({ message: "Audit not found" });
