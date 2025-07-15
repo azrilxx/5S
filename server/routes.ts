@@ -239,8 +239,31 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
-  // REMOVED: /api/users/me endpoint - redundant with /api/auth/me
-  // Use /api/auth/me instead for getting current user profile
+  // Get current user
+  app.get("/api/users/me", authenticateToken, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+      
+      // Return user data in the correct format
+      const userData = {
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        team: user.team,
+        zones: user.zones || []
+      };
+      
+      res.json({ success: true, data: userData });
+    } catch (error) {
+      console.error("Get current user error:", error);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
 
   // Audit logs route
   app.get("/api/audit-logs", authenticateToken, async (req: any, res) => {

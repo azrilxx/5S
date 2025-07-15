@@ -62,7 +62,13 @@ export const getQueryFn: <T>(options: {
       credentials: "include",
     });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+    if (res.status === 401) {
+      if (unauthorizedBehavior === "returnNull") {
+        return null;
+      }
+      // Clear token on 401 and redirect to login
+      localStorage.removeItem("auth_token");
+      window.location.href = "/login";
       return null;
     }
 

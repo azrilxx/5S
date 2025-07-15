@@ -30,6 +30,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     queryKey: ['/api/users/me'],
     enabled: !!tokenStorage.get(),
     retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 
   useEffect(() => {
