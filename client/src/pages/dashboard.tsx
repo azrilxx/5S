@@ -43,6 +43,7 @@ export default function Dashboard() {
       <Layout
         title="Dashboard"
         subtitle="Monitor your 5S audit activities"
+        showNewAuditButton={true}
         onNewAudit={handleNewAudit}
       >
         <div className="space-y-6">
@@ -82,6 +83,7 @@ export default function Dashboard() {
     <Layout
       title="Dashboard"
       subtitle="Monitor your 5S audit activities"
+      showNewAuditButton={true}
       onNewAudit={handleNewAudit}
     >
       <div className="space-y-6">
