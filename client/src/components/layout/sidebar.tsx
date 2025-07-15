@@ -65,7 +65,7 @@ export default function Sidebar() {
   if (!user) return null;
 
   return (
-    <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
+    <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg border-r border-slate-200" style={{ display: 'block' }}>
       <div className="flex flex-col h-full">
         {/* Logo/Brand */}
         <div className="flex items-center px-6 py-4 border-b border-slate-200">
@@ -119,11 +119,11 @@ export default function Sidebar() {
             <div className="flex items-center">
               <div className="w-8 h-8 bg-slate-400 rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-medium">
-                  {user.name.charAt(0).toUpperCase()}
+                  {user.username ? user.username.charAt(0).toUpperCase() : 'U'}
                 </span>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-slate-900">{user.name}</p>
+                <p className="text-sm font-medium text-slate-900">{user.username || 'Unknown'}</p>
                 <p className="text-xs text-slate-500">{user.role}</p>
               </div>
             </div>
