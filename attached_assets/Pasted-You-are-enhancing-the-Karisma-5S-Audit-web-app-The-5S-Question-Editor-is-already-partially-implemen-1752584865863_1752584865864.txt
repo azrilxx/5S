@@ -1,0 +1,70 @@
+You are enhancing the Karisma 5S Audit web app. The 5S Question Editor is already partially implemented in the current codebase under `question-editor.tsx`, with form-level editing for each 5S category, toggleable zones, and basic mutation support.
+
+Your task is to fully complete and polish the 5S Question Editor to production-level quality. Use the instructions below and **verify everything system-wide**. This must NOT break current logic.
+
+---
+
+🔁 SCOPE: Stage 3 – Enhancement of the 5S Question Editor (UI/UX and Backend Confirmation)
+
+---
+
+🧠 BACKEND REQUIREMENTS:
+
+1. ✅ Ensure `/api/questions` exists and supports full CRUD:
+   - GET: Fetch all questions by category and optionally filtered by zone.
+   - POST: Create new question with `text`, `category`, `description`, `enabledZones`, `isRequired`.
+   - PUT: Edit existing question.
+   - DELETE: Remove question.
+
+2. ✅ Validate the backend is storing and returning `enabledZones[]` array properly.
+
+3. ✅ Confirm questions are scoped per 5S category (`Sort`, `Set in Order`, etc.) and persist correctly to DB.
+
+---
+
+🎨 UI/UX ENHANCEMENT TASKS (question-editor.tsx):
+
+1. ✅ Split UI view per 5S category with tab or accordion layout.
+2. ✅ Show which zones a question applies to, with toggle (checkbox per zone).
+3. ✅ Add inline validation:
+   - Required fields: question text, category.
+   - Optional: description.
+4. ✅ Add toast/success/error feedback when saving or deleting.
+5. ✅ Allow reordering questions (drag/drop or up/down controls).
+6. ✅ Add visual badge for required questions.
+7. ✅ Add “New Question” button per category.
+8. ✅ Add “Preview Questions” per zone (non-editable view).
+
+---
+
+🧪 TESTING + STABILITY:
+
+1. ✅ Test save, edit, delete flow for all categories.
+2. ✅ Confirm state sync with database (through `/api/questions`).
+3. ✅ Ensure performance is acceptable with many questions (pagination optional).
+4. ✅ Refactor code if any question logic is duplicated across components.
+
+---
+
+💡 OPTIONAL ENHANCEMENTS:
+
+- ✅ Add question versioning (track who edited what and when).
+- ✅ Allow import/export of questions in JSON or CSV.
+
+---
+
+🔐 AUTHORIZATION:
+
+- This editor must only be accessible to users with `role === 'admin' || role === 'superadmin'`.
+
+---
+
+🛠️ PLATFORM NOTES:
+
+- TailwindCSS must be used for styling.
+- You may use shadcn/ui or Headless UI for components.
+- Store should sync using React Query and maintain offline editing stability if possible.
+
+---
+
+Your goal is to finalize Stage 3 and prepare the system for Stage 4 (Reporting + Action Tracker). Be precise, modular, and do not touch unrelated code.

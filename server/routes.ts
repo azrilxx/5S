@@ -976,6 +976,100 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Questions CRUD routes
+  app.get("/api/questions", authenticateToken, async (req: Request & { user?: any }, res: Response) => {
+    try {
+      // Only admin users can access questions
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const questions = await storage.getAllQuestions();
+      res.json(questions);
+    } catch (error) {
+      console.error("Get questions error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.get("/api/questions/:id", authenticateToken, async (req: Request & { user?: any }, res: Response) => {
+    try {
+      // Only admin users can access questions
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const question = await storage.getQuestion(id);
+      
+      if (!question) {
+        return res.status(404).json({ message: "Question not found" });
+      }
+      
+      res.json(question);
+    } catch (error) {
+      console.error("Get question error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.post("/api/questions", authenticateToken, async (req: Request & { user?: any }, res: Response) => {
+    try {
+      // Only admin users can create questions
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const question = await storage.createQuestion(req.body);
+      res.status(201).json(question);
+    } catch (error) {
+      console.error("Create question error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.put("/api/questions/:id", authenticateToken, async (req: Request & { user?: any }, res: Response) => {
+    try {
+      // Only admin users can update questions
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const question = await storage.updateQuestion(id, req.body);
+      
+      if (!question) {
+        return res.status(404).json({ message: "Question not found" });
+      }
+      
+      res.json(question);
+    } catch (error) {
+      console.error("Update question error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  app.delete("/api/questions/:id", authenticateToken, async (req: Request & { user?: any }, res: Response) => {
+    try {
+      // Only admin users can delete questions
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteQuestion(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Question not found" });
+      }
+      
+      res.json({ message: "Question deleted successfully" });
+    } catch (error) {
+      console.error("Delete question error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // PDF question extraction route
   app.post("/api/questions/extract-pdf", authenticateToken, pdfUpload.single('pdf'), async (req: Request & { user?: any; file?: Express.Multer.File }, res: Response) => {
     try {
