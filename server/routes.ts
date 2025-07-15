@@ -379,11 +379,16 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
 
   app.post("/api/audits", authenticateToken, async (req: any, res) => {
     try {
-      const auditData = insertAuditSchema.parse(req.body);
-      const audit = await storage.createAudit({
-        ...auditData,
-        auditor: req.user.username
-      });
+      // Parse the request body and add auditor from authenticated user
+      const requestData = { ...req.body, auditor: req.user.username };
+      
+      // Convert scheduledDate string to Date object if provided
+      if (requestData.scheduledDate) {
+        requestData.scheduledDate = new Date(requestData.scheduledDate);
+      }
+      
+      const auditData = insertAuditSchema.parse(requestData);
+      const audit = await storage.createAudit(auditData);
       res.status(201).json(audit);
     } catch (error) {
       console.error("Create audit error:", error);
