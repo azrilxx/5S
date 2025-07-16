@@ -171,7 +171,7 @@ export default function ZonesEnhanced() {
     return "text-red-600";
   };
 
-  const buildings = [...new Set(zones.map(z => z.building).filter(Boolean))];
+  const buildings = [...new Set(zones.map(z => z.building).filter((building): building is string => Boolean(building)))];
   const types = [...new Set(zones.map(z => z.type))];
 
   const filteredZones = zones.filter(zone => {

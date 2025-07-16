@@ -6,16 +6,22 @@ import { MessageSquare } from "lucide-react";
 import { useAuth } from "@/components/auth/auth-provider";
 import MessagesModal from "./messages-modal";
 
+interface UnreadCountResponse {
+  count: number;
+}
+
 export default function MessagesButton() {
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
 
   // Fetch unread messages count
-  const { data: unreadCount = 0 } = useQuery({
+  const { data: unreadCountData } = useQuery<UnreadCountResponse>({
     queryKey: ["/api/messages/unread-count"],
     enabled: !!user,
     refetchInterval: 30000, // Refresh every 30 seconds
   });
+
+  const unreadCount = unreadCountData?.count || 0;
 
   return (
     <>

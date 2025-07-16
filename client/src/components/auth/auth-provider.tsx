@@ -10,6 +10,13 @@ interface User {
   role: string;
   team: string | null;
   zones: string[];
+  isActive?: boolean;
+  createdAt?: Date;
+}
+
+interface AuthResponse {
+  success: boolean;
+  data: User;
 }
 
 interface AuthContextType {
@@ -26,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   // Check for existing token and get user data
-  const { data: userData, isLoading: isUserLoading, error } = useQuery({
+  const { data: userData, isLoading: isUserLoading, error } = useQuery<AuthResponse>({
     queryKey: ['/api/users/me'],
     enabled: !!tokenStorage.get(),
     retry: false,

@@ -23,6 +23,34 @@ import {
 } from "lucide-react";
 import Layout from "@/components/layout/layout";
 
+interface Audit {
+  id: number;
+  title: string;
+  zone: string;
+  auditor: string;
+  status: string;
+  scheduledDate: string;
+  completedAt?: string;
+  overallScore?: number;
+  notes?: string;
+  createdAt: string;
+}
+
+interface User {
+  id: number;
+  username: string;
+  name: string;
+  email: string;
+  role: string;
+  team: string | null;
+  zones: string[];
+}
+
+interface AuthResponse {
+  success: boolean;
+  data: User;
+}
+
 export default function AuditHistory() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedZone, setSelectedZone] = useState<string>('');
@@ -30,26 +58,26 @@ export default function AuditHistory() {
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [activeTab, setActiveTab] = useState('all');
 
-  const { data: audits, isLoading } = useQuery({
+  const { data: audits, isLoading } = useQuery<Audit[]>({
     queryKey: ["/api/audits"],
   });
 
-  const { data: zones } = useQuery({
+  const { data: zones } = useQuery<any[]>({
     queryKey: ["/api/zones"],
   });
 
-  const { data: users } = useQuery({
+  const { data: users } = useQuery<User[]>({
     queryKey: ["/api/users"],
   });
 
-  const { data: currentUser } = useQuery({
+  const { data: currentUser } = useQuery<AuthResponse>({
     queryKey: ["/api/users/me"],
   });
 
   // Filter audits based on user role and filters
-  const filteredAudits = audits?.filter((audit: any) => {
+  const filteredAudits = audits?.filter((audit: Audit) => {
     // Role-based filtering
-    if (currentUser?.role !== 'admin' && audit.auditor !== currentUser?.username) {
+    if (currentUser?.data?.role !== 'admin' && audit.auditor !== currentUser?.data?.username) {
       return false;
     }
 
@@ -225,7 +253,7 @@ export default function AuditHistory() {
                 </Select>
               </div>
 
-              {currentUser?.role === 'admin' && (
+              {currentUser?.data?.role === 'admin' && (
                 <div className="space-y-2">
                   <label className="text-sm font-medium">User</label>
                   <Select value={selectedUser} onValueChange={setSelectedUser}>
@@ -234,7 +262,7 @@ export default function AuditHistory() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">All users</SelectItem>
-                      {users?.map((user: any) => (
+                      {users?.map((user: User) => (
                         <SelectItem key={user.id} value={user.username}>
                           {user.name}
                         </SelectItem>
@@ -284,7 +312,7 @@ export default function AuditHistory() {
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredAudits.map((audit: any) => (
+                {filteredAudits?.map((audit: Audit) => (
                   <div key={audit.id} className="border border-slate-200 rounded-lg p-4 hover:bg-slate-50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
@@ -293,7 +321,7 @@ export default function AuditHistory() {
                           <Badge className={getStatusColor(audit.status)}>
                             {audit.status}
                           </Badge>
-                          {audit.overallScore !== null && (
+                          {audit.overallScore !== null && audit.overallScore !== undefined && (
                             <Badge className={getScoreColor(audit.overallScore)}>
                               {audit.overallScore}%
                             </Badge>

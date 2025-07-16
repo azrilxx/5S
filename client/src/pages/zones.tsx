@@ -7,29 +7,54 @@ import { MapPin, Users, CheckCircle, Building, Layers, Plus } from "lucide-react
 import Layout from "@/components/layout/layout";
 import { useState } from "react";
 
+interface Building {
+  id: number;
+  name: string;
+  description: string;
+  address: string;
+  isActive: boolean;
+}
+
+interface Floor {
+  id: number;
+  name: string;
+  buildingId: number;
+  isActive: boolean;
+}
+
+interface Zone {
+  id: number;
+  name: string;
+  description: string;
+  type: string;
+  buildingId: number;
+  floorId: number;
+  isActive: boolean;
+}
+
 export default function Zones() {
   const [activeTab, setActiveTab] = useState("hierarchy");
 
-  const { data: buildings, isLoading: buildingsLoading } = useQuery({
+  const { data: buildings, isLoading: buildingsLoading } = useQuery<Building[]>({
     queryKey: ["/api/buildings"],
   });
 
-  const { data: floors, isLoading: floorsLoading } = useQuery({
+  const { data: floors, isLoading: floorsLoading } = useQuery<Floor[]>({
     queryKey: ["/api/floors"],
   });
 
-  const { data: zones, isLoading: zonesLoading } = useQuery({
+  const { data: zones, isLoading: zonesLoading } = useQuery<Zone[]>({
     queryKey: ["/api/zones"],
   });
 
   const isLoading = buildingsLoading || floorsLoading || zonesLoading;
 
   // Group zones by building and floor for hierarchy view
-  const buildingGroups = buildings?.reduce((acc: any, building: any) => {
-    const buildingFloors = floors?.filter((floor: any) => floor.buildingId === building.id) || [];
-    const floorsWithZones = buildingFloors.map((floor: any) => ({
+  const buildingGroups = buildings?.reduce((acc: any, building: Building) => {
+    const buildingFloors = floors?.filter((floor: Floor) => floor.buildingId === building.id) || [];
+    const floorsWithZones = buildingFloors.map((floor: Floor) => ({
       ...floor,
-      zones: zones?.filter((zone: any) => zone.floorId === floor.id) || []
+      zones: zones?.filter((zone: Zone) => zone.floorId === floor.id) || []
     }));
     
     acc[building.id] = {
@@ -147,7 +172,7 @@ export default function Zones() {
                           </Badge>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 pl-11">
-                          {floor.zones.map((zone: any) => renderZoneCard(zone))}
+                          {floor.zones.map((zone: Zone) => renderZoneCard(zone))}
                         </div>
                       </div>
                     ))}
@@ -168,7 +193,7 @@ export default function Zones() {
                   </Card>
                 ))
               ) : (
-                buildings?.map((building: any) => (
+                buildings?.map((building: Building) => (
                   <Card key={building.id} className="hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-slate-200/60 group">
                     <CardHeader className="pb-4">
                       <div className="flex items-center justify-between">
@@ -227,7 +252,7 @@ export default function Zones() {
                   </Card>
                 ))
               ) : (
-                zones?.map((zone: any) => renderZoneCard(zone))
+                zones?.map((zone: Zone) => renderZoneCard(zone))
               )}
             </div>
           </TabsContent>

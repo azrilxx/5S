@@ -25,6 +25,16 @@ type Message = {
   createdAt: string;
 };
 
+interface User {
+  id: number;
+  username: string;
+  name: string;
+  email: string;
+  role: string;
+  team: string | null;
+  zones: string[];
+}
+
 interface MessagesModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -42,19 +52,19 @@ export default function MessagesModal({ open, onOpenChange }: MessagesModalProps
   const queryClient = useQueryClient();
 
   // Fetch received messages
-  const { data: messages = [] } = useQuery({
+  const { data: messages = [] } = useQuery<Message[]>({
     queryKey: ["/api/messages"],
     enabled: !!user && open,
   });
 
   // Fetch sent messages
-  const { data: sentMessages = [] } = useQuery({
+  const { data: sentMessages = [] } = useQuery<Message[]>({
     queryKey: ["/api/messages/sent"],
     enabled: !!user && open,
   });
 
   // Fetch all users for recipient selection
-  const { data: users = [] } = useQuery({
+  const { data: users = [] } = useQuery<User[]>({
     queryKey: ["/api/users"],
     enabled: !!user && open,
   });
@@ -62,10 +72,7 @@ export default function MessagesModal({ open, onOpenChange }: MessagesModalProps
   // Send message mutation
   const sendMessage = useMutation({
     mutationFn: async (messageData: { recipient: string; subject: string; body: string }) => {
-      return await apiRequest("/api/messages", {
-        method: "POST",
-        body: messageData,
-      });
+      return await apiRequest("POST", "/api/messages", messageData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
@@ -91,9 +98,7 @@ export default function MessagesModal({ open, onOpenChange }: MessagesModalProps
   // Mark message as read mutation
   const markAsRead = useMutation({
     mutationFn: async (messageId: number) => {
-      return await apiRequest(`/api/messages/${messageId}/read`, {
-        method: "PUT",
-      });
+      return await apiRequest("PUT", `/api/messages/${messageId}/read`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
@@ -103,9 +108,7 @@ export default function MessagesModal({ open, onOpenChange }: MessagesModalProps
   // Delete message mutation
   const deleteMessage = useMutation({
     mutationFn: async (messageId: number) => {
-      return await apiRequest(`/api/messages/${messageId}`, {
-        method: "DELETE",
-      });
+      return await apiRequest("DELETE", `/api/messages/${messageId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/messages"] });
@@ -273,8 +276,8 @@ export default function MessagesModal({ open, onOpenChange }: MessagesModalProps
           </SelectTrigger>
           <SelectContent>
             {users
-              .filter((u: any) => u.username !== user?.username)
-              .map((u: any) => (
+              .filter((u: User) => u.username !== user?.username)
+              .map((u: User) => (
                 <SelectItem key={u.username} value={u.username}>
                   {u.name}
                 </SelectItem>

@@ -267,8 +267,9 @@ export class MemStorage implements IStorage {
       ...insertZone,
       id: this.currentZoneIds++,
       description: insertZone.description ?? null,
-      floor: insertZone.floor ?? null,
+      floorId: insertZone.floorId ?? null,
       isActive: insertZone.isActive ?? true,
+      createdAt: new Date(),
     };
     this.zones.set(zone.id, zone);
     return zone;
@@ -796,7 +797,7 @@ export class DatabaseStorage implements IStorage {
       
       // Then delete the audit
       const result = await db.delete(audits).where(eq(audits.id, id));
-      return result.rowCount > 0;
+      return result.rowCount !== null && result.rowCount > 0;
     } catch (error) {
       console.error("Error deleting audit:", error);
       return false;

@@ -23,6 +23,23 @@ import {
 } from "lucide-react";
 import Layout from "@/components/layout/layout";
 
+interface Question {
+  id: string;
+  category: string;
+  question: string;
+  description?: string;
+}
+
+interface Zone {
+  id: number;
+  name: string;
+  description: string;
+  type: string;
+  buildingId: number;
+  floorId: number;
+  isActive: boolean;
+}
+
 interface AuditQuestion {
   id: string;
   category: string;
@@ -60,19 +77,19 @@ export default function AuditForm() {
   const zone = params?.zone || '';
 
   // Fetch questions for this zone
-  const { data: questions, isLoading: questionsLoading } = useQuery({
+  const { data: questions, isLoading: questionsLoading } = useQuery<Question[]>({
     queryKey: ["/api/questions", zone],
     enabled: !!zone,
   });
 
   // Fetch zone details
-  const { data: zones } = useQuery({
+  const { data: zones } = useQuery<Zone[]>({
     queryKey: ["/api/zones"],
   });
 
-  const zoneDetails = zones?.find((z: any) => z.name === zone);
+  const zoneDetails = zones?.find((z: Zone) => z.name === zone);
 
-  const filteredQuestions = questions?.filter((q: any) => 
+  const filteredQuestions = questions?.filter((q: Question) => 
     q.category === AUDIT_CATEGORIES[currentCategory]?.id
   ) || [];
 
@@ -83,7 +100,7 @@ export default function AuditForm() {
         ...prev[questionId],
         id: questionId,
         category: AUDIT_CATEGORIES[currentCategory].id,
-        question: filteredQuestions.find(q => q.id === questionId)?.question || '',
+        question: filteredQuestions.find((q: Question) => q.id === questionId)?.question || '',
         response
       }
     }));
@@ -155,10 +172,7 @@ export default function AuditForm() {
         answers: Object.values(answers)
       };
 
-      return apiRequest(`/api/audits`, {
-        method: 'POST',
-        body: JSON.stringify(auditData),
-      });
+      return apiRequest('POST', `/api/audits`, auditData);
     },
     onSuccess: () => {
       toast({
@@ -200,7 +214,7 @@ export default function AuditForm() {
 
   if (questionsLoading) {
     return (
-      <Layout title="Loading Audit..." showHomeButton={true}>
+      <Layout title="Loading Audit..." subtitle="Please wait..." showHomeButton={true}>
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
@@ -211,7 +225,7 @@ export default function AuditForm() {
   return (
     <Layout 
       title={`5S Audit - ${zone}`} 
-      subtitle={`${AUDIT_CATEGORIES[currentCategory]?.name} (${currentCategory + 1}/${AUDIT_CATEGORIES.length})`}
+      subtitle="Complete your audit checklist"
       showHomeButton={false}
     >
       <div className="space-y-6">

@@ -12,21 +12,62 @@ import { format } from "date-fns";
 import { CalendarIcon, MapPin, Users, Building, ArrowRight } from "lucide-react";
 import Layout from "@/components/layout/layout";
 
+interface Zone {
+  id: number;
+  name: string;
+  description: string;
+  type: string;
+  buildingId: number;
+  floorId: number;
+  isActive: boolean;
+}
+
+interface Building {
+  id: number;
+  name: string;
+  description: string;
+  address: string;
+  isActive: boolean;
+}
+
+interface Team {
+  id: number;
+  name: string;
+  leader: string;
+  members: string[];
+  assignedZones: string[];
+}
+
+interface User {
+  id: number;
+  username: string;
+  name: string;
+  email: string;
+  role: string;
+  team: string | null;
+  zones: string[];
+}
+
+interface AuthResponse {
+  success: boolean;
+  data: User;
+}
+
 export default function AuditNew() {
   const [, setLocation] = useLocation();
   const [selectedZone, setSelectedZone] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTeam, setSelectedTeam] = useState<string>('');
 
-  const { data: allZones, isLoading: zonesLoading } = useQuery({
+  const { data: allZones, isLoading: zonesLoading } = useQuery<Zone[]>({
     queryKey: ["/api/zones"],
   });
 
-  const { data: currentUser } = useQuery({
+  const { data: currentUser } = useQuery<AuthResponse>({
     queryKey: ["/api/users/me"],
   });
 
-  const { data: teams } = useQuery({
+  const { data: teams } = useQuery<Team[]>({
     queryKey: ["/api/teams"],
   });
 
@@ -36,33 +77,33 @@ export default function AuditNew() {
     if (!allZones || !currentUser || !teams) return allZones;
     
     // Admins see all zones
-    if (currentUser.role === 'admin') {
+    if (currentUser.data.role === 'admin') {
       return allZones;
     }
     
     // If user has no team, show all zones (fallback)
-    if (!currentUser.team) {
+    if (!currentUser.data.team) {
       return allZones;
     }
     
     // Find user's team and filter zones
-    const userTeam = teams.find((team: any) => team.name === currentUser.team);
-    if (!userTeam?.assigned_zones) {
+    const userTeam = teams.find((team: Team) => team.name === currentUser.data.team);
+    if (!userTeam?.assignedZones) {
       return allZones;
     }
     
-    return allZones.filter((zone: any) => 
-      userTeam.assigned_zones.includes(zone.name)
+    return allZones.filter((zone: Zone) => 
+      userTeam.assignedZones.includes(zone.name)
     );
   }, [allZones, currentUser, teams]);
 
-  const { data: buildings } = useQuery({
+  const { data: buildings } = useQuery<Building[]>({
     queryKey: ["/api/buildings"],
   });
 
-  const selectedZoneDetails = zones?.find((z: any) => z.name === selectedZone);
-  const selectedTeamDetails = selectedTeam && selectedTeam !== 'none' ? teams?.find((t: any) => t.name === selectedTeam) : null;
-  const buildingDetails = buildings?.find((b: any) => b.id === selectedZoneDetails?.buildingId);
+  const selectedZoneDetails = zones?.find((z: Zone) => z.name === selectedZone);
+  const selectedTeamDetails = selectedTeam && selectedTeam !== 'none' ? teams?.find((t: Team) => t.name === selectedTeam) : null;
+  const buildingDetails = buildings?.find((b: Building) => b.id === selectedZoneDetails?.buildingId);
 
   const handleStartAudit = () => {
     if (!selectedZone) {
@@ -100,7 +141,7 @@ export default function AuditNew() {
                     {zonesLoading ? (
                       <SelectItem value="loading" disabled>Loading zones...</SelectItem>
                     ) : (
-                      zones?.map((zone: any) => (
+                      zones?.map((zone: Zone) => (
                         <SelectItem key={zone.id} value={zone.name}>
                           {zone.name} ({zone.type})
                         </SelectItem>
@@ -202,7 +243,7 @@ export default function AuditNew() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">No team assignment</SelectItem>
-                    {teams?.map((team: any) => (
+                    {teams?.map((team: Team) => (
                       <SelectItem key={team.id} value={team.name}>
                         {team.name} (Leader: {team.leader})
                       </SelectItem>
