@@ -64,6 +64,8 @@
     "@tanstack/react-query": "^5.60.5",
     "@types/bcrypt": "^5.0.2",
     "@types/papaparse": "^5.3.16",
+    "@types/pdf-parse": "^1.1.5",
+    "@types/react-csv": "^1.1.10",
     "argon2": "^0.43.1",
     "axios": "^1.10.0",
     "bcrypt": "^6.0.0",

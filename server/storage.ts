@@ -154,11 +154,11 @@ export class MemStorage implements IStorage {
 
     // Initialize zones
     const defaultZones: Zone[] = [
-      { id: this.currentZoneIds++, name: "Office Ground Floor", description: "Reception, Meeting Room, Surau", type: "office", floor: "Ground", isActive: true },
-      { id: this.currentZoneIds++, name: "Factory Zone 1", description: "Main production area", type: "factory", floor: "Ground", isActive: true },
-      { id: this.currentZoneIds++, name: "Factory Zone 2", description: "Secondary production area", type: "factory", floor: "Ground", isActive: true },
-      { id: this.currentZoneIds++, name: "First Floor", description: "Sales 1, Sales 2, Pantry, Meeting Room", type: "office", floor: "First", isActive: true },
-      { id: this.currentZoneIds++, name: "Second Floor", description: "Admin, Filing Room, Accounts", type: "office", floor: "Second", isActive: true },
+      { id: this.currentZoneIds++, name: "Office Ground Floor", description: "Reception, Meeting Room, Surau", type: "office", buildingId: 1, floorId: 1, isActive: true, createdAt: new Date() },
+      { id: this.currentZoneIds++, name: "Factory Zone 1", description: "Main production area", type: "factory", buildingId: 1, floorId: 1, isActive: true, createdAt: new Date() },
+      { id: this.currentZoneIds++, name: "Factory Zone 2", description: "Secondary production area", type: "factory", buildingId: 1, floorId: 1, isActive: true, createdAt: new Date() },
+      { id: this.currentZoneIds++, name: "First Floor", description: "Sales 1, Sales 2, Pantry, Meeting Room", type: "office", buildingId: 1, floorId: 2, isActive: true, createdAt: new Date() },
+      { id: this.currentZoneIds++, name: "Second Floor", description: "Admin, Filing Room, Accounts", type: "office", buildingId: 1, floorId: 3, isActive: true, createdAt: new Date() },
     ];
     defaultZones.forEach(zone => this.zones.set(zone.id, zone));
 
@@ -207,6 +207,52 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values());
   }
 
+  // Building methods (placeholder - not implemented in MemStorage)
+  async getAllBuildings(): Promise<Building[]> {
+    return [];
+  }
+
+  async getBuilding(id: number): Promise<Building | undefined> {
+    return undefined;
+  }
+
+  async createBuilding(insertBuilding: InsertBuilding): Promise<Building> {
+    throw new Error("Buildings not implemented in MemStorage");
+  }
+
+  async updateBuilding(id: number, updates: Partial<InsertBuilding>): Promise<Building | undefined> {
+    return undefined;
+  }
+
+  async deleteBuilding(id: number): Promise<boolean> {
+    return false;
+  }
+
+  // Floor methods (placeholder - not implemented in MemStorage)
+  async getAllFloors(): Promise<Floor[]> {
+    return [];
+  }
+
+  async getFloor(id: number): Promise<Floor | undefined> {
+    return undefined;
+  }
+
+  async getFloorsByBuilding(buildingId: number): Promise<Floor[]> {
+    return [];
+  }
+
+  async createFloor(insertFloor: InsertFloor): Promise<Floor> {
+    throw new Error("Floors not implemented in MemStorage");
+  }
+
+  async updateFloor(id: number, updates: Partial<InsertFloor>): Promise<Floor | undefined> {
+    return undefined;
+  }
+
+  async deleteFloor(id: number): Promise<boolean> {
+    return false;
+  }
+
   // Zone methods
   async getAllZones(): Promise<Zone[]> {
     return Array.from(this.zones.values());
@@ -239,6 +285,14 @@ export class MemStorage implements IStorage {
 
   async deleteZone(id: number): Promise<boolean> {
     return this.zones.delete(id);
+  }
+
+  async getZonesByFloor(floorId: number): Promise<Zone[]> {
+    return Array.from(this.zones.values()).filter(zone => zone.floorId === floorId);
+  }
+
+  async getZonesByBuilding(buildingId: number): Promise<Zone[]> {
+    return Array.from(this.zones.values()).filter(zone => zone.buildingId === buildingId);
   }
 
   // Team methods
@@ -805,11 +859,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getActionsByAssignee(assignee: string): Promise<Action[]> {
-    return await db.select().from(actions).where(eq(actions.assignee, assignee));
-  }
-
-  async getAuditsByAuditor(auditor: string): Promise<Audit[]> {
-    return await db.select().from(audits).where(eq(audits.auditor, auditor));
+    return await db.select().from(actions).where(eq(actions.assignedTo, assignee));
   }
 
   async getActionsByZone(zone: string): Promise<Action[]> {
@@ -843,7 +893,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getActiveSchedules(): Promise<Schedule[]> {
-    return await db.select().from(schedules).where(eq(schedules.status, 'active'));
+    return await db.select().from(schedules).where(eq(schedules.isActive, true));
   }
 
   async getAllReports(): Promise<Report[]> {
@@ -913,16 +963,7 @@ export class DatabaseStorage implements IStorage {
     return result.rowCount !== null && result.rowCount > 0;
   }
 
-  // Zone methods implementation
-  async updateZone(id: number, updates: Partial<InsertZone>): Promise<Zone | undefined> {
-    const [zone] = await db.update(zones).set(updates).where(eq(zones.id, id)).returning();
-    return zone || undefined;
-  }
 
-  async deleteZone(id: number): Promise<boolean> {
-    const result = await db.delete(zones).where(eq(zones.id, id));
-    return result.rowCount !== null && result.rowCount > 0;
-  }
 
   // Message methods
   async getAllMessages(): Promise<Message[]> {
