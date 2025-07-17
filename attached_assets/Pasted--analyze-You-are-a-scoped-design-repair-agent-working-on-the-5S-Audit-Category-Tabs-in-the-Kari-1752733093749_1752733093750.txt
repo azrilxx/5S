@@ -1,0 +1,69 @@
+/analyze
+
+You are a scoped design repair agent working on the **5S Audit Category Tabs** in the Karisma 5S Audit web application. Before performing any code edits, use Replit’s internal agent tools to **search for the latest UI/UX best practices** for tab-based navigation using TailwindCSS or similar frameworks.
+
+---
+
+### 🎯 OBJECTIVE
+
+**Current issue:**  
+The active tab (`5S`) appears **vertically misaligned**, breaking the visual rhythm. Its content area drops lower than other tabs, and the circular count badge is **not vertically centered**. This inconsistency disrupts professional UI appearance.
+
+**Desired fix:**  
+Design and implement a **consistent, visually clean horizontal tab group** where:
+- All tabs (`1S` to `5S`) sit on the **same horizontal baseline**
+- The **active tab** is visually emphasized but **does not expand vertically**
+- The **badge** stays **centered** in every state
+- TailwindCSS utility classes are used effectively and efficiently
+
+---
+
+### 🔎 USE YOUR CLAUDE AGENT TO RESEARCH
+
+Before writing or modifying code:
+1. Search: “best practices for TailwindCSS tab navigation UI”
+2. Search: “how to style active tab in Tailwind without breaking layout”
+3. Search: “center badge inside button or tab TailwindCSS”
+4. Evaluate results: What are the common UI patterns in professional apps (e.g., shadcn/ui, Radix UI)?
+5. Assess if the design can be directly adopted or minimally adapted
+
+You MUST NOT guess or reuse broken code. Use verified design patterns where possible.
+
+---
+
+### 🛠️ SCOPE OF IMPLEMENTATION
+
+You are allowed to:
+- Refactor the tab layout component
+- Apply updated TailwindCSS utility classes
+- Introduce `flex`, `grid`, or `inline-flex` for alignment
+- Adjust active tab classes (`bg-blue-500`, `text-white`, etc.)
+- Fix the badge alignment using `flex items-center justify-center`, etc.
+
+You are NOT allowed to:
+- Change tab routing logic or application state logic
+- Alter or break other components like `Add Question` button or content panel
+- Modify anything outside the tab selector group
+
+---
+
+### 🧪 TEST BEFORE FINALIZING
+
+Once implemented:
+- Ensure tab interactivity remains functional
+- Confirm tabs do not shift vertically when selected
+- Validate that all styles remain scoped and backward-compatible
+- Do not affect any unrelated functionality or layout
+
+---
+
+### 📎 IMAGE REFERENCE
+
+![5S Misaligned Tabs](attached:889bcb2b-10bf-4948-8046-90070ec857a5.png)
+
+---
+
+### 📄 OUTPUT FORMAT
+
+Return the entire **updated component code block**, fully working, as a single file. Include any helper classes or extracted styling if necessary.
+
