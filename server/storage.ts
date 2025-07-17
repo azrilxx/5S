@@ -15,6 +15,7 @@ export interface IStorage {
   // User methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
@@ -334,6 +335,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).find(user => user.username === username);
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.email === email);
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const user: User = {
       ...insertUser,
@@ -359,11 +364,17 @@ export class MemStorage implements IStorage {
   }
 
   async updateUser(id: number, updates: Partial<InsertUser>): Promise<User | undefined> {
+    console.log("MemStorage updateUser called with:", { id, updates });
+    console.log("Available user IDs:", Array.from(this.users.keys()));
+    
     const user = this.users.get(id);
+    console.log("Found user:", user ? { id: user.id, username: user.username } : null);
+    
     if (!user) return undefined;
     
     const updatedUser = { ...user, ...updates };
     this.users.set(id, updatedUser);
+    console.log("Updated user:", { id: updatedUser.id, email: updatedUser.email });
     return updatedUser;
   }
 
@@ -829,6 +840,11 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByUsername(username: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
     return user || undefined;
   }
 

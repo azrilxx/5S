@@ -287,11 +287,23 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     try {
       const { name, email } = req.body;
       
+      console.log("Profile update request:", { userId: req.user.id, name, email });
+      
       if (!name || !email) {
         return res.status(400).json({ message: "Name and email are required" });
       }
       
+      // Check if email is already taken by another user
+      const existingUser = await storage.getUserByEmail(email);
+      console.log("Existing user with email:", existingUser ? { id: existingUser.id, email: existingUser.email } : null);
+      
+      if (existingUser && existingUser.id !== req.user.id) {
+        return res.status(400).json({ message: "Email is already taken" });
+      }
+      
       const updatedUser = await storage.updateUser(req.user.id, { name, email });
+      console.log("Update result:", updatedUser ? { id: updatedUser.id, email: updatedUser.email } : null);
+      
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
       }
