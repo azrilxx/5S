@@ -13,7 +13,7 @@ const lessons = [
     duration: "15 min",
     completed: true,
     category: "5S Fundamentals",
-    videoId: "dQw4w9WgXcQ", // Educational placeholder - replace with actual 5S Sort training video
+    videoId: "Pu29athsH0E", // What is 5S Methodology?
     keyPoints: [
       "Separate necessary from unnecessary items in the workplace",
       "Use red tag system to identify questionable items",
@@ -32,7 +32,7 @@ const lessons = [
     duration: "20 min",
     completed: true,
     category: "5S Fundamentals",
-    videoId: "dQw4w9WgXcQ", // Educational placeholder - replace with actual 5S Seiton training video
+    videoId: "bLadn_zOx2Q", // Boosts Efficiency
     keyPoints: [
       "Arrange necessary items in logical, accessible locations",
       "Create visual workplace with clear labels and marking",
@@ -51,7 +51,7 @@ const lessons = [
     duration: "18 min",
     completed: false,
     category: "5S Fundamentals",
-    videoId: "dQw4w9WgXcQ", // Educational placeholder - replace with actual 5S Seiso training video
+    videoId: "GW_LTbKUBsg", // 5S in Factory & Office: How to Make Your Workplace Excellent
     keyPoints: [
       "Clean workplace to reveal hidden problems and defects",
       "Use cleaning as inspection opportunity for equipment",
@@ -70,7 +70,7 @@ const lessons = [
     duration: "25 min",
     completed: false,
     category: "5S Fundamentals",
-    videoId: "dQw4w9WgXcQ", // Educational placeholder - replace with actual 5S Seiketsu training video
+    // No video for this topic
     keyPoints: [
       "Develop standard operating procedures for 5S activities",
       "Create visual standards and documentation systems",
@@ -89,7 +89,7 @@ const lessons = [
     duration: "22 min",
     completed: false,
     category: "5S Fundamentals",
-    videoId: "dQw4w9WgXcQ", // Educational placeholder - replace with actual 5S Shitsuke training video
+    // No video for this topic
     keyPoints: [
       "Develop self-discipline to maintain 5S without supervision",
       "Create organizational culture that supports 5S practices",
@@ -103,17 +103,8 @@ const lessons = [
   }
 ];
 
-// Safe video embed component with graceful fallback
-const VideoEmbed = ({ videoId, title }: { videoId?: string; title: string }) => {
-  if (!videoId) {
-    return (
-      <div className="w-full h-48 bg-slate-100 rounded-lg flex flex-col items-center justify-center text-slate-500">
-        <AlertCircle className="h-8 w-8 mb-2" />
-        <p className="text-sm text-center">Video not available – check your internet connection or contact admin.</p>
-      </div>
-    );
-  }
-
+// Safe video embed component - only renders when videoId is provided
+const VideoEmbed = ({ videoId, title }: { videoId: string; title: string }) => {
   return (
     <div className="w-full h-48 bg-slate-100 rounded-lg overflow-hidden">
       <iframe
@@ -126,7 +117,6 @@ const VideoEmbed = ({ videoId, title }: { videoId?: string; title: string }) => 
         allowFullScreen
         className="rounded-lg"
         onError={() => {
-          // Fallback handling - this would be handled by the parent component
           console.warn(`Failed to load video: ${videoId}`);
         }}
       />
