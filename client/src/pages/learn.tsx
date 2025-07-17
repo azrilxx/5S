@@ -40,7 +40,6 @@ const lessons = [
     duration: "25 min",
     completed: false,
     category: "5S Fundamentals"
-    // No video for this topic
   },
   {
     id: 5,
@@ -49,7 +48,6 @@ const lessons = [
     duration: "22 min",
     completed: false,
     category: "5S Fundamentals"
-    // No video for this topic
   }
 ];
 
