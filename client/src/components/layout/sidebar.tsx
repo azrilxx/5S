@@ -98,7 +98,6 @@ const getNavigationSections = (userRole: string) => {
     items: [
       { name: "Learn 5S", href: "/learn", icon: BookOpen },
       { name: "Trainings", href: "/trainings", icon: GraduationCap },
-      { name: "Documentation", href: "/documentation", icon: FileText },
       { name: "Feedback", href: "/feedback", icon: MessageSquare },
     ]
   });

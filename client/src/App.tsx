@@ -32,7 +32,7 @@ import Trainings from "@/pages/trainings";
 import Feedback from "@/pages/feedback";
 import Analytics from "@/pages/analytics";
 import KPITracking from "@/pages/kpi";
-import Documentation from "@/pages/documentation";
+
 import AccessControl from "@/pages/access-control";
 import { useEffect } from "react";
 import { apiRequest } from "@/lib/queryClient";
@@ -200,11 +200,7 @@ function Router() {
           <KPITracking />
         </ProtectedRoute>
       </Route>
-      <Route path="/documentation">
-        <ProtectedRoute>
-          <Documentation />
-        </ProtectedRoute>
-      </Route>
+
       <Route path="/access-control">
         <ProtectedRoute>
           <AccessControl />
