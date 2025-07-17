@@ -24,7 +24,8 @@
       "Bash(pgrep:*)",
       "Bash(find:*)",
       "Bash(true)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(env)"
     ],
     "deny": []
   }

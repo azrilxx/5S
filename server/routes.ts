@@ -357,7 +357,19 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
   // Update user settings
   app.put("/api/users/settings", authenticateToken, async (req: any, res) => {
     try {
+      console.log("Settings update - req.user:", JSON.stringify(req.user, null, 2));
+      console.log("Settings update - req.body:", JSON.stringify(req.body, null, 2));
+      
       const { language, notifications, theme } = req.body;
+      
+      // Ensure userId is properly parsed as integer
+      const userId = Number(req.user.id);
+      console.log("Parsed userId:", userId, "Type:", typeof userId, "IsNaN:", isNaN(userId));
+      
+      if (isNaN(userId)) {
+        console.error("Invalid user ID:", req.user.id);
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
       
       // Validate required fields with safe defaults
       const safeSettings = {
@@ -370,16 +382,21 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
         theme: theme || 'light'
       };
       
-      const updatedUser = await storage.updateUser(req.user.id, {
+      console.log("Calling storage.updateUser with:", userId, safeSettings);
+      
+      // Update user with both language and preferences
+      const updatedUser = await storage.updateUser(userId, {
         language: safeSettings.language,
         preferences: safeSettings
       });
+      
+      console.log("UpdateUser result:", updatedUser ? "SUCCESS" : "FAILED");
       
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      res.json(safeSettings);
+      res.json({ success: true, settings: safeSettings });
     } catch (error) {
       console.error("Update user settings error:", error);
       res.status(500).json({ message: "Internal server error" });
@@ -1343,9 +1360,12 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
   });
 
   app.put("/api/settings", authenticateToken, async (req: Request & { user?: any }, res: Response) => {
+    console.log("=== LEGACY SETTINGS ROUTE ===");
+    console.log("req.user:", req.user);
     try {
       // Only allow non-admin users to update settings
       if (req.user?.role === 'admin') {
+        console.log("Blocking admin user from using legacy settings route");
         return res.status(403).json({ message: "Settings are for regular users only" });
       }
 

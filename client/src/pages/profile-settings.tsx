@@ -185,15 +185,25 @@ export default function ProfileSettings() {
         },
         body: JSON.stringify(newSettings),
       });
-      if (!response.ok) throw new Error("Failed to save settings");
-      return response.json();
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to save settings");
+      }
+      
+      const result = await response.json();
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users/settings"] });
       toast({ title: t("settings.settingsSaved") });
     },
-    onError: () => {
-      toast({ title: t("messages.actionFailed"), variant: "destructive" });
+    onError: (error) => {
+      toast({ 
+        title: t("messages.actionFailed"), 
+        description: error.message,
+        variant: "destructive" 
+      });
     },
   });
 
@@ -269,11 +279,19 @@ export default function ProfileSettings() {
     
     // Auto-save language preference immediately
     const updatedSettings = { ...settings, language: newLanguage };
+    
     saveSettingsMutation.mutate(updatedSettings, {
       onSuccess: () => {
         toast({
           title: newLanguage === 'en' ? "Language Updated" : "语言已更新",
           description: newLanguage === 'en' ? "Interface language changed to English" : "界面语言已更改为中文"
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: newLanguage === 'en' ? "Language Update Failed" : "语言更新失败",
+          description: newLanguage === 'en' ? "Failed to save language preference" : "保存语言偏好失败",
+          variant: "destructive"
         });
       }
     });

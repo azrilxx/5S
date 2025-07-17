@@ -364,17 +364,11 @@ export class MemStorage implements IStorage {
   }
 
   async updateUser(id: number, updates: Partial<InsertUser>): Promise<User | undefined> {
-    console.log("MemStorage updateUser called with:", { id, updates });
-    console.log("Available user IDs:", Array.from(this.users.keys()));
-    
     const user = this.users.get(id);
-    console.log("Found user:", user ? { id: user.id, username: user.username } : null);
-    
     if (!user) return undefined;
     
     const updatedUser = { ...user, ...updates };
     this.users.set(id, updatedUser);
-    console.log("Updated user:", { id: updatedUser.id, email: updatedUser.email });
     return updatedUser;
   }
 
