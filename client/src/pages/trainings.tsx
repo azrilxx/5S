@@ -1,39 +1,26 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Users, Calendar, Award } from "lucide-react";
+import { ExternalLink, GraduationCap } from "lucide-react";
 import Layout from "@/components/layout/layout";
 
-const trainings = [
+const externalTrainings = [
   {
     id: 1,
-    title: "5S Fundamentals Workshop",
-    description: "Complete introduction to 5S methodology with hands-on exercises",
-    date: "2025-01-20",
-    duration: "4 hours",
-    attendees: 25,
-    status: "upcoming",
-    instructor: "John Smith"
+    title: "5S Principles and Implementation",
+    description: "Comprehensive 5S training program covering principles and practical implementation strategies",
+    url: "https://www.bsigroup.com/en-MY/training-courses/5s-principles-and-implementation/"
   },
   {
     id: 2,
-    title: "Advanced Audit Techniques",
-    description: "Deep dive into effective audit strategies and common pitfalls",
-    date: "2025-01-15",
-    duration: "3 hours",
-    attendees: 18,
-    status: "completed",
-    instructor: "Sarah Johnson"
+    title: "5S Principles and Awareness Training",
+    description: "Professional awareness training to build understanding of 5S methodology and workplace organization",
+    url: "https://www.iconictraining.com.my/showproducts/productid/2536040/5s-principles-and-awareness-training/"
   },
   {
     id: 3,
-    title: "Team Leadership in 5S",
-    description: "Leading teams through 5S implementation and cultural change",
-    date: "2025-01-25",
-    duration: "2 hours",
-    attendees: 12,
-    status: "upcoming",
-    instructor: "Mike Wilson"
+    title: "5S Management Consultant Malaysia",
+    description: "Expert 5S training and consultation services for comprehensive workplace transformation",
+    url: "https://www.yenpremiumcoach.yenuni.com.my/5s-training-and-consultation/"
   }
 ];
 
@@ -46,36 +33,25 @@ export default function Trainings() {
     >
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {trainings.map((training) => (
+          {externalTrainings.map((training) => (
             <Card key={training.id} className="hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <Badge variant={training.status === "completed" ? "default" : "secondary"}>
-                    {training.status}
-                  </Badge>
                   <GraduationCap className="h-5 w-5 text-primary" />
+                  <ExternalLink className="h-4 w-4 text-slate-400" />
                 </div>
                 <CardTitle className="text-lg">{training.title}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-slate-600 mb-4">{training.description}</p>
-                <div className="space-y-2">
-                  <div className="flex items-center text-sm text-slate-500">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    {new Date(training.date).toLocaleDateString()} • {training.duration}
-                  </div>
-                  <div className="flex items-center text-sm text-slate-500">
-                    <Users className="h-4 w-4 mr-2" />
-                    {training.attendees} Attendees
-                  </div>
-                  <div className="flex items-center text-sm text-slate-500">
-                    <Award className="h-4 w-4 mr-2" />
-                    {training.instructor}
-                  </div>
-                </div>
                 <div className="mt-4">
-                  <Button size="sm" className="w-full">
-                    {training.status === "completed" ? "View Materials" : "Register"}
+                  <Button 
+                    size="sm" 
+                    className="w-full"
+                    onClick={() => window.open(training.url, '_blank')}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Training
                   </Button>
                 </div>
               </CardContent>
