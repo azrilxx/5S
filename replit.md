@@ -318,7 +318,7 @@ The application follows a monorepo structure with shared types and schemas, maki
 - **Details**:
   - **Critical Fix**: Switched from MemStorage to DatabaseStorage in `server/storage.ts` to resolve teams visibility issue
   - **Database Schema**: Removed problematic "tags" columns from actions and checklist_items tables causing dashboard errors
-  - **Superadmin Implementation**: Successfully upgraded Calvin, Shukri, and Azril to "superadmin" role with enhanced privileges
+  - **Superadmin Implementation**: Successfully upgraded Azril and Shukri to "superadmin" role with enhanced privileges (Calvin reverted to normal user)
   - **Role-Based Access**: Updated all authentication middleware to recognize "superadmin" role alongside "admin" role
   - **Dashboard Enhancement**: Modified dashboard to properly display "Super Admin Dashboard" for superadmin users
   - **Notification Rules System**: Created comprehensive notification rules system for Stage 9 audit notifications:
@@ -328,7 +328,8 @@ The application follows a monorepo structure with shared types and schemas, maki
     - Automated triggers for overdue actions, failed audits, and audit assignments
   - **Teams Management**: All 6 teams (Galvanize, Chrome, Steel, Aluminum, Copper, Titanium) now properly visible to superadmin users
   - **Sidebar Navigation**: Added "Notification Settings" to System Administration section for admin/superadmin access
-- **Impact**: Provides fully functional superadmin system with complete team visibility, notification management, and enhanced administrative capabilities
+  - **Final Access Control**: Only Azril and Shukri maintain superadmin access, all other users have normal user privileges
+- **Impact**: Provides fully functional superadmin system with complete team visibility, notification management, and enhanced administrative capabilities restricted to 2 authorized super administrators
 
 ### Hierarchical Zone Management & Realistic Data Implementation
 - **Date**: January 15, 2025
