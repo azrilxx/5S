@@ -86,8 +86,7 @@ export const checklistItems = pgTable("checklist_items", {
   comments: text("comments"),
   photoUrl: text("photo_url"),
   requiresAction: boolean("requires_action").default(false),
-  order: integer("order").default(0),
-  tags: text("tags").array().default([]), // array of tag IDs
+  order: integer("order").default(0)
 });
 
 // Actions table
@@ -106,7 +105,6 @@ export const actions = pgTable("actions", {
   completedAt: timestamp("completed_at"),
   proofPhotoUrl: text("proof_photo_url"),
   comments: text("comments"),
-  tags: text("tags").array().default([]), // array of tag IDs
   createdAt: timestamp("created_at").defaultNow(),
 });
 

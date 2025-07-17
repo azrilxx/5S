@@ -74,8 +74,8 @@ export default function Dashboard() {
     return auditDate === today;
   }) || [];
 
-  // Filter actions based on user role
-  const filteredActions = user?.role === 'admin' 
+  // Filter actions based on user role - admin and superadmin see all actions
+  const filteredActions = (user?.role === 'admin' || user?.role === 'superadmin')
     ? (actions as any[]) || []
     : (actions as any[])?.filter((action: any) => action.assignedTo === user?.username) || [];
 
@@ -88,8 +88,8 @@ export default function Dashboard() {
     return new Date(action.dueDate) < new Date() && action.status !== 'closed';
   }) || [];
 
-  const isAdmin = user?.role === 'admin';
-  const dashboardTitle = isAdmin ? "Admin Dashboard" : "My Dashboard";
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
+  const dashboardTitle = isAdmin ? (user?.role === 'superadmin' ? "Super Admin Dashboard" : "Admin Dashboard") : "My Dashboard";
   const dashboardSubtitle = isAdmin 
     ? "Monitor all 5S audit activities and manage system" 
     : "View your audit activities and assigned actions";
