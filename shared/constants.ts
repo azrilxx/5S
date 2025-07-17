@@ -30,6 +30,9 @@ export const SYSTEM_ALLOWED_USERS: string[] = [
   "System Administrator",
 ];
 
+// Locked admin users - DO NOT MODIFY without approval
+export const LOCKED_ADMINS = ['Azril', 'Shukri'] as const;
+
 // Official team structure with proper assignments
 export const TEAM_STRUCTURE = {
   Galvanize: {
@@ -100,4 +103,12 @@ export function getTeamByMember(memberName: string): string | null {
   if (TEAM_STRUCTURE.Copper.members.includes(memberName as any)) return "Copper";
   if (TEAM_STRUCTURE.Titanium.members.includes(memberName as any)) return "Titanium";
   return null;
+}
+
+// Get role by name - static role assignment for specific users
+export function getRoleByName(name: string): 'admin' | 'user' {
+  if (LOCKED_ADMINS.includes(name as any)) {
+    return 'admin';
+  }
+  return 'user';
 }

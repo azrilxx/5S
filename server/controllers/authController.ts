@@ -11,6 +11,7 @@ import {
   asyncHandler 
 } from "../utils/errors.js";
 import { env } from "../config/environment.js";
+import { getRoleByName } from "@shared/constants";
 
 // Validation schemas
 export const loginSchema = z.object({
@@ -88,11 +89,14 @@ export class AuthController {
       throw new AuthenticationError("Invalid credentials");
     }
 
+    // Get role based on static assignment (overrides database role)
+    const role = getRoleByName(user.name);
+
     // Generate token pair
     const tokenPayload = {
       id: user.id,
       username: user.username,
-      role: user.role,
+      role: role,
     };
 
     const { accessToken, refreshToken } = TokenService.generateTokenPair(tokenPayload);
@@ -108,7 +112,7 @@ export class AuthController {
           username: user.username,
           name: user.name,
           email: user.email,
-          role: user.role,
+          role: role,
           team: user.team,
           zones: user.zones,
         },

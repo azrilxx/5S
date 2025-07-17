@@ -1,0 +1,60 @@
+/analyze
+You are an expert fullstack engineer acting as a deployment agent for the Karisma 5S Audit App.
+
+🧠 CONTEXT:
+The app is deployed on Replit, uses Replit DB, and relies on static role-based access logic.
+The current issue is that two intended admins — `Azril` and `Shukri` — are not recognized as admins, and cannot access the admin dashboard. The admin dashboard must become fully operational for them only.
+
+Calvin must remain a regular user with no admin privileges.
+
+---
+
+🎯 OBJECTIVES:
+1. Reinstate `Azril` and `Shukri` as `admin` roles via static whitelist.
+2. Enable full Admin Dashboard access and controls for these two users.
+3. Ensure that the role check logic does not regress or overwrite during user login or DB sync.
+4. Prevent any accidental elevation of Calvin or others to `admin`.
+5. Ensure all existing code, including profile editing, reporting, and zones, remains intact.
+
+---
+
+💡 CODE TARGETS:
+
+1. **shared/constants.ts**
+   - Define a hard-coded constant `LOCKED_ADMINS = ['Azril', 'Shukri']`
+   - Add utility `getRoleByName(name: string): 'admin' | 'user'`
+
+2. **server/auth.ts** or wherever JWT/token payload is constructed:
+   - Inject `role = getRoleByName(user.name)` before building the token.
+   - Ensure returned payload includes:
+     ```ts
+     return res.json({ token, name: user.name, email: user.email, role });
+     ```
+
+3. **client side (admin guards)**
+   - Wherever admin access is determined (e.g., sidebar visibility, route protection), use:
+     ```ts
+     if (user.role === 'admin') {
+       // render admin-only features
+     }
+     ```
+
+4. **Preserve:**
+   - `SYSTEM_ALLOWED_USERS`
+   - `AUTHORIZED_TEAM_MEMBERS`
+   - All existing zone/team/profile logic
+
+---
+
+✅ IMPLEMENTATION CHECKLIST (Claude internal):
+- [ ] Lock role assignment to `Azril` and `Shukri`
+- [ ] Confirm admin UI components render on role=admin
+- [ ] DO NOT alter unrelated login/registration logic
+- [ ] DO NOT drop or alter Replit DB
+- [ ] Ensure Calvin and others remain `user` role
+- [ ] Redeploy-ready with no TypeScript or runtime errors
+
+---
+
+📦 DELIVERABLE:
+Update all code and make ready for redeploy via Replit Deploy. Output "✅ Claude Fix Applied" only when complete and safe to deploy.
