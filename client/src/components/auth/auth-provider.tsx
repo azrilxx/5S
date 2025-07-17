@@ -37,8 +37,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     queryKey: ['/api/users/me'],
     enabled: !!tokenStorage.get(),
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache user data
   });
 
   useEffect(() => {
@@ -72,6 +72,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     tokenStorage.remove();
     setUser(null);
+    // Clear all localStorage to force fresh data
+    localStorage.clear();
     window.location.href = "/login";
   };
 

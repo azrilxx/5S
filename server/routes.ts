@@ -309,6 +309,9 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
         return res.status(404).json({ success: false, message: "User not found" });
       }
       
+      // Debug logging for role verification
+      console.log(`[DEBUG] User ${user.username} has role: ${user.role}`);
+      
       // Return user data in the correct format
       const userData = {
         id: user.id,

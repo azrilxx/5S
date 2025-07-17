@@ -89,7 +89,11 @@ export default function Dashboard() {
   }) || [];
 
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
-  const dashboardTitle = isAdmin ? (user?.role === 'superadmin' ? "Super Admin Dashboard" : "Admin Dashboard") : "My Dashboard";
+  const isSuperAdmin = user?.role === 'superadmin';
+  const dashboardTitle = isSuperAdmin ? "Super Admin Dashboard" : (isAdmin ? "Admin Dashboard" : "My Dashboard");
+  
+  // Debug logging
+  console.log(`[DEBUG] Dashboard - User: ${user?.username}, Role: ${user?.role}, isSuperAdmin: ${isSuperAdmin}`);
   const dashboardSubtitle = isAdmin 
     ? "Monitor all 5S audit activities and manage system" 
     : "View your audit activities and assigned actions";

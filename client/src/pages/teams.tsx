@@ -44,12 +44,13 @@ export default function Teams() {
     queryKey: ["/api/teams"],
   });
 
-  // Debug logging for admin users
-  if (user?.role === 'admin') {
-    console.log('Teams data for admin:', teams);
+  // Debug logging for admin/superadmin users
+  if (user?.role === 'admin' || user?.role === 'superadmin') {
+    console.log('Teams data for admin/superadmin:', teams);
     console.log('Teams count:', teams.length);
     console.log('Team names:', teams.map(t => t.name));
     console.log('Expected teams: Galvanize, Chrome, Steel, Aluminum, Copper, Titanium');
+    console.log('User role:', user?.role);
   }
 
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
