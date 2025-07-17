@@ -20,30 +20,6 @@ export default function ChecklistItemComponent({
   onPhotoUpload 
 }: ChecklistItemProps) {
   const [uploading, setUploading] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
-
-  // Fetch available tags
-  const { data: availableTags = [] } = useQuery<Tag[]>({
-    queryKey: ["/api/tags/active"],
-    queryFn: async () => {
-      const response = await fetch("/api/tags/active", {
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      if (!response.ok) throw new Error("Failed to fetch tags");
-      return response.json();
-    },
-  });
-
-  // Convert item.tags (string array of IDs) to Tag objects
-  useEffect(() => {
-    if (item.tags && availableTags.length > 0) {
-      const tagIds = item.tags.map(id => parseInt(id));
-      const tags = availableTags.filter(tag => tagIds.includes(tag.id));
-      setSelectedTags(tags);
-    }
-  }, [item.tags, availableTags]);
 
   const handleResponseChange = (value: string) => {
     const requiresAction = value === "no";
@@ -52,12 +28,6 @@ export default function ChecklistItemComponent({
 
   const handleCommentsChange = (comments: string) => {
     onUpdate(item.id, { comments });
-  };
-
-  const handleTagsChange = (tags: Tag[]) => {
-    setSelectedTags(tags);
-    const tagIds = tags.map(tag => tag.id.toString());
-    onUpdate(item.id, { tags: tagIds });
   };
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -146,31 +116,15 @@ export default function ChecklistItemComponent({
           </div>
         </div>
 
-        <div className="mt-4 space-y-4">
-          <div>
-            <Label className="text-sm font-medium text-slate-700 mb-2">Comments</Label>
-            <Textarea
-              value={item.comments || ""}
-              onChange={(e) => handleCommentsChange(e.target.value)}
-              rows={3}
-              placeholder="Add any observations or notes..."
-              className="mt-1"
-            />
-          </div>
-          
-          <div>
-            <Label className="text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
-              <Tags className="h-4 w-4" />
-              Tags
-            </Label>
-            <TagInput
-              availableTags={availableTags}
-              selectedTags={selectedTags}
-              onTagsChange={handleTagsChange}
-              placeholder="Add tags to categorize this item..."
-              maxTags={5}
-            />
-          </div>
+        <div className="mt-4">
+          <Label className="text-sm font-medium text-slate-700 mb-2">Comments</Label>
+          <Textarea
+            value={item.comments || ""}
+            onChange={(e) => handleCommentsChange(e.target.value)}
+            rows={3}
+            placeholder="Add any observations or notes..."
+            className="mt-1"
+          />
         </div>
 
         {item.requiresAction && (
