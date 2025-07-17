@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Play, CheckCircle, Clock, Video, AlertCircle } from "lucide-react";
+import { Play, CheckCircle, Clock } from "lucide-react";
 import Layout from "@/components/layout/layout";
 
 const lessons = [
@@ -13,17 +13,7 @@ const lessons = [
     duration: "15 min",
     completed: true,
     category: "5S Fundamentals",
-    videoId: "Pu29athsH0E", // What is 5S Methodology?
-    keyPoints: [
-      "Separate necessary from unnecessary items in the workplace",
-      "Use red tag system to identify questionable items",
-      "Remove all unnecessary items to reduce clutter and distractions"
-    ],
-    detailedContent: {
-      objective: "Eliminate unnecessary items from the workplace to reduce waste and improve efficiency",
-      steps: ["Assessment of all items", "Categorization (necessary/unnecessary)", "Red tag system implementation", "Proper disposal process"],
-      benefits: ["Reduced search time", "Improved workspace efficiency", "Better safety through reduced clutter"]
-    }
+    videoId: "Pu29athsH0E" // What is 5S Methodology?
   },
   {
     id: 2,
@@ -32,17 +22,7 @@ const lessons = [
     duration: "20 min",
     completed: true,
     category: "5S Fundamentals",
-    videoId: "bLadn_zOx2Q", // Boosts Efficiency
-    keyPoints: [
-      "Arrange necessary items in logical, accessible locations",
-      "Create visual workplace with clear labels and marking",
-      "Position frequently used items closest to work areas"
-    ],
-    detailedContent: {
-      objective: "Organize remaining necessary items for optimal workflow and easy access",
-      steps: ["Location planning", "Visual management system", "Storage organization", "Standardized placement"],
-      benefits: ["Reduced search time", "Improved safety", "Enhanced productivity", "Better quality control"]
-    }
+    videoId: "bLadn_zOx2Q" // Boosts Efficiency
   },
   {
     id: 3,
@@ -51,17 +31,7 @@ const lessons = [
     duration: "18 min",
     completed: false,
     category: "5S Fundamentals",
-    videoId: "GW_LTbKUBsg", // 5S in Factory & Office: How to Make Your Workplace Excellent
-    keyPoints: [
-      "Clean workplace to reveal hidden problems and defects",
-      "Use cleaning as inspection opportunity for equipment",
-      "Establish regular cleaning schedules and standards"
-    ],
-    detailedContent: {
-      objective: "Clean and inspect workplace to maintain standards and identify problems early",
-      steps: ["Deep cleaning process", "Inspection during cleaning", "Problem detection", "Maintenance scheduling"],
-      benefits: ["Improved safety", "Better equipment reliability", "Enhanced productivity", "Quality improvements"]
-    }
+    videoId: "GW_LTbKUBsg" // 5S in Factory & Office: How to Make Your Workplace Excellent
   },
   {
     id: 4,
@@ -69,18 +39,8 @@ const lessons = [
     description: "Learn to establish and maintain consistent 5S practices",
     duration: "25 min",
     completed: false,
-    category: "5S Fundamentals",
+    category: "5S Fundamentals"
     // No video for this topic
-    keyPoints: [
-      "Develop standard operating procedures for 5S activities",
-      "Create visual standards and documentation systems",
-      "Ensure consistency across all work areas and shifts"
-    ],
-    detailedContent: {
-      objective: "Create systematic approach to maintain first 3S steps consistently",
-      steps: ["Standardize previous 3 steps", "Create common systems", "Document workflows", "Visual standards"],
-      benefits: ["Consistent operations", "Reduced variability", "Foundation for continuous improvement"]
-    }
   },
   {
     id: 5,
@@ -88,18 +48,8 @@ const lessons = [
     description: "Build habits and culture to sustain 5S improvements",
     duration: "22 min",
     completed: false,
-    category: "5S Fundamentals",
+    category: "5S Fundamentals"
     // No video for this topic
-    keyPoints: [
-      "Develop self-discipline to maintain 5S without supervision",
-      "Create organizational culture that supports 5S practices",
-      "Implement regular audits and continuous improvement"
-    ],
-    detailedContent: {
-      objective: "Build sustainable discipline and culture to maintain 5S long-term",
-      steps: ["Self-discipline development", "Continuous practice", "Cultural integration", "Regular monitoring"],
-      benefits: ["Sustained productivity gains", "Employee pride", "Foundation for kaizen", "Long-term success"]
-    }
   }
 ];
 
@@ -149,55 +99,10 @@ export default function Learn() {
               <CardContent>
                 <p className="text-sm text-slate-600 mb-4">{lesson.description}</p>
                 
-                {/* Enhanced multimedia content with safe fallback */}
+                {/* Video embed for applicable lessons only */}
                 {lesson.videoId && (
                   <div className="mb-4">
                     <VideoEmbed videoId={lesson.videoId} title={lesson.title} />
-                  </div>
-                )}
-                
-                {/* Key learning points */}
-                {lesson.keyPoints && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium text-slate-700 mb-2 flex items-center">
-                      <BookOpen className="h-4 w-4 mr-1" />
-                      Key Learning Points
-                    </h4>
-                    <ul className="space-y-1">
-                      {lesson.keyPoints.map((point, index) => (
-                        <li key={index} className="text-xs text-slate-600 flex items-start">
-                          <span className="text-slate-400 mr-2">•</span>
-                          {point}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                
-                {/* Enhanced detailed content */}
-                {lesson.detailedContent && (
-                  <div className="mb-4 p-3 bg-slate-50 rounded-lg">
-                    <p className="text-xs text-slate-600 mb-2">
-                      <strong>Objective:</strong> {lesson.detailedContent.objective}
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                      <div>
-                        <strong className="text-slate-700">Steps:</strong>
-                        <ul className="mt-1 space-y-1">
-                          {lesson.detailedContent.steps.map((step, index) => (
-                            <li key={index} className="text-slate-600">• {step}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <strong className="text-slate-700">Benefits:</strong>
-                        <ul className="mt-1 space-y-1">
-                          {lesson.detailedContent.benefits.map((benefit, index) => (
-                            <li key={index} className="text-slate-600">• {benefit}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
                   </div>
                 )}
                 
