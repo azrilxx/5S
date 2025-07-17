@@ -142,8 +142,8 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
 
   app.post("/api/users", authenticateToken, async (req: any, res) => {
     try {
-      // Only admin can create users
-      if (req.user.role !== 'admin') {
+      // Only admin/superadmin can create users
+      if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
         return res.status(403).json({ message: "Access denied" });
       }
       
@@ -667,17 +667,88 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/teams", authenticateToken, async (req: any, res) => {
+  // Notification Rules routes
+  app.get("/api/notification-rules", authenticateToken, async (req: any, res) => {
     try {
-      // Only admin can create teams
-      if (req.user.role !== 'admin') {
+      // Only admin/superadmin can manage notification rules
+      if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
         return res.status(403).json({ message: "Access denied" });
       }
       
-      const team = await storage.createTeam(req.body);
-      res.status(201).json(team);
+      const rules = await storage.getAllNotificationRules();
+      res.json(rules);
     } catch (error) {
-      console.error("Create team error:", error);
+      console.error("Get notification rules error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/notification-rules", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin/superadmin can create notification rules
+      if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const rule = await storage.createNotificationRule(req.body);
+      res.status(201).json(rule);
+    } catch (error) {
+      console.error("Create notification rule error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.put("/api/notification-rules/:id", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin/superadmin can update notification rules
+      if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const rule = await storage.updateNotificationRule(id, req.body);
+      if (!rule) {
+        return res.status(404).json({ message: "Notification rule not found" });
+      }
+      res.json(rule);
+    } catch (error) {
+      console.error("Update notification rule error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/notification-rules/:id", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin/superadmin can delete notification rules
+      if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteNotificationRule(id);
+      if (!success) {
+        return res.status(404).json({ message: "Notification rule not found" });
+      }
+      res.json({ message: "Notification rule deleted successfully" });
+    } catch (error) {
+      console.error("Delete notification rule error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Manual notification trigger for testing
+  app.post("/api/notification-rules/trigger", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin/superadmin can trigger notifications
+      if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const { notificationService } = await import("./notificationService.js");
+      await notificationService.runPeriodicChecks();
+      res.json({ message: "Notification checks triggered successfully" });
+    } catch (error) {
+      console.error("Trigger notification error:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });
@@ -722,8 +793,8 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
 
   app.post("/api/teams", authenticateToken, async (req: any, res) => {
     try {
-      // Only admin can create teams
-      if (req.user.role !== 'admin') {
+      // Only admin/superadmin can create teams
+      if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
         return res.status(403).json({ message: "Access denied" });
       }
       const teamData = req.body;

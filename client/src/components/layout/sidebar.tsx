@@ -23,7 +23,8 @@ import {
   Edit,
   User,
   UserCog,
-  ChevronDown
+  ChevronDown,
+  Bell
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -81,6 +82,7 @@ const getNavigationSections = (userRole: string) => {
         items: [
           { name: "User Management", href: "/user-management", icon: Users },
           { name: "Role Management", href: "/role-management", icon: UserCog },
+          { name: "Notification Settings", href: "/notification-settings", icon: Bell },
           { name: "Notification Rules", href: "/notification-rules", icon: Settings },
           { name: "Settings", href: "/settings", icon: Settings },
           { name: "Access Control", href: "/access-control", icon: Shield },

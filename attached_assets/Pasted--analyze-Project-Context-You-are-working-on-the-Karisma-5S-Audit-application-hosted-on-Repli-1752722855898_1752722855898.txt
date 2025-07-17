@@ -1,0 +1,48 @@
+/analyze
+
+Project Context:
+You are working on the **Karisma 5S Audit** application hosted on **Replit** using React and Replit DB. The app is live and stable. Most modules are operational and several enhancement stages have already been implemented.
+
+🧠 MCP Directive:
+Use autonomous reasoning and sequential task execution. You are expected to **validate all dependent functions**, ensure **no existing functionality is broken**, and thoroughly test your output before proposing any final changes.
+
+---
+
+🎯 Objective: Fix Superadmin Roles & Implement Stage 9 Notification Rules
+
+1. ✅ **Fix Superadmin Role Assignment**
+   - Ensure that **azril**, **calvin**, and **shukri** have persistent `superadmin` privileges.
+   - DO NOT modify other users or their data.
+   - Validate the admin panel reflects superadmin access for these users only.
+   - Test role functionality using the current user login state logic.
+
+2. 🚨 **Implement Notification Rules (Stage 9)**
+   - Add logic to trigger **email alerts** for:
+     - Overdue action items
+     - Failed audits
+   - Build admin-accessible **Notification Settings UI** to:
+     - Enable/disable specific alerts
+     - Select delivery method (email for now, Slack/webhook placeholders allowed)
+   - If email config is not yet active, **mock the email delivery function** with console logs but structure code cleanly for future SMTP config.
+   - Store preferences in Replit DB (or supabase if activated).
+   - Ensure language support for this new module.
+
+---
+
+🛡️ Guardrails (MUST FOLLOW):
+- DO NOT remove, rename, or refactor **any existing working component**.
+- Validate after each file change that no dependent features break.
+- Run regression tests (if defined) or simulate manual test flows for:
+  - Login, profile save, language change, zone/team views
+  - User list, report export, and audit record creation
+- DO NOT delete any existing teams or users unless explicitly instructed.
+
+---
+
+💬 Notes:
+- Use conservative logic. No experimental APIs unless wrapped in fallback conditions.
+- Your edits must **integrate**, not overwrite. Assume this app is in active use by real users.
+
+---
+
+Proceed carefully. All functionality must remain intact after changes.

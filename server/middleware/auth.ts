@@ -148,11 +148,11 @@ export const requireRole = (allowedRoles: string[]) => {
   };
 };
 
-// Admin only middleware
-export const requireAdmin = requireRole(["admin"]);
+// Admin only middleware (includes superadmin)
+export const requireAdmin = requireRole(["admin", "superadmin"]);
 
-// Supervisor or Admin middleware
-export const requireSupervisor = requireRole(["admin", "supervisor"]);
+// Supervisor or Admin middleware (includes superadmin)
+export const requireSupervisor = requireRole(["admin", "superadmin", "supervisor"]);
 
 // Optional authentication (doesn't fail if no token)
 export const optionalAuth = async (

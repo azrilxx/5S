@@ -26,6 +26,7 @@ import SystemLogs from "@/pages/system-logs";
 import QuestionEditor from "@/pages/question-editor";
 import ActionTracker from "@/pages/action-tracker";
 import NotificationRules from "@/pages/notification-rules";
+import NotificationSettings from "@/pages/notification-settings";
 import Learn from "@/pages/learn";
 import Trainings from "@/pages/trainings";
 import Feedback from "@/pages/feedback";
@@ -167,6 +168,11 @@ function Router() {
       <Route path="/notification-rules">
         <ProtectedRoute>
           <NotificationRules />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/notification-settings">
+        <ProtectedRoute>
+          <NotificationSettings />
         </ProtectedRoute>
       </Route>
       <Route path="/learn">
