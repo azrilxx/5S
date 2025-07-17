@@ -21,7 +21,10 @@
       "Bash(npx drizzle-kit:*)",
       "Bash(mv:*)",
       "Bash(PGPASSWORD=postgres psql -h localhost -U postgres -d karisma_audit -c \"\nCREATE TABLE IF NOT EXISTS tags (\n  id serial PRIMARY KEY NOT NULL,\n  name text NOT NULL UNIQUE,\n  description text,\n  color text DEFAULT ''#3b82f6'',\n  category text,\n  is_active boolean DEFAULT true NOT NULL,\n  created_at timestamp DEFAULT now() NOT NULL\n);\n\")",
-      "Bash(pgrep:*)"
+      "Bash(pgrep:*)",
+      "Bash(find:*)",
+      "Bash(true)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }

@@ -174,14 +174,14 @@ export class MemStorage implements IStorage {
     };
     this.users.set(adminUser.id, adminUser);
 
-    // Initialize test user with proper structure
-    const testUser: User = {
+    // Initialize test users with proper structure
+    const azrilUser: User = {
       id: this.currentUserIds++,
-      username: "Azril",
+      username: "azril",
       password: "$2b$10$sr0eczlEWk9EIto1r/wMw.hrOOZ.zZTHVB6Ac1d0kqssWjIpuZ.ky", // password: karisma123
       name: "Azril Rahman",
       email: "azril@karisma.com",
-      role: "admin",
+      role: "auditor",
       team: null,
       zones: [],
       language: "en",
@@ -197,7 +197,55 @@ export class MemStorage implements IStorage {
       isActive: true,
       createdAt: new Date(),
     };
-    this.users.set(testUser.id, testUser);
+
+    const lynUser: User = {
+      id: this.currentUserIds++,
+      username: "lyn",
+      password: "$2b$10$sr0eczlEWk9EIto1r/wMw.hrOOZ.zZTHVB6Ac1d0kqssWjIpuZ.ky", // password: karisma123
+      name: "Lyn Wong",
+      email: "lyn@karisma.com",
+      role: "auditor",
+      team: null,
+      zones: [],
+      language: "en",
+      preferences: {
+        language: "en",
+        notifications: {
+          assignedActions: true,
+          upcomingAudits: true,
+          overdueItems: true
+        },
+        theme: "light"
+      },
+      isActive: true,
+      createdAt: new Date(),
+    };
+
+    const calvinUser: User = {
+      id: this.currentUserIds++,
+      username: "calvin",
+      password: "$2b$10$sr0eczlEWk9EIto1r/wMw.hrOOZ.zZTHVB6Ac1d0kqssWjIpuZ.ky", // password: karisma123
+      name: "Calvin Tan",
+      email: "calvin@karisma.com",
+      role: "auditor",
+      team: null,
+      zones: [],
+      language: "en",
+      preferences: {
+        language: "en",
+        notifications: {
+          assignedActions: true,
+          upcomingAudits: true,
+          overdueItems: true
+        },
+        theme: "light"
+      },
+      isActive: true,
+      createdAt: new Date(),
+    };
+    this.users.set(azrilUser.id, azrilUser);
+    this.users.set(lynUser.id, lynUser);
+    this.users.set(calvinUser.id, calvinUser);
 
     // Initialize zones
     const defaultZones: Zone[] = [
