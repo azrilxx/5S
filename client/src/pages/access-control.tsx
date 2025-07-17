@@ -9,43 +9,43 @@ import Layout from "@/components/layout/layout";
 const users = [
   {
     id: 1,
-    name: "John Admin",
-    email: "john@karisma.com",
+    name: "Azril",
+    email: "azril@karisma.com",
     role: "admin",
-    team: "IT",
+    team: "Galvanize",
     zones: ["All Zones"],
     lastLogin: "2025-01-10",
     status: "active"
   },
   {
     id: 2,
-    name: "Sarah Supervisor",
-    email: "sarah@karisma.com",
-    role: "supervisor",
-    team: "Production",
-    zones: ["Factory Zone 1", "Factory Zone 2"],
+    name: "Shukri",
+    email: "shukri@karisma.com",
+    role: "admin",
+    team: "Copper",
+    zones: ["All Zones"],
     lastLogin: "2025-01-09",
     status: "active"
   },
   {
     id: 3,
-    name: "Mike Auditor",
-    email: "mike@karisma.com",
-    role: "auditor",
-    team: "Quality",
-    zones: ["Office Ground Floor"],
+    name: "Calvin",
+    email: "calvin@karisma.com",
+    role: "user",
+    team: "Chrome",
+    zones: ["Factory Zone 2", "Meeting Room (Ground Floor)", "Shoes Area"],
     lastLogin: "2025-01-08",
     status: "active"
   },
   {
     id: 4,
-    name: "Lisa Viewer",
-    email: "lisa@karisma.com",
-    role: "viewer",
-    team: "Management",
-    zones: ["All Zones"],
+    name: "May",
+    email: "may@karisma.com",
+    role: "user",
+    team: "Aluminum",
+    zones: ["Surau Area (In)", "Surau Area (Out)", "Admin"],
     lastLogin: "2025-01-07",
-    status: "inactive"
+    status: "active"
   }
 ];
 

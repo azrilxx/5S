@@ -118,11 +118,11 @@ export const authenticateToken = async (
       throw new ApiError(401, "User not found or inactive");
     }
 
-    // Attach user info to request
+    // Attach user info to request (use role from JWT token, not database)
     (req as AuthenticatedRequest).user = {
       id: user.id,
       username: user.username,
-      role: user.role,
+      role: decoded.role,
     };
 
     next();
