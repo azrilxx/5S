@@ -32,22 +32,6 @@ const lessons = [
     completed: false,
     category: "5S Fundamentals",
     videoId: "GW_LTbKUBsg" // 5S in Factory & Office: How to Make Your Workplace Excellent
-  },
-  {
-    id: 4,
-    title: "Standardize (Seiketsu) - Create standards",
-    description: "Learn to establish and maintain consistent 5S practices",
-    duration: "25 min",
-    completed: false,
-    category: "5S Fundamentals"
-  },
-  {
-    id: 5,
-    title: "Sustain (Shitsuke) - Maintain discipline",
-    description: "Build habits and culture to sustain 5S improvements",
-    duration: "22 min",
-    completed: false,
-    category: "5S Fundamentals"
   }
 ];
 
