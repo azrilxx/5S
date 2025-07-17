@@ -44,6 +44,14 @@ export default function Teams() {
     queryKey: ["/api/teams"],
   });
 
+  // Debug logging for admin users
+  if (user?.role === 'admin') {
+    console.log('Teams data for admin:', teams);
+    console.log('Teams count:', teams.length);
+    console.log('Team names:', teams.map(t => t.name));
+    console.log('Expected teams: Galvanize, Chrome, Steel, Aluminum, Copper, Titanium');
+  }
+
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ["/api/users"],
   });
@@ -169,6 +177,11 @@ export default function Teams() {
             <div className="flex items-center space-x-2">
               <Users className="w-5 h-5 text-blue-600" />
               <span className="font-medium">All Teams ({teams.length})</span>
+              {teams.length < 6 && (
+                <span className="text-red-600 text-sm">
+                  (Expected 6 teams - debugging in progress)
+                </span>
+              )}
             </div>
             <Button onClick={() => setShowCreateForm(true)} className="bg-blue-600 hover:bg-blue-700">
               <UserPlus className="w-4 h-4 mr-2" />
