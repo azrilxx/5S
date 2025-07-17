@@ -181,7 +181,7 @@ export class MemStorage implements IStorage {
       password: "$2b$10$sr0eczlEWk9EIto1r/wMw.hrOOZ.zZTHVB6Ac1d0kqssWjIpuZ.ky", // password: karisma123
       name: "Azril Rahman",
       email: "azril@karisma.com",
-      role: "auditor",
+      role: "admin",
       team: null,
       zones: [],
       language: "en",
@@ -243,9 +243,57 @@ export class MemStorage implements IStorage {
       isActive: true,
       createdAt: new Date(),
     };
+
+    const shukriUser: User = {
+      id: this.currentUserIds++,
+      username: "shukri",
+      password: "$2b$10$sr0eczlEWk9EIto1r/wMw.hrOOZ.zZTHVB6Ac1d0kqssWjIpuZ.ky", // password: karisma123
+      name: "Shukri Hassan",
+      email: "shukri@karisma.com",
+      role: "admin",
+      team: null,
+      zones: [],
+      language: "en",
+      preferences: {
+        language: "en",
+        notifications: {
+          assignedActions: true,
+          upcomingAudits: true,
+          overdueItems: true
+        },
+        theme: "light"
+      },
+      isActive: true,
+      createdAt: new Date(),
+    };
+
+    const mayUser: User = {
+      id: this.currentUserIds++,
+      username: "may",
+      password: "$2b$10$sr0eczlEWk9EIto1r/wMw.hrOOZ.zZTHVB6Ac1d0kqssWjIpuZ.ky", // password: karisma123
+      name: "May Lim",
+      email: "may@karisma.com",
+      role: "admin",
+      team: null,
+      zones: [],
+      language: "en",
+      preferences: {
+        language: "en",
+        notifications: {
+          assignedActions: true,
+          upcomingAudits: true,
+          overdueItems: true
+        },
+        theme: "light"
+      },
+      isActive: true,
+      createdAt: new Date(),
+    };
     this.users.set(azrilUser.id, azrilUser);
     this.users.set(lynUser.id, lynUser);
     this.users.set(calvinUser.id, calvinUser);
+    this.users.set(shukriUser.id, shukriUser);
+    this.users.set(mayUser.id, mayUser);
 
     // Initialize zones
     const defaultZones: Zone[] = [
