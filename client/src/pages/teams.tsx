@@ -46,11 +46,11 @@ export default function Teams() {
 
   // Debug logging for admin/superadmin users
   if (user?.role === 'admin' || user?.role === 'superadmin') {
-    console.log('Teams data for admin/superadmin:', teams);
-    console.log('Teams count:', teams.length);
-    console.log('Team names:', teams.map(t => t.name));
-    console.log('Expected teams: Galvanize, Chrome, Steel, Aluminum, Copper, Titanium');
-    console.log('User role:', user?.role);
+    console.log(`[DEBUG] Teams page - User: ${user?.username}, Role: ${user?.role}`);
+    console.log(`[DEBUG] Teams data for admin/superadmin:`, teams);
+    console.log(`[DEBUG] Teams count: ${teams.length}`);
+    console.log(`[DEBUG] Team names: ${teams.map(t => t.name).join(', ')}`);
+    console.log(`[DEBUG] Expected teams: Galvanize, Chrome, Steel, Aluminum, Copper, Titanium`);
   }
 
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({

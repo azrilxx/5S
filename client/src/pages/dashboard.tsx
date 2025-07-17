@@ -94,6 +94,7 @@ export default function Dashboard() {
   
   // Debug logging
   console.log(`[DEBUG] Dashboard - User: ${user?.username}, Role: ${user?.role}, isSuperAdmin: ${isSuperAdmin}`);
+  console.log(`[DEBUG] Dashboard title: ${dashboardTitle}`);
   const dashboardSubtitle = isAdmin 
     ? "Monitor all 5S audit activities and manage system" 
     : "View your audit activities and assigned actions";

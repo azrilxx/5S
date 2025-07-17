@@ -43,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (userData && userData.success) {
+      console.log(`[DEBUG] AuthProvider - Setting user:`, userData.data);
       setUser(userData.data);
       setIsLoading(false);
     } else if (error || !tokenStorage.get()) {
