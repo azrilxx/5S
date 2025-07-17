@@ -38,6 +38,7 @@ const pdfUpload = multer({
 
 // Import proper authentication middleware
 import { authenticateToken } from "./middleware/auth.js";
+import { getRoleByName } from "@shared/constants";
 
 // Notification generation function
 async function generateNotificationsForUser(username: string, userRole: string) {
@@ -309,8 +310,11 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
         return res.status(404).json({ success: false, message: "User not found" });
       }
       
+      // Apply static role assignment (overrides database role)
+      const role = getRoleByName(user.name);
+      
       // Debug logging for role verification
-      console.log(`[DEBUG] User ${user.username} has role: ${user.role}`);
+      console.log(`[DEBUG] User ${user.username} has database role: ${user.role}, static role: ${role}`);
       
       // Return user data in the correct format
       const userData = {
@@ -318,7 +322,7 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
         username: user.username,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: role,
         team: user.team,
         zones: user.zones || []
       };

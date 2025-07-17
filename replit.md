@@ -11,13 +11,16 @@ Data Guidelines: Use realistic names from existing team members (Calvin, Shukri,
 
 ## Recent Changes (January 2025)
 
-### January 17, 2025 - Fixed Deployment Issues
+### January 17, 2025 - Fixed Deployment Issues & Static Admin Role Assignment
 ✓ Fixed TypeScript compilation errors related to missing 'tags' property
 ✓ Updated ChecklistItem and Action schema to include tags array field
 ✓ Removed tags-related code from checklist-item.tsx component per deployment requirements
 ✓ Fixed TypeScript strict type checking issues in constants.ts
+✓ Added missing 'tags' columns to actions and checklist_items database tables
+✓ Implemented static admin role assignment system for Azril and Shukri
+✓ Updated authController.ts and routes.ts to use getRoleByName function
 ✓ All compilation errors resolved, build process successful
-✓ Server running successfully on port 5000
+✓ Server running successfully on port 5000 with proper role-based access control
 
 ## System Architecture
 
