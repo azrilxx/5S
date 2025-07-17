@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import { TagManagement } from '@/components/settings/tag-management';
 import { 
   Settings as SettingsIcon, 
   Shield, 
@@ -42,7 +43,8 @@ import {
   Wifi,
   HardDrive,
   Cpu,
-  Monitor
+  Monitor,
+  Tags
 } from 'lucide-react';
 
 export function SuperAdminSettings() {
@@ -147,10 +149,11 @@ export function SuperAdminSettings() {
     <Layout title="Super Admin Settings" subtitle="Advanced system configuration and management">
       <div className="space-y-6">
         <Tabs defaultValue="system" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="system">System</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
+            <TabsTrigger value="tags">Tags</TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
             <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
             <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
@@ -467,6 +470,11 @@ export function SuperAdminSettings() {
                 </Button>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Tag Management */}
+          <TabsContent value="tags" className="space-y-6">
+            <TagManagement />
           </TabsContent>
 
           {/* Integrations */}

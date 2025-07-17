@@ -20,12 +20,17 @@ import {
   Target,
   Menu,
   X,
-  Edit
+  Edit,
+  User,
+  UserCog,
+  ChevronDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/components/auth/auth-provider";
+import { useI18n } from "@/lib/i18n";
 import { useState } from "react";
 import MessagesButton from "@/components/messages/messages-button";
 
@@ -75,6 +80,7 @@ const getNavigationSections = (userRole: string) => {
         title: "System Administration",
         items: [
           { name: "User Management", href: "/user-management", icon: Users },
+          { name: "Role Management", href: "/role-management", icon: UserCog },
           { name: "Notification Rules", href: "/notification-rules", icon: Settings },
           { name: "Settings", href: "/settings", icon: Settings },
           { name: "Access Control", href: "/access-control", icon: Shield },
@@ -101,6 +107,7 @@ const getNavigationSections = (userRole: string) => {
 export default function Sidebar() {
   const [location] = useLocation();
   const { user, logout } = useAuth();
+  const { t } = useI18n();
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -175,29 +182,44 @@ export default function Sidebar() {
       {/* User Profile */}
       <div className="px-6 py-5 border-t border-slate-200/80 bg-slate-50/50">
         <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="w-9 h-9 bg-gradient-to-br from-slate-400 to-slate-500 rounded-xl flex items-center justify-center shadow-sm">
-              <span className="text-white text-sm font-bold">
-                {user.username ? user.username.charAt(0).toUpperCase() : 'U'}
-              </span>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-semibold text-slate-900">{user.username || 'Unknown'}</p>
-              <p className="text-xs text-slate-600 font-medium capitalize">{user.role}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <MessagesButton />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={logout}
-              className="text-slate-400 hover:text-red-500 transition-colors duration-200 p-1.5 rounded-lg hover:bg-red-50"
-              title="Logout"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="flex items-center gap-3 p-2 w-full justify-start hover:bg-slate-100">
+                <div className="w-9 h-9 bg-gradient-to-br from-slate-400 to-slate-500 rounded-xl flex items-center justify-center shadow-sm">
+                  <span className="text-white text-sm font-bold">
+                    {user.username ? user.username.charAt(0).toUpperCase() : 'U'}
+                  </span>
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-semibold text-slate-900">{user.username || 'Unknown'}</p>
+                  <p className="text-xs text-slate-600 font-medium capitalize">{user.role}</p>
+                </div>
+                <ChevronDown className="h-4 w-4 text-slate-400" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem asChild>
+                <Link href="/profile" className="flex items-center gap-2 cursor-pointer">
+                  <User className="h-4 w-4" />
+                  {t("navigation.profile")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/settings" className="flex items-center gap-2 cursor-pointer">
+                  <Settings className="h-4 w-4" />
+                  {t("navigation.settings")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={logout}
+                className="flex items-center gap-2 cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <LogOut className="h-4 w-4" />
+                {t("navigation.logout")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <MessagesButton />
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { storage } from "./storage";
-import { insertUserSchema, insertBuildingSchema, insertFloorSchema, insertZoneSchema, insertAuditSchema, insertChecklistItemSchema, insertActionSchema, insertScheduleSchema, insertReportSchema, insertTeamSchema } from "@shared/schema";
+import { insertUserSchema, insertBuildingSchema, insertFloorSchema, insertZoneSchema, insertAuditSchema, insertChecklistItemSchema, insertActionSchema, insertScheduleSchema, insertReportSchema, insertTeamSchema, insertTagSchema } from "@shared/schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import multer from "multer";
@@ -262,6 +262,148 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     } catch (error) {
       console.error("Get current user error:", error);
       res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+
+  // Get user profile
+  app.get("/api/users/profile", authenticateToken, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Return user profile data
+      const { password, ...userProfile } = user;
+      res.json(userProfile);
+    } catch (error) {
+      console.error("Get user profile error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Update user profile
+  app.put("/api/users/profile", authenticateToken, async (req: any, res) => {
+    try {
+      const { name, email } = req.body;
+      
+      if (!name || !email) {
+        return res.status(400).json({ message: "Name and email are required" });
+      }
+      
+      const updatedUser = await storage.updateUser(req.user.id, { name, email });
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const { password, ...userProfile } = updatedUser;
+      res.json(userProfile);
+    } catch (error) {
+      console.error("Update user profile error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Get user settings
+  app.get("/api/users/settings", authenticateToken, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Ensure safe defaults for user settings
+      const defaultSettings = {
+        language: 'en',
+        notifications: {
+          assignedActions: true,
+          upcomingAudits: true,
+          overdueItems: true
+        },
+        theme: 'light'
+      };
+      
+      // Merge user preferences with defaults
+      const userPrefs = (user.preferences as any) || {};
+      const settings = {
+        language: user.language || userPrefs.language || defaultSettings.language,
+        notifications: {
+          assignedActions: userPrefs.notifications?.assignedActions ?? defaultSettings.notifications.assignedActions,
+          upcomingAudits: userPrefs.notifications?.upcomingAudits ?? defaultSettings.notifications.upcomingAudits,
+          overdueItems: userPrefs.notifications?.overdueItems ?? defaultSettings.notifications.overdueItems
+        },
+        theme: userPrefs.theme || defaultSettings.theme
+      };
+      
+      res.json(settings);
+    } catch (error) {
+      console.error("Get user settings error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Update user settings
+  app.put("/api/users/settings", authenticateToken, async (req: any, res) => {
+    try {
+      const { language, notifications, theme } = req.body;
+      
+      // Validate required fields with safe defaults
+      const safeSettings = {
+        language: language || 'en',
+        notifications: {
+          assignedActions: notifications?.assignedActions ?? true,
+          upcomingAudits: notifications?.upcomingAudits ?? true,
+          overdueItems: notifications?.overdueItems ?? true
+        },
+        theme: theme || 'light'
+      };
+      
+      const updatedUser = await storage.updateUser(req.user.id, {
+        language: safeSettings.language,
+        preferences: safeSettings
+      });
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(safeSettings);
+    } catch (error) {
+      console.error("Update user settings error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Update user role (admin only)
+  app.put("/api/users/:id/role", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin can update user roles
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const id = parseInt(req.params.id);
+      const { role } = req.body;
+      
+      if (!role || !['admin', 'supervisor', 'auditor', 'user'].includes(role)) {
+        return res.status(400).json({ message: "Invalid role" });
+      }
+      
+      // Don't allow changing own role
+      if (id === req.user.id) {
+        return res.status(400).json({ message: "Cannot change your own role" });
+      }
+      
+      const updatedUser = await storage.updateUser(id, { role });
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const { password, ...safeUser } = updatedUser;
+      res.json(safeUser);
+    } catch (error) {
+      console.error("Update user role error:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
   });
 
@@ -1159,7 +1301,7 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
-  // User Settings Routes
+  // Legacy User Settings Routes (for backward compatibility)
   app.get("/api/settings", authenticateToken, async (req: Request & { user?: any }, res: Response) => {
     try {
       // Only allow non-admin users to access settings
@@ -1321,6 +1463,106 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     } catch (error) {
       console.error("Error marking notification as read:", error);
       return res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  // Tag management endpoints
+  app.get("/api/tags", authenticateToken, async (req, res) => {
+    try {
+      const tags = await storage.getAllTags();
+      res.json(tags);
+    } catch (error) {
+      console.error("Error fetching tags:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/tags/active", authenticateToken, async (req, res) => {
+    try {
+      const tags = await storage.getActiveTags();
+      res.json(tags);
+    } catch (error) {
+      console.error("Error fetching active tags:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/tags/category/:category", authenticateToken, async (req, res) => {
+    try {
+      const { category } = req.params;
+      const tags = await storage.getTagsByCategory(category);
+      res.json(tags);
+    } catch (error) {
+      console.error("Error fetching tags by category:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/tags/:id", authenticateToken, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const tag = await storage.getTag(id);
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      res.json(tag);
+    } catch (error) {
+      console.error("Error fetching tag:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/tags", authenticateToken, async (req, res) => {
+    try {
+      const result = insertTagSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ 
+          message: "Invalid tag data", 
+          errors: result.error.errors 
+        });
+      }
+
+      const tag = await storage.createTag(result.data);
+      res.status(201).json(tag);
+    } catch (error) {
+      console.error("Error creating tag:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.put("/api/tags/:id", authenticateToken, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const result = insertTagSchema.partial().safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ 
+          message: "Invalid tag data", 
+          errors: result.error.errors 
+        });
+      }
+
+      const tag = await storage.updateTag(id, result.data);
+      if (!tag) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      res.json(tag);
+    } catch (error) {
+      console.error("Error updating tag:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/tags/:id", authenticateToken, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteTag(id);
+      if (!success) {
+        return res.status(404).json({ message: "Tag not found" });
+      }
+      res.json({ message: "Tag deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting tag:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
   });
 

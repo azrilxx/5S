@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/components/auth/auth-provider";
+import { I18nProvider } from "@/lib/i18n";
 import { tokenStorage } from "@/lib/auth";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
@@ -16,6 +17,8 @@ import Actions from "@/pages/actions";
 import Schedules from "@/pages/schedules";
 import Reports from "@/pages/reports";
 import Settings from "@/pages/settings";
+import ProfileSettings from "@/pages/profile-settings";
+import RoleManagement from "@/pages/role-management";
 import Zones from "@/pages/zones";
 import Teams from "@/pages/teams";
 import UserManagement from "@/pages/user-management";
@@ -121,6 +124,16 @@ function Router() {
           <Settings />
         </ProtectedRoute>
       </Route>
+      <Route path="/profile">
+        <ProtectedRoute>
+          <ProfileSettings />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/role-management">
+        <ProtectedRoute>
+          <RoleManagement />
+        </ProtectedRoute>
+      </Route>
       <Route path="/zones">
         <ProtectedRoute>
           <Zones />
@@ -204,11 +217,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-
-        </TooltipProvider>
+        <I18nProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </I18nProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

@@ -12,6 +12,8 @@ export const users = pgTable("users", {
   role: text("role").notNull().default("auditor"), // admin, auditor, supervisor, viewer
   team: text("team"), // A, B, C, D, E, F, G, H, I
   zones: text("zones").array().default([]), // assigned zones
+  language: text("language").default("en"), // en, zh
+  preferences: json("preferences").default({}), // user preferences as JSON
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -85,6 +87,7 @@ export const checklistItems = pgTable("checklist_items", {
   photoUrl: text("photo_url"),
   requiresAction: boolean("requires_action").default(false),
   order: integer("order").default(0),
+  tags: text("tags").array().default([]), // array of tag IDs
 });
 
 // Actions table
@@ -103,6 +106,7 @@ export const actions = pgTable("actions", {
   completedAt: timestamp("completed_at"),
   proofPhotoUrl: text("proof_photo_url"),
   comments: text("comments"),
+  tags: text("tags").array().default([]), // array of tag IDs
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -172,6 +176,17 @@ export const messages = pgTable("messages", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Tags table
+export const tags = pgTable("tags", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  color: text("color").default("#3b82f6"), // hex color code
+  category: text("category"), // safety, quality, cleanliness, etc.
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertBuildingSchema = createInsertSchema(buildings).omit({ id: true, createdAt: true });
@@ -186,6 +201,7 @@ export const insertReportSchema = createInsertSchema(reports).omit({ id: true, c
 export const insertQuestionSchema = createInsertSchema(questions).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertNotificationRuleSchema = createInsertSchema(notificationRules).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertMessageSchema = createInsertSchema(messages).omit({ id: true, createdAt: true });
+export const insertTagSchema = createInsertSchema(tags).omit({ id: true, createdAt: true });
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -214,3 +230,5 @@ export type NotificationRule = typeof notificationRules.$inferSelect;
 export type InsertNotificationRule = z.infer<typeof insertNotificationRuleSchema>;
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type Tag = typeof tags.$inferSelect;
+export type InsertTag = z.infer<typeof insertTagSchema>;

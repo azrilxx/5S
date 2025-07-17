@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
-import { Download, FileText, Eye, TrendingUp, TrendingDown, Activity, FileSpreadsheet } from "lucide-react";
+import { Download, FileText, Eye, TrendingUp, TrendingDown, Activity, FileSpreadsheet, Tags } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ZONES } from "@/lib/constants";
@@ -15,10 +15,12 @@ import Layout from "@/components/layout/layout";
 import { CSVLink } from "react-csv";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { TagFilter, TagDisplay, type Tag } from "@/components/ui/tag-input";
 
 export default function Reports() {
   const [selectedPeriod, setSelectedPeriod] = useState<string>("30");
   const [selectedZone, setSelectedZone] = useState<string>("all");
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [showExportOptions, setShowExportOptions] = useState(false);
 
   const { user } = useAuth();
@@ -39,6 +41,19 @@ export default function Reports() {
 
   const { data: dashboardStats } = useQuery({
     queryKey: ["/api/dashboard/stats"],
+  });
+
+  const { data: availableTags = [] } = useQuery<Tag[]>({
+    queryKey: ["/api/tags/active"],
+    queryFn: async () => {
+      const response = await fetch("/api/tags/active", {
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to fetch tags");
+      return response.json();
+    },
   });
 
   const generateReportMutation = useMutation({
@@ -133,23 +148,38 @@ export default function Reports() {
       const auditDate = new Date(audit.completedAt || audit.createdAt);
       const matchesPeriod = auditDate >= cutoffDate;
       const matchesZone = selectedZone === "all" || audit.zone === selectedZone;
-      return matchesPeriod && matchesZone;
+      
+      // Tag filtering - check if audit has any of the selected tags
+      const matchesTags = selectedTags.length === 0 || (
+        audit.tags && selectedTags.some(filterTag => 
+          audit.tags?.some((auditTagId: string) => parseInt(auditTagId) === filterTag.id)
+        )
+      );
+      
+      return matchesPeriod && matchesZone && matchesTags;
     });
   };
 
   const prepareCSVData = () => {
     const filteredData = getFilteredData();
-    return filteredData.map((audit: any) => ({
-      'Audit ID': audit.id,
-      'Zone': audit.zone,
-      'Status': audit.status,
-      'Score': audit.score || 'N/A',
-      'Auditor': audit.auditor,
-      'Completion Date': new Date(audit.completedAt || audit.createdAt).toLocaleDateString(),
-      'Compliance Rate': audit.complianceRate || 'N/A',
-      'Issues Found': audit.issuesFound || 0,
-      'Actions Created': audit.actionsCreated || 0,
-    }));
+    return filteredData.map((audit: any) => {
+      const auditTags = audit.tags && availableTags.length > 0 
+        ? availableTags.filter((tag: Tag) => audit.tags?.some((auditTagId: string) => parseInt(auditTagId) === tag.id))
+        : [];
+      
+      return {
+        'Audit ID': audit.id,
+        'Zone': audit.zone,
+        'Status': audit.status,
+        'Score': audit.score || 'N/A',
+        'Auditor': audit.auditor,
+        'Tags': auditTags.map((tag: Tag) => tag.name).join(', '),
+        'Completion Date': new Date(audit.completedAt || audit.createdAt).toLocaleDateString(),
+        'Compliance Rate': audit.complianceRate || 'N/A',
+        'Issues Found': audit.issuesFound || 0,
+        'Actions Created': audit.actionsCreated || 0,
+      };
+    });
   };
 
   const handleExportPDF = () => {
@@ -164,24 +194,32 @@ export default function Reports() {
     doc.setFontSize(12);
     doc.text(`Period: Last ${selectedPeriod} days`, 14, 32);
     doc.text(`Zone: ${selectedZone === 'all' ? 'All Zones' : selectedZone}`, 14, 40);
-    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 48);
-    doc.text(`Total Records: ${filteredData.length}`, 14, 56);
+    doc.text(`Tags: ${selectedTags.length > 0 ? selectedTags.map(tag => tag.name).join(', ') : 'All Tags'}`, 14, 48);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 56);
+    doc.text(`Total Records: ${filteredData.length}`, 14, 64);
     
     // Add table
-    const tableData = filteredData.map((audit: any) => [
-      audit.id,
-      audit.zone,
-      audit.status,
-      audit.score || 'N/A',
-      audit.auditor,
-      new Date(audit.completedAt || audit.createdAt).toLocaleDateString(),
-    ]);
+    const tableData = filteredData.map((audit: any) => {
+      const auditTags = audit.tags && availableTags.length > 0 
+        ? availableTags.filter((tag: Tag) => audit.tags?.some((auditTagId: string) => parseInt(auditTagId) === tag.id))
+        : [];
+      
+      return [
+        audit.id,
+        audit.zone,
+        audit.status,
+        audit.score || 'N/A',
+        audit.auditor,
+        auditTags.map((tag: Tag) => tag.name).join(', ').substring(0, 20) + (auditTags.length > 2 ? '...' : ''),
+        new Date(audit.completedAt || audit.createdAt).toLocaleDateString(),
+      ];
+    });
     
     autoTable(doc, {
-      head: [['ID', 'Zone', 'Status', 'Score', 'Auditor', 'Date']],
+      head: [['ID', 'Zone', 'Status', 'Score', 'Auditor', 'Tags', 'Date']],
       body: tableData,
-      startY: 65,
-      styles: { fontSize: 8 },
+      startY: 72,
+      styles: { fontSize: 7 },
       headStyles: { fillColor: [41, 128, 185] },
     });
     
@@ -241,6 +279,14 @@ export default function Reports() {
                     ))}
                   </SelectContent>
                 </Select>
+                <div className="w-60">
+                  <TagFilter
+                    availableTags={availableTags}
+                    selectedTags={selectedTags}
+                    onTagsChange={setSelectedTags}
+                    placeholder="Filter by tags..."
+                  />
+                </div>
                 <div className="flex items-center space-x-2">
                   <Button onClick={handleExportPDF}>
                     <FileText className="h-4 w-4 mr-2" />

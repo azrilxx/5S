@@ -1,11 +1,12 @@
 import { 
-  users, buildings, floors, zones, teams, audits, checklistItems, actions, schedules, reports, questions, notificationRules, messages,
+  users, buildings, floors, zones, teams, audits, checklistItems, actions, schedules, reports, questions, notificationRules, messages, tags,
   type User, type InsertUser, type Building, type InsertBuilding, type Floor, type InsertFloor,
   type Zone, type InsertZone, type Team, type InsertTeam,
   type Audit, type InsertAudit, type ChecklistItem, type InsertChecklistItem,
   type Action, type InsertAction, type Schedule, type InsertSchedule,
   type Report, type InsertReport, type Question, type InsertQuestion,
-  type NotificationRule, type InsertNotificationRule, type Message, type InsertMessage
+  type NotificationRule, type InsertNotificationRule, type Message, type InsertMessage,
+  type Tag, type InsertTag
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql, desc, and } from "drizzle-orm";
@@ -108,6 +109,15 @@ export interface IStorage {
   getUnreadMessagesCount(recipient: string): Promise<number>;
   markMessageAsRead(id: number): Promise<boolean>;
 
+  // Tag methods
+  getAllTags(): Promise<Tag[]>;
+  getTag(id: number): Promise<Tag | undefined>;
+  createTag(tag: InsertTag): Promise<Tag>;
+  updateTag(id: number, tag: Partial<InsertTag>): Promise<Tag | undefined>;
+  deleteTag(id: number): Promise<boolean>;
+  getActiveTags(): Promise<Tag[]>;
+  getTagsByCategory(category: string): Promise<Tag[]>;
+
   // Settings methods
   getSettings(key: string): Promise<any>;
   setSettings(key: string, settings: any): Promise<void>;
@@ -122,6 +132,7 @@ export class MemStorage implements IStorage {
   private actions: Map<number, Action> = new Map();
   private schedules: Map<number, Schedule> = new Map();
   private reports: Map<number, Report> = new Map();
+  private tags: Map<number, Tag> = new Map();
   
   private currentUserIds = 1;
   private currentZoneIds = 1;
@@ -131,6 +142,7 @@ export class MemStorage implements IStorage {
   private currentActionIds = 1;
   private currentScheduleIds = 1;
   private currentReportIds = 1;
+  private currentTagIds = 1;
 
   constructor() {
     this.initializeData();
@@ -141,16 +153,51 @@ export class MemStorage implements IStorage {
     const adminUser: User = {
       id: this.currentUserIds++,
       username: "admin",
-      password: "$argon2id$v=19$m=19456,t=2,p=1$713b8Be8s/r8rUZnSFqVqw$8lT8NOLCqmGFlF9fCTrJEpsxJTNq5m1wsqsTJMShjEM", // password: admin123
+      password: "$2b$10$VOziMDOYDzq9lm0ZP2Nk/uqohQiY.OaAA2sRjZK/Ii4iWxgihszjK", // password: admin123
       name: "System Administrator",
       email: "admin@karisma.com",
       role: "admin",
       team: null,
       zones: [],
+      language: "en",
+      preferences: {
+        language: "en",
+        notifications: {
+          assignedActions: true,
+          upcomingAudits: true,
+          overdueItems: true
+        },
+        theme: "light"
+      },
       isActive: true,
       createdAt: new Date(),
     };
     this.users.set(adminUser.id, adminUser);
+
+    // Initialize test user with proper structure
+    const testUser: User = {
+      id: this.currentUserIds++,
+      username: "Azril",
+      password: "$2b$10$sr0eczlEWk9EIto1r/wMw.hrOOZ.zZTHVB6Ac1d0kqssWjIpuZ.ky", // password: karisma123
+      name: "Azril Rahman",
+      email: "azril@karisma.com",
+      role: "admin",
+      team: null,
+      zones: [],
+      language: "en",
+      preferences: {
+        language: "en",
+        notifications: {
+          assignedActions: true,
+          upcomingAudits: true,
+          overdueItems: true
+        },
+        theme: "light"
+      },
+      isActive: true,
+      createdAt: new Date(),
+    };
+    this.users.set(testUser.id, testUser);
 
     // Initialize zones
     const defaultZones: Zone[] = [
@@ -169,6 +216,17 @@ export class MemStorage implements IStorage {
       { id: this.currentTeamIds++, name: "Team C", leader: "Carol Davis", members: ["Carol Davis", "Mike Wilson"], assignedZones: ["Office Ground Floor"], responsibilities: ["5S", "1S"] },
     ];
     defaultTeams.forEach(team => this.teams.set(team.id, team));
+
+    // Initialize tags
+    const defaultTags: Tag[] = [
+      { id: this.currentTagIds++, name: "Safety Risk", description: "Issues that pose safety hazards", color: "#ef4444", category: "safety", isActive: true, createdAt: new Date() },
+      { id: this.currentTagIds++, name: "Missing Label", description: "Items or areas without proper labeling", color: "#f97316", category: "organization", isActive: true, createdAt: new Date() },
+      { id: this.currentTagIds++, name: "Blocked Access", description: "Pathways or equipment with obstructed access", color: "#eab308", category: "accessibility", isActive: true, createdAt: new Date() },
+      { id: this.currentTagIds++, name: "Equipment Issue", description: "Machinery or equipment malfunction", color: "#8b5cf6", category: "maintenance", isActive: true, createdAt: new Date() },
+      { id: this.currentTagIds++, name: "Cleanliness", description: "Areas requiring cleaning or maintenance", color: "#06b6d4", category: "cleanliness", isActive: true, createdAt: new Date() },
+      { id: this.currentTagIds++, name: "Documentation", description: "Missing or outdated documentation", color: "#10b981", category: "quality", isActive: true, createdAt: new Date() },
+    ];
+    defaultTags.forEach(tag => this.tags.set(tag.id, tag));
   }
 
   // User methods
@@ -187,6 +245,16 @@ export class MemStorage implements IStorage {
       role: insertUser.role ?? "auditor",
       team: insertUser.team ?? null,
       zones: insertUser.zones ?? null,
+      language: insertUser.language ?? "en",
+      preferences: insertUser.preferences ?? {
+        language: "en",
+        notifications: {
+          assignedActions: true,
+          upcomingAudits: true,
+          overdueItems: true
+        },
+        theme: "light"
+      },
       isActive: insertUser.isActive ?? true,
       createdAt: new Date(),
     };
@@ -401,6 +469,7 @@ export class MemStorage implements IStorage {
       comments: insertItem.comments ?? null,
       photoUrl: insertItem.photoUrl ?? null,
       requiresAction: insertItem.requiresAction ?? null,
+      tags: insertItem.tags ?? [],
     };
     this.checklistItems.set(item.id, item);
     return item;
@@ -437,6 +506,7 @@ export class MemStorage implements IStorage {
       dueDate: insertAction.dueDate ?? null,
       proofPhotoUrl: insertAction.proofPhotoUrl ?? null,
       comments: insertAction.comments ?? null,
+      tags: insertAction.tags ?? [],
       createdAt: new Date(),
     };
     this.actions.set(action.id, action);
@@ -597,6 +667,50 @@ export class MemStorage implements IStorage {
 
   async markMessageAsRead(id: number): Promise<boolean> {
     return false;
+  }
+
+  // Tag methods
+  async getAllTags(): Promise<Tag[]> {
+    return Array.from(this.tags.values());
+  }
+
+  async getTag(id: number): Promise<Tag | undefined> {
+    return this.tags.get(id);
+  }
+
+  async createTag(insertTag: InsertTag): Promise<Tag> {
+    const tag: Tag = {
+      ...insertTag,
+      id: this.currentTagIds++,
+      description: insertTag.description ?? null,
+      color: insertTag.color ?? "#3b82f6",
+      category: insertTag.category ?? null,
+      isActive: insertTag.isActive ?? true,
+      createdAt: new Date(),
+    };
+    this.tags.set(tag.id, tag);
+    return tag;
+  }
+
+  async updateTag(id: number, updates: Partial<InsertTag>): Promise<Tag | undefined> {
+    const tag = this.tags.get(id);
+    if (!tag) return undefined;
+    
+    const updatedTag = { ...tag, ...updates };
+    this.tags.set(id, updatedTag);
+    return updatedTag;
+  }
+
+  async deleteTag(id: number): Promise<boolean> {
+    return this.tags.delete(id);
+  }
+
+  async getActiveTags(): Promise<Tag[]> {
+    return Array.from(this.tags.values()).filter(tag => tag.isActive);
+  }
+
+  async getTagsByCategory(category: string): Promise<Tag[]> {
+    return Array.from(this.tags.values()).filter(tag => tag.category === category);
   }
 
   // Settings methods
@@ -1024,6 +1138,39 @@ export class DatabaseStorage implements IStorage {
     return result.rowCount !== null && result.rowCount > 0;
   }
 
+  // Tag methods
+  async getAllTags(): Promise<Tag[]> {
+    return await db.select().from(tags);
+  }
+
+  async getTag(id: number): Promise<Tag | undefined> {
+    const [tag] = await db.select().from(tags).where(eq(tags.id, id));
+    return tag || undefined;
+  }
+
+  async createTag(insertTag: InsertTag): Promise<Tag> {
+    const [tag] = await db.insert(tags).values(insertTag).returning();
+    return tag;
+  }
+
+  async updateTag(id: number, updates: Partial<InsertTag>): Promise<Tag | undefined> {
+    const [tag] = await db.update(tags).set(updates).where(eq(tags.id, id)).returning();
+    return tag || undefined;
+  }
+
+  async deleteTag(id: number): Promise<boolean> {
+    const result = await db.delete(tags).where(eq(tags.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  async getActiveTags(): Promise<Tag[]> {
+    return await db.select().from(tags).where(eq(tags.isActive, true));
+  }
+
+  async getTagsByCategory(category: string): Promise<Tag[]> {
+    return await db.select().from(tags).where(eq(tags.category, category));
+  }
+
   // Settings methods - using a simple in-memory store for now
   private settingsStore: Map<string, any> = new Map();
 
@@ -1036,4 +1183,4 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();

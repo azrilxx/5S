@@ -57,6 +57,8 @@ export default function AuditHistory() {
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [activeTab, setActiveTab] = useState('all');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'score_high' | 'score_low'>('newest');
+  const [statusFilter, setStatusFilter] = useState<string>('');
 
   const { data: audits, isLoading } = useQuery<Audit[]>({
     queryKey: ["/api/audits"],
@@ -74,7 +76,7 @@ export default function AuditHistory() {
     queryKey: ["/api/users/me"],
   });
 
-  // Filter audits based on user role and filters
+  // Filter and sort audits based on user role and filters
   const filteredAudits = audits?.filter((audit: Audit) => {
     // Role-based filtering
     if (currentUser?.data?.role !== 'admin' && audit.auditor !== currentUser?.data?.username) {
@@ -83,7 +85,8 @@ export default function AuditHistory() {
 
     // Search filter
     if (searchTerm && !audit.zone.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !audit.auditor.toLowerCase().includes(searchTerm.toLowerCase())) {
+        !audit.auditor.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        !audit.title.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false;
     }
 
@@ -106,7 +109,25 @@ export default function AuditHistory() {
       }
     }
 
+    // Status filter
+    if (statusFilter && audit.status !== statusFilter) {
+      return false;
+    }
+
     return true;
+  })?.sort((a, b) => {
+    switch (sortBy) {
+      case 'newest':
+        return new Date(b.scheduledDate).getTime() - new Date(a.scheduledDate).getTime();
+      case 'oldest':
+        return new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime();
+      case 'score_high':
+        return (b.overallScore || 0) - (a.overallScore || 0);
+      case 'score_low':
+        return (a.overallScore || 0) - (b.overallScore || 0);
+      default:
+        return new Date(b.scheduledDate).getTime() - new Date(a.scheduledDate).getTime();
+    }
   }) || [];
 
   const getScoreColor = (score: number) => {
@@ -148,6 +169,8 @@ export default function AuditHistory() {
     setSelectedZone('');
     setSelectedUser('');
     setSelectedDate(undefined);
+    setStatusFilter('');
+    setSortBy('newest');
   };
 
   return (
@@ -214,7 +237,7 @@ export default function AuditHistory() {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center">
                 <Filter className="h-5 w-5 mr-2" />
-                Filters
+                Filters & Sorting
               </CardTitle>
               <Button variant="outline" size="sm" onClick={clearFilters}>
                 Clear All
@@ -222,7 +245,7 @@ export default function AuditHistory() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Search</label>
                 <div className="relative">
@@ -249,6 +272,21 @@ export default function AuditHistory() {
                         {zone.name}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Status</label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All statuses</SelectItem>
+                    <SelectItem value="scheduled">Scheduled</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -291,6 +329,21 @@ export default function AuditHistory() {
                   </PopoverContent>
                 </Popover>
               </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Sort by</label>
+                <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest First</SelectItem>
+                    <SelectItem value="oldest">Oldest First</SelectItem>
+                    <SelectItem value="score_high">Highest Score</SelectItem>
+                    <SelectItem value="score_low">Lowest Score</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -298,7 +351,17 @@ export default function AuditHistory() {
         {/* Audit List */}
         <Card>
           <CardHeader>
-            <CardTitle>Audit Records</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Audit Records ({filteredAudits.length})</CardTitle>
+              <div className="flex items-center gap-2 text-sm text-slate-600">
+                <span>Sorted by:</span>
+                <Badge variant="secondary">
+                  {sortBy === 'newest' ? 'Newest First' : 
+                   sortBy === 'oldest' ? 'Oldest First' :
+                   sortBy === 'score_high' ? 'Highest Score' : 'Lowest Score'}
+                </Badge>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {isLoading ? (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,12 +10,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/components/auth/auth-provider";
-import { AlertTriangle, Calendar, User, MapPin, Edit2, Clock, CheckCircle, XCircle, AlertCircle, Filter, RefreshCw, Download, FileText, FileSpreadsheet, Users } from "lucide-react";
+import { AlertTriangle, Calendar, User, MapPin, Edit2, Clock, CheckCircle, XCircle, AlertCircle, Filter, RefreshCw, Download, FileText, FileSpreadsheet, Users, Save, Tags } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CSVLink } from "react-csv";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { TagInput, TagDisplay, TagFilter, type Tag } from "@/components/ui/tag-input";
 
 interface Action {
   id: number;
@@ -28,6 +29,7 @@ interface Action {
   dueDate: string;
   createdAt: string;
   updatedAt: string;
+  tags?: string[]; // Array of tag IDs
 }
 
 interface User {
@@ -51,9 +53,11 @@ export default function ActionTracker() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [zoneFilter, setZoneFilter] = useState<string>("all");
+  const [tagFilter, setTagFilter] = useState<Tag[]>([]);
   const [showUnresolvedOnly, setShowUnresolvedOnly] = useState(false);
   const [selectedActions, setSelectedActions] = useState<number[]>([]);
   const [showBulkActions, setShowBulkActions] = useState(false);
+  const [actionTags, setActionTags] = useState<Tag[]>([]);
 
   const { data: actions = [], isLoading: actionsLoading } = useQuery<Action[]>({
     queryKey: ["/api/actions"],
@@ -68,6 +72,30 @@ export default function ActionTracker() {
     queryKey: ["/api/zones"],
     enabled: user?.role === 'admin',
   });
+
+  const { data: availableTags = [] } = useQuery<Tag[]>({
+    queryKey: ["/api/tags/active"],
+    queryFn: async () => {
+      const response = await fetch("/api/tags/active", {
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to fetch tags");
+      return response.json();
+    },
+  });
+
+  // Convert selected action tags (string array of IDs) to Tag objects
+  useEffect(() => {
+    if (selectedAction?.tags && availableTags.length > 0) {
+      const tagIds = selectedAction.tags.map(id => parseInt(id));
+      const tags = availableTags.filter(tag => tagIds.includes(tag.id));
+      setActionTags(tags);
+    } else {
+      setActionTags([]);
+    }
+  }, [selectedAction, availableTags]);
 
   const updateActionMutation = useMutation({
     mutationFn: async (actionData: Action) => {
@@ -89,6 +117,35 @@ export default function ActionTracker() {
         description: "The action has been successfully updated." 
       });
       setSelectedAction(null);
+    },
+    onError: () => {
+      toast({ 
+        title: "Update Failed",
+        description: "Failed to update action. Please try again.",
+        variant: "destructive" 
+      });
+    },
+  });
+
+  const quickUpdateMutation = useMutation({
+    mutationFn: async ({ actionId, updates }: { actionId: number, updates: Partial<Action> }) => {
+      const response = await fetch(`/api/actions/${actionId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("auth_token")}`,
+        },
+        body: JSON.stringify({ ...updates, updatedAt: new Date().toISOString() }),
+      });
+      if (!response.ok) throw new Error("Failed to update action");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/actions"] });
+      toast({ 
+        title: "Action Updated",
+        description: "The action has been successfully updated." 
+      });
     },
     onError: () => {
       toast({ 
@@ -144,6 +201,7 @@ export default function ActionTracker() {
       dueDate: formData.get("dueDate") as string,
       title: formData.get("title") as string,
       description: formData.get("description") as string,
+      tags: actionTags.map(tag => tag.id.toString()),
     };
     
     updateActionMutation.mutate(actionData);
@@ -181,19 +239,34 @@ export default function ActionTracker() {
     setSelectedActions(checked ? filteredActions.map(a => a.id) : []);
   };
 
+  const handleQuickAssigneeChange = (actionId: number, assignee: string) => {
+    quickUpdateMutation.mutate({ actionId, updates: { assignee } });
+  };
+
+  const handleQuickStatusChange = (actionId: number, status: Action["status"]) => {
+    quickUpdateMutation.mutate({ actionId, updates: { status } });
+  };
+
   const prepareCSVData = () => {
-    return filteredActions.map(action => ({
-      'Action ID': action.id,
-      'Title': action.title,
-      'Description': action.description,
-      'Assignee': action.assignee,
-      'Zone': action.zone,
-      'Priority': action.priority,
-      'Status': action.status,
-      'Due Date': new Date(action.dueDate).toLocaleDateString(),
-      'Created At': new Date(action.createdAt).toLocaleDateString(),
-      'Updated At': new Date(action.updatedAt).toLocaleDateString(),
-    }));
+    return filteredActions.map(action => {
+      const actionTags = action.tags && availableTags.length > 0 
+        ? availableTags.filter(tag => action.tags?.some(actionTagId => parseInt(actionTagId) === tag.id))
+        : [];
+      
+      return {
+        'Action ID': action.id,
+        'Title': action.title,
+        'Description': action.description,
+        'Assignee': action.assignee,
+        'Zone': action.zone,
+        'Priority': action.priority,
+        'Status': action.status,
+        'Tags': actionTags.map(tag => tag.name).join(', '),
+        'Due Date': new Date(action.dueDate).toLocaleDateString(),
+        'Created At': new Date(action.createdAt).toLocaleDateString(),
+        'Updated At': new Date(action.updatedAt).toLocaleDateString(),
+      };
+    });
   };
 
   const handleExportPDF = () => {
@@ -210,21 +283,28 @@ export default function ActionTracker() {
     doc.text(`Filters Applied: ${showUnresolvedOnly ? 'Unresolved Only' : 'All Actions'}`, 14, 48);
     
     // Add table
-    const tableData = filteredActions.map(action => [
-      action.id,
-      action.title.substring(0, 30) + (action.title.length > 30 ? '...' : ''),
-      action.assignee,
-      action.zone,
-      action.priority,
-      action.status,
-      new Date(action.dueDate).toLocaleDateString(),
-    ]);
+    const tableData = filteredActions.map(action => {
+      const actionTags = action.tags && availableTags.length > 0 
+        ? availableTags.filter(tag => action.tags?.some(actionTagId => parseInt(actionTagId) === tag.id))
+        : [];
+      
+      return [
+        action.id,
+        action.title.substring(0, 20) + (action.title.length > 20 ? '...' : ''),
+        action.assignee,
+        action.zone,
+        action.priority,
+        action.status,
+        actionTags.map(tag => tag.name).join(', ').substring(0, 15) + (actionTags.length > 2 ? '...' : ''),
+        new Date(action.dueDate).toLocaleDateString(),
+      ];
+    });
     
     autoTable(doc, {
-      head: [['ID', 'Title', 'Assignee', 'Zone', 'Priority', 'Status', 'Due Date']],
+      head: [['ID', 'Title', 'Assignee', 'Zone', 'Priority', 'Status', 'Tags', 'Due Date']],
       body: tableData,
       startY: 55,
-      styles: { fontSize: 8 },
+      styles: { fontSize: 7 },
       headStyles: { fillColor: [41, 128, 185] },
     });
     
@@ -279,7 +359,14 @@ export default function ActionTracker() {
     const matchesZone = zoneFilter === "all" || action.zone === zoneFilter;
     const matchesUnresolved = !showUnresolvedOnly || action.status !== "completed";
     
-    return matchesSearch && matchesStatus && matchesPriority && matchesZone && matchesUnresolved;
+    // Tag filtering
+    const matchesTags = tagFilter.length === 0 || (
+      action.tags && tagFilter.some(filterTag => 
+        action.tags?.some(actionTagId => parseInt(actionTagId) === filterTag.id)
+      )
+    );
+    
+    return matchesSearch && matchesStatus && matchesPriority && matchesZone && matchesUnresolved && matchesTags;
   });
 
   const openActions = actions.filter(action => action.status !== "completed");
@@ -394,6 +481,14 @@ export default function ActionTracker() {
               ))}
             </SelectContent>
           </Select>
+          <div className="max-w-sm">
+            <TagFilter
+              availableTags={availableTags}
+              selectedTags={tagFilter}
+              onTagsChange={setTagFilter}
+              placeholder="Filter by tags..."
+            />
+          </div>
           <div className="flex items-center space-x-2">
             <Switch
               id="unresolved-only"
@@ -467,6 +562,7 @@ export default function ActionTracker() {
                   <th className="text-left p-3">Zone</th>
                   <th className="text-left p-3">Priority</th>
                   <th className="text-left p-3">Status</th>
+                  <th className="text-left p-3">Tags</th>
                   <th className="text-left p-3">Due Date</th>
                   <th className="text-left p-3">Actions</th>
                 </tr>
@@ -474,7 +570,7 @@ export default function ActionTracker() {
               <tbody>
                 {filteredActions.length === 0 ? (
                   <tr>
-                    <td colSpan={user?.role === 'admin' ? 8 : 7} className="text-center p-8 text-gray-500">
+                    <td colSpan={user?.role === 'admin' ? 9 : 8} className="text-center p-8 text-gray-500">
                       No actions found matching your filters
                     </td>
                   </tr>
@@ -500,7 +596,25 @@ export default function ActionTracker() {
                       <td className="p-3">
                         <div className="flex items-center gap-2">
                           <User className="w-4 h-4 text-gray-400" />
-                          <span>{action.assignee}</span>
+                          {user?.role === 'admin' ? (
+                            <Select
+                              value={action.assignee}
+                              onValueChange={(value) => handleQuickAssigneeChange(action.id, value)}
+                            >
+                              <SelectTrigger className="w-32 h-8 border-none shadow-none p-0">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {users.map((user) => (
+                                  <SelectItem key={user.id} value={user.name}>
+                                    {user.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <span>{action.assignee}</span>
+                          )}
                         </div>
                       </td>
                       <td className="p-3">
@@ -517,9 +631,38 @@ export default function ActionTracker() {
                       <td className="p-3">
                         <div className="flex items-center gap-2">
                           {getStatusIcon(action.status)}
-                          <Badge className={getStatusColor(action.status)}>
-                            {action.status.replace('_', ' ')}
-                          </Badge>
+                          {user?.role === 'admin' ? (
+                            <Select
+                              value={action.status}
+                              onValueChange={(value) => handleQuickStatusChange(action.id, value as Action["status"])}
+                            >
+                              <SelectTrigger className="w-32 h-8 border-none shadow-none p-0">
+                                <SelectValue className={getStatusColor(action.status)} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="in_progress">In Progress</SelectItem>
+                                <SelectItem value="completed">Completed</SelectItem>
+                                <SelectItem value="overdue">Overdue</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Badge className={getStatusColor(action.status)}>
+                              {action.status.replace('_', ' ')}
+                            </Badge>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div className="max-w-32">
+                          {action.tags && availableTags.length > 0 && (
+                            <TagDisplay
+                              tags={availableTags.filter(tag => 
+                                action.tags?.some(actionTagId => parseInt(actionTagId) === tag.id)
+                              )}
+                              maxDisplay={2}
+                            />
+                          )}
                         </div>
                       </td>
                       <td className="p-3">
@@ -531,16 +674,23 @@ export default function ActionTracker() {
                         </div>
                       </td>
                       <td className="p-3">
-                        {user?.role === 'admin' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setSelectedAction(action)}
-                            title="Edit action"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {user?.role === 'admin' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedAction(action)}
+                              title="Edit action"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {action.updatedAt && action.updatedAt !== action.createdAt && (
+                            <span className="text-xs text-gray-500" title={`Updated: ${new Date(action.updatedAt).toLocaleString()}`}>
+                              Updated
+                            </span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -639,6 +789,19 @@ export default function ActionTracker() {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                <div>
+                  <Label htmlFor="tags" className="flex items-center gap-2">
+                    <Tags className="h-4 w-4" />
+                    Tags
+                  </Label>
+                  <TagInput
+                    availableTags={availableTags}
+                    selectedTags={actionTags}
+                    onTagsChange={setActionTags}
+                    placeholder="Add tags to categorize this action..."
+                    maxTags={5}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="dueDate">Due Date</Label>
