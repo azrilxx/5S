@@ -295,6 +295,23 @@ The application follows a monorepo structure with shared types and schemas, maki
   - Application now runs successfully on http://localhost:5000 with all endpoints functional
 - **Impact**: Deployment-ready application with resolved TypeScript compilation errors, ensuring production readiness
 
+### Comprehensive User Authorization System Implementation
+- **Date**: July 17, 2025
+- **Change**: Implemented strict user validation system to prevent unauthorized placeholder names from being added to the system
+- **Details**:
+  - Created `shared/constants.ts` with definitive list of 21 authorized team members: Calvin, Jenn, Jennifer, Maz, Suzi, Aemey, Afiq, Poh_Chin, Jack, Hema, May, Shukri, Chin, Alice, Azril, Lyn, Adel, Anne, Candy, Sherene, Joanne
+  - Added system accounts (admin, System Administrator) to allowed users list
+  - Implemented `validateTeamMember()` and `isAuthorizedUser()` functions with comprehensive error messages
+  - Added validation to all user creation and update operations in both MemStorage and DatabaseStorage classes
+  - Enhanced team creation/updates to validate all team leaders and members
+  - Added validation to action assignments ensuring only authorized users can be assigned or assign actions
+  - Implemented audit creation validation to prevent unauthorized auditors
+  - Added message creation validation to restrict sender and recipient to authorized users only
+  - Updated team initialization in MemStorage to use proper authorized team structure
+  - All validation functions throw descriptive error messages when unauthorized users are detected
+  - Created comprehensive test suite to validate authorization system effectiveness
+- **Impact**: Ensures complete data integrity by preventing any unauthorized names from entering the system, maintaining the strict requirement of only 21 predefined team members plus system accounts
+
 ### Hierarchical Zone Management & Realistic Data Implementation
 - **Date**: January 15, 2025
 - **Change**: Implemented hierarchical zone management with building > floor > zone structure and updated all dummy data to use realistic team member names

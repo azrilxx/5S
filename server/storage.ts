@@ -8,6 +8,7 @@ import {
   type NotificationRule, type InsertNotificationRule, type Message, type InsertMessage,
   type Tag, type InsertTag
 } from "@shared/schema";
+import { validateTeamMember, isAuthorizedUser, AUTHORIZED_TEAM_MEMBERS } from "@shared/constants";
 import { db } from "./db";
 import { eq, sql, desc, and } from "drizzle-orm";
 
@@ -306,11 +307,11 @@ export class MemStorage implements IStorage {
     ];
     defaultZones.forEach(zone => this.zones.set(zone.id, zone));
 
-    // Initialize teams
+    // Initialize teams with proper authorized structure
     const defaultTeams: Team[] = [
-      { id: this.currentTeamIds++, name: "Team A", leader: "John Doe", members: ["John Doe", "Jane Smith"], assignedZones: ["Factory Zone 1"], responsibilities: ["1S", "2S"] },
-      { id: this.currentTeamIds++, name: "Team B", leader: "Bob Johnson", members: ["Bob Johnson", "Alice Brown"], assignedZones: ["Factory Zone 2"], responsibilities: ["3S", "4S"] },
-      { id: this.currentTeamIds++, name: "Team C", leader: "Carol Davis", members: ["Carol Davis", "Mike Wilson"], assignedZones: ["Office Ground Floor"], responsibilities: ["5S", "1S"] },
+      { id: this.currentTeamIds++, name: "Galvanize", leader: "Azril", members: ["Azril", "Afiq", "Joanne"], assignedZones: ["Factory Zone 1", "Main Door", "Receptionist"], responsibilities: ["Daily cleanup", "Equipment maintenance", "Sort and organize workstations"] },
+      { id: this.currentTeamIds++, name: "Chrome", leader: "Calvin", members: ["Calvin", "Jenn", "Jennifer", "Aemey"], assignedZones: ["Factory Zone 2", "Meeting Room (Ground Floor)", "Shoes Area"], responsibilities: ["Quality control", "Shine and cleaning", "Standardize procedures"] },
+      { id: this.currentTeamIds++, name: "Steel", leader: "Maz", members: ["Maz", "Suzi", "Poh_Chin", "Candy"], assignedZones: ["Common Area (Second Floor)", "Account", "Filing Room"], responsibilities: ["Sustain 5S practices", "Weekly audits", "Training coordination"] },
     ];
     defaultTeams.forEach(team => this.teams.set(team.id, team));
 
@@ -340,6 +341,12 @@ export class MemStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
+    // Validate user name against authorized list
+    const validation = validateTeamMember(insertUser.name);
+    if (!validation.isValid) {
+      throw new Error(`User creation failed: ${validation.error}`);
+    }
+    
     const user: User = {
       ...insertUser,
       id: this.currentUserIds++,
@@ -475,6 +482,21 @@ export class MemStorage implements IStorage {
   }
 
   async createTeam(insertTeam: InsertTeam): Promise<Team> {
+    // Validate team leader
+    if (insertTeam.leader && !isAuthorizedUser(insertTeam.leader)) {
+      throw new Error(`Team leader "${insertTeam.leader}" is not authorized. Only authorized team members can be leaders.`);
+    }
+    
+    // Validate team members
+    if (insertTeam.members) {
+      for (const member of insertTeam.members) {
+        const validation = validateTeamMember(member);
+        if (!validation.isValid) {
+          throw new Error(`Team member validation failed: ${validation.error}`);
+        }
+      }
+    }
+    
     const team: Team = {
       ...insertTeam,
       id: this.currentTeamIds++,
@@ -490,6 +512,21 @@ export class MemStorage implements IStorage {
   async updateTeam(id: number, updates: Partial<InsertTeam>): Promise<Team | undefined> {
     const team = this.teams.get(id);
     if (!team) return undefined;
+    
+    // Validate team leader if being updated
+    if (updates.leader && !isAuthorizedUser(updates.leader)) {
+      throw new Error(`Team leader "${updates.leader}" is not authorized. Only authorized team members can be leaders.`);
+    }
+    
+    // Validate team members if being updated
+    if (updates.members) {
+      for (const member of updates.members) {
+        const validation = validateTeamMember(member);
+        if (!validation.isValid) {
+          throw new Error(`Team member validation failed: ${validation.error}`);
+        }
+      }
+    }
     
     const updatedTeam = { ...team, ...updates };
     this.teams.set(id, updatedTeam);
@@ -510,6 +547,11 @@ export class MemStorage implements IStorage {
   }
 
   async createAudit(insertAudit: InsertAudit): Promise<Audit> {
+    // Validate auditor
+    if (insertAudit.auditor && !isAuthorizedUser(insertAudit.auditor)) {
+      throw new Error(`Audit cannot be assigned to "${insertAudit.auditor}". Only authorized team members can conduct audits.`);
+    }
+    
     const audit: Audit = {
       ...insertAudit,
       id: this.currentAuditIds++,
@@ -595,6 +637,16 @@ export class MemStorage implements IStorage {
   }
 
   async createAction(insertAction: InsertAction): Promise<Action> {
+    // Validate assigned user
+    if (insertAction.assignedTo && !isAuthorizedUser(insertAction.assignedTo)) {
+      throw new Error(`Action cannot be assigned to "${insertAction.assignedTo}". Only authorized team members can be assigned actions.`);
+    }
+    
+    // Validate assigned by user
+    if (insertAction.assignedBy && !isAuthorizedUser(insertAction.assignedBy)) {
+      throw new Error(`Action cannot be assigned by "${insertAction.assignedBy}". Only authorized team members can assign actions.`);
+    }
+    
     const action: Action = {
       ...insertAction,
       id: this.currentActionIds++,
@@ -617,6 +669,16 @@ export class MemStorage implements IStorage {
   async updateAction(id: number, updates: Partial<InsertAction>): Promise<Action | undefined> {
     const action = this.actions.get(id);
     if (!action) return undefined;
+    
+    // Validate assigned user if being updated
+    if (updates.assignedTo && !isAuthorizedUser(updates.assignedTo)) {
+      throw new Error(`Action cannot be assigned to "${updates.assignedTo}". Only authorized team members can be assigned actions.`);
+    }
+    
+    // Validate assigned by user if being updated
+    if (updates.assignedBy && !isAuthorizedUser(updates.assignedBy)) {
+      throw new Error(`Action cannot be assigned by "${updates.assignedBy}". Only authorized team members can assign actions.`);
+    }
     
     const updatedAction = { ...action, ...updates };
     this.actions.set(id, updatedAction);
@@ -843,6 +905,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
+    // Validate user name against authorized list
+    const validation = validateTeamMember(insertUser.name);
+    if (!validation.isValid) {
+      throw new Error(`User creation failed: ${validation.error}`);
+    }
+    
     const [user] = await db
       .insert(users)
       .values(insertUser)
@@ -963,6 +1031,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createTeam(insertTeam: InsertTeam): Promise<Team> {
+    // Validate team leader
+    if (insertTeam.leader && !isAuthorizedUser(insertTeam.leader)) {
+      throw new Error(`Team leader "${insertTeam.leader}" is not authorized. Only authorized team members can be leaders.`);
+    }
+    
+    // Validate team members
+    if (insertTeam.members) {
+      for (const member of insertTeam.members) {
+        const validation = validateTeamMember(member);
+        if (!validation.isValid) {
+          throw new Error(`Team member validation failed: ${validation.error}`);
+        }
+      }
+    }
+    
     const [team] = await db
       .insert(teams)
       .values(insertTeam)
@@ -971,6 +1054,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateTeam(id: number, updates: Partial<InsertTeam>): Promise<Team | undefined> {
+    // Validate team leader if being updated
+    if (updates.leader && !isAuthorizedUser(updates.leader)) {
+      throw new Error(`Team leader "${updates.leader}" is not authorized. Only authorized team members can be leaders.`);
+    }
+    
+    // Validate team members if being updated
+    if (updates.members) {
+      for (const member of updates.members) {
+        const validation = validateTeamMember(member);
+        if (!validation.isValid) {
+          throw new Error(`Team member validation failed: ${validation.error}`);
+        }
+      }
+    }
+    
     const [team] = await db
       .update(teams)
       .set(updates)
@@ -994,6 +1092,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAudit(insertAudit: InsertAudit): Promise<Audit> {
+    // Validate auditor
+    if (insertAudit.auditor && !isAuthorizedUser(insertAudit.auditor)) {
+      throw new Error(`Audit cannot be assigned to "${insertAudit.auditor}". Only authorized team members can conduct audits.`);
+    }
+    
     const [audit] = await db
       .insert(audits)
       .values(insertAudit)
@@ -1063,6 +1166,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAction(insertAction: InsertAction): Promise<Action> {
+    // Validate assigned user
+    if (insertAction.assignedTo && !isAuthorizedUser(insertAction.assignedTo)) {
+      throw new Error(`Action cannot be assigned to "${insertAction.assignedTo}". Only authorized team members can be assigned actions.`);
+    }
+    
+    // Validate assigned by user
+    if (insertAction.assignedBy && !isAuthorizedUser(insertAction.assignedBy)) {
+      throw new Error(`Action cannot be assigned by "${insertAction.assignedBy}". Only authorized team members can assign actions.`);
+    }
+    
     const [action] = await db
       .insert(actions)
       .values(insertAction)
@@ -1071,6 +1184,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateAction(id: number, updates: Partial<InsertAction>): Promise<Action | undefined> {
+    // Validate assigned user if being updated
+    if (updates.assignedTo && !isAuthorizedUser(updates.assignedTo)) {
+      throw new Error(`Action cannot be assigned to "${updates.assignedTo}". Only authorized team members can be assigned actions.`);
+    }
+    
+    // Validate assigned by user if being updated
+    if (updates.assignedBy && !isAuthorizedUser(updates.assignedBy)) {
+      throw new Error(`Action cannot be assigned by "${updates.assignedBy}". Only authorized team members can assign actions.`);
+    }
+    
     const [action] = await db
       .update(actions)
       .set(updates)
@@ -1197,6 +1320,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
+    // Validate sender
+    if (insertMessage.sender && !isAuthorizedUser(insertMessage.sender)) {
+      throw new Error(`Message cannot be sent by "${insertMessage.sender}". Only authorized team members can send messages.`);
+    }
+    
+    // Validate recipient
+    if (insertMessage.recipient && !isAuthorizedUser(insertMessage.recipient)) {
+      throw new Error(`Message cannot be sent to "${insertMessage.recipient}". Only authorized team members can receive messages.`);
+    }
+    
     const [message] = await db.insert(messages).values(insertMessage).returning();
     return message;
   }
