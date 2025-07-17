@@ -1,0 +1,68 @@
+/analyze
+
+## Objective
+Enhance the `Learn 5S` screen of the Karisma 5S Audit App by embedding high-quality educational content into each of the five 5S learning modules. Use your autonomous agent capabilities to research and integrate supporting material **without breaking or modifying any existing working logic or components**.
+
+---
+
+## Constraints
+- ✅ Do not change or remove any existing UI code, props, logic, or behavior.
+- ✅ Do not break the existing layout or Tailwind styling.
+- ✅ All enhancements must be **fully backward compatible**.
+- ✅ All enhancements must be **optional** and fail-safe (i.e., fallback if no content found).
+
+---
+
+## Tasks
+
+### 1. Research Phase
+For each of the five 5S categories — Seiri, Seiton, Seiso, Seiketsu, and Shitsuke — perform a real-time web search and:
+
+- Identify a **clear, accurate, and up-to-date** educational video (YouTube or other embed-safe platforms).
+- Confirm that the video is embeddable and suitable for workplace learning.
+- Summarize key bullet points from reputable sources about each concept (Seiri to Shitsuke).
+
+---
+
+### 2. Embed Phase
+For each 5S card component:
+
+- Add an **optional embedded YouTube video** inside the card, styled responsively.
+- Below the title and description, add a small embedded video area (`<iframe>` with fallback).
+- Include a bullet list of 2–3 takeaway points under each module, styled with subtle text classes (`text-sm text-muted`).
+
+---
+
+### 3. Resilience Phase
+Ensure the following:
+
+- If the video link or metadata is not available, fallback gracefully with:
+  - Existing static description text.
+  - A placeholder text such as `“Video not available – check your internet connection or contact admin.”`
+- Do not affect the module state, review status, or buttons.
+
+---
+
+### 4. QA Phase
+Perform the following before finalizing:
+
+- Run an internal check that **none of the following are affected**:
+  - Auth logic
+  - Admin roles
+  - Routes
+  - Layout wrapping
+  - Completion toggles
+  - Tailwind classes and spacing
+- Confirm that `azril` and `shukri` still retain admin functionality and dashboard access.
+
+---
+
+## Output
+
+- Update only the `Learn5S.tsx` or equivalent component
+- Return a complete, working code snippet ready to be copy-pasted and redeployed
+- Include a comment at the top: `// Claude-enhanced with 5S multimedia embeds (safe mode enabled)`
+
+---
+
+/end
