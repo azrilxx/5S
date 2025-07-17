@@ -2,7 +2,6 @@ import type { Express, Request, Response } from "express";
 import { storage } from "./storage";
 import { insertUserSchema, insertBuildingSchema, insertFloorSchema, insertZoneSchema, insertAuditSchema, insertChecklistItemSchema, insertActionSchema, insertScheduleSchema, insertReportSchema, insertTeamSchema, insertTagSchema } from "@shared/schema";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -37,23 +36,8 @@ const pdfUpload = multer({
   }
 });
 
-// Middleware to verify JWT token
-const authenticateToken = (req: Request & { user?: any }, res: Response, next: Function) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ message: 'Access token required' });
-  }
-
-  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
-    if (err) {
-      return res.status(403).json({ message: 'Invalid or expired token' });
-    }
-    req.user = user;
-    next();
-  });
-};
+// Import proper authentication middleware
+import { authenticateToken } from "./middleware/auth.js";
 
 // Notification generation function
 async function generateNotificationsForUser(username: string, userRole: string) {
@@ -177,6 +161,84 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Get user profile (must come before /api/users/:id route to avoid conflict)
+  app.get("/api/users/profile", authenticateToken, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Return user profile data
+      const { password, ...userProfile } = user;
+      res.json(userProfile);
+    } catch (error) {
+      console.error("Get user profile error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Update user profile (must come before /api/users/:id route to avoid conflict)
+  app.put("/api/users/profile", authenticateToken, async (req: any, res) => {
+    try {
+      const { name, email } = req.body;
+      
+      if (!name || !email) {
+        return res.status(400).json({ message: "Name and email are required" });
+      }
+      
+      // Check if email is already taken by another user
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser && existingUser.id !== req.user.id) {
+        return res.status(400).json({ message: "Email is already taken" });
+      }
+      
+      const updatedUser = await storage.updateUser(req.user.id, { name, email });
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const { password, ...userProfile } = updatedUser;
+      res.json(userProfile);
+    } catch (error) {
+      console.error("Update user profile error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Update user settings (must come before /api/users/:id route to avoid conflict)
+  app.put("/api/users/settings", authenticateToken, async (req: any, res) => {
+    try {
+      const { language, notifications, theme } = req.body;
+      
+      // Validate required fields with safe defaults
+      const safeSettings = {
+        language: language || 'en',
+        notifications: {
+          assignedActions: notifications?.assignedActions ?? true,
+          upcomingAudits: notifications?.upcomingAudits ?? true,
+          overdueItems: notifications?.overdueItems ?? true
+        },
+        theme: theme || 'light'
+      };
+      
+      // Update user with both language and preferences
+      const updatedUser = await storage.updateUser(req.user.id, {
+        language: safeSettings.language,
+        preferences: safeSettings
+      });
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({ success: true, settings: safeSettings });
+    } catch (error) {
+      console.error("Update user settings error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   app.put("/api/users/:id", authenticateToken, async (req: any, res) => {
     try {
       // Only admin can update users
@@ -265,56 +327,6 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Get user profile
-  app.get("/api/users/profile", authenticateToken, async (req: any, res) => {
-    try {
-      const user = await storage.getUser(req.user.id);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      // Return user profile data
-      const { password, ...userProfile } = user;
-      res.json(userProfile);
-    } catch (error) {
-      console.error("Get user profile error:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });
-
-  // Update user profile
-  app.put("/api/users/profile", authenticateToken, async (req: any, res) => {
-    try {
-      const { name, email } = req.body;
-      
-      console.log("Profile update request:", { userId: req.user.id, name, email });
-      
-      if (!name || !email) {
-        return res.status(400).json({ message: "Name and email are required" });
-      }
-      
-      // Check if email is already taken by another user
-      const existingUser = await storage.getUserByEmail(email);
-      console.log("Existing user with email:", existingUser ? { id: existingUser.id, email: existingUser.email } : null);
-      
-      if (existingUser && existingUser.id !== req.user.id) {
-        return res.status(400).json({ message: "Email is already taken" });
-      }
-      
-      const updatedUser = await storage.updateUser(req.user.id, { name, email });
-      console.log("Update result:", updatedUser ? { id: updatedUser.id, email: updatedUser.email } : null);
-      
-      if (!updatedUser) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      const { password, ...userProfile } = updatedUser;
-      res.json(userProfile);
-    } catch (error) {
-      console.error("Update user profile error:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });
 
   // Get user settings
   app.get("/api/users/settings", authenticateToken, async (req: any, res) => {
@@ -354,54 +366,6 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Update user settings
-  app.put("/api/users/settings", authenticateToken, async (req: any, res) => {
-    try {
-      console.log("Settings update - req.user:", JSON.stringify(req.user, null, 2));
-      console.log("Settings update - req.body:", JSON.stringify(req.body, null, 2));
-      
-      const { language, notifications, theme } = req.body;
-      
-      // Ensure userId is properly parsed as integer
-      const userId = Number(req.user.id);
-      console.log("Parsed userId:", userId, "Type:", typeof userId, "IsNaN:", isNaN(userId));
-      
-      if (isNaN(userId)) {
-        console.error("Invalid user ID:", req.user.id);
-        return res.status(400).json({ message: "Invalid user ID" });
-      }
-      
-      // Validate required fields with safe defaults
-      const safeSettings = {
-        language: language || 'en',
-        notifications: {
-          assignedActions: notifications?.assignedActions ?? true,
-          upcomingAudits: notifications?.upcomingAudits ?? true,
-          overdueItems: notifications?.overdueItems ?? true
-        },
-        theme: theme || 'light'
-      };
-      
-      console.log("Calling storage.updateUser with:", userId, safeSettings);
-      
-      // Update user with both language and preferences
-      const updatedUser = await storage.updateUser(userId, {
-        language: safeSettings.language,
-        preferences: safeSettings
-      });
-      
-      console.log("UpdateUser result:", updatedUser ? "SUCCESS" : "FAILED");
-      
-      if (!updatedUser) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      
-      res.json({ success: true, settings: safeSettings });
-    } catch (error) {
-      console.error("Update user settings error:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });
 
   // Update user role (admin only)
   app.put("/api/users/:id/role", authenticateToken, async (req: any, res) => {
