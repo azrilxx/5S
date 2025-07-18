@@ -1226,13 +1226,18 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
   // Questions CRUD routes
   app.get("/api/questions", authenticateToken, async (req: Request & { user?: any }, res: Response) => {
     try {
-      // Only admin users can access questions
-      if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: "Access denied" });
-      }
-      
+      const { zone } = req.query;
       const questions = await storage.getAllQuestions();
-      res.json(questions);
+      
+      // Filter questions by zone if zone parameter is provided
+      if (zone && typeof zone === 'string') {
+        const filteredQuestions = questions.filter((q: any) => 
+          q.enabledZones && q.enabledZones.includes(zone)
+        );
+        res.json(filteredQuestions);
+      } else {
+        res.json(questions);
+      }
     } catch (error) {
       console.error("Get questions error:", error);
       res.status(500).json({ message: "Internal server error" });

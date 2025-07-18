@@ -57,11 +57,11 @@ interface AuditFormData {
 }
 
 const AUDIT_CATEGORIES = [
-  { id: '1S', name: 'Sort', description: 'Remove unnecessary items', color: 'bg-red-500' },
-  { id: '2S', name: 'Set in Order', description: 'Organize remaining items', color: 'bg-orange-500' },
-  { id: '3S', name: 'Shine', description: 'Clean and inspect', color: 'bg-yellow-500' },
-  { id: '4S', name: 'Standardize', description: 'Maintain and improve', color: 'bg-green-500' },
-  { id: '5S', name: 'Sustain', description: 'Maintain discipline', color: 'bg-blue-500' }
+  { id: '1S', name: 'Sort', description: 'Remove unnecessary items', color: 'bg-red-500', dbCategory: 'sort' },
+  { id: '2S', name: 'Set in Order', description: 'Organize remaining items', color: 'bg-orange-500', dbCategory: 'setInOrder' },
+  { id: '3S', name: 'Shine', description: 'Clean and inspect', color: 'bg-yellow-500', dbCategory: 'shine' },
+  { id: '4S', name: 'Standardize', description: 'Maintain and improve', color: 'bg-green-500', dbCategory: 'standardize' },
+  { id: '5S', name: 'Sustain', description: 'Maintain discipline', color: 'bg-blue-500', dbCategory: 'sustain' }
 ];
 
 export default function AuditForm() {
@@ -79,6 +79,7 @@ export default function AuditForm() {
   // Fetch questions for this zone
   const { data: questions, isLoading: questionsLoading } = useQuery<Question[]>({
     queryKey: ["/api/questions", zone],
+    queryFn: () => apiRequest("GET", `/api/questions?zone=${encodeURIComponent(zone)}`).then(res => res.json()),
     enabled: !!zone,
   });
 
@@ -90,7 +91,7 @@ export default function AuditForm() {
   const zoneDetails = zones?.find((z: Zone) => z.name === zone);
 
   const filteredQuestions = questions?.filter((q: Question) => 
-    q.category === AUDIT_CATEGORIES[currentCategory]?.id
+    q.category === AUDIT_CATEGORIES[currentCategory]?.dbCategory
   ) || [];
 
   const handleResponseChange = (questionId: string, response: '✓' | '✗' | 'N/A') => {
