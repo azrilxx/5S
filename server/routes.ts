@@ -6,8 +6,8 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { extractQuestionsFromText } from "./deepseek";
-import { DashboardCache, AuditCache, ActionCache, cache } from "./cache";
-import { wsManager } from "./websocket";
+// import { DashboardCache, AuditCache, ActionCache, cache } from "./cache";
+// import { wsManager } from "./websocket";
 
 const JWT_SECRET = process.env.JWT_SECRET || "karisma-5s-secret-key";
 
@@ -1010,9 +1010,9 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
       let actions;
       
       if (assignee) {
-        actions = await ActionCache.getActionsByAssignee(assignee);
+        actions = await storage.getActionsByAssignee(assignee);
       } else if (zone) {
-        actions = await ActionCache.getActionsByZone(zone);
+        actions = await storage.getActionsByZone(zone);
       } else {
         actions = await storage.getAllActions();
       }
@@ -1032,15 +1032,15 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
         assignedBy: req.user.username
       });
       
-      // Invalidate relevant caches
-      ActionCache.invalidateForAssignee(action.assignedTo);
-      ActionCache.invalidateForZone(action.zone);
-      DashboardCache.invalidate();
+      // // Invalidate relevant caches
+      // ActionCache.invalidateForAssignee(action.assignedTo);
+      // ActionCache.invalidateForZone(action.zone);
+      // DashboardCache.invalidate();
       
-      // Send real-time notification
-      if (wsManager) {
-        wsManager.notifyActionCreated(action.assignedTo, action);
-      }
+      // // Send real-time notification
+      // if (wsManager) {
+      //   wsManager.notifyActionCreated(action.assignedTo, action);
+      // }
       
       res.status(201).json(action);
     } catch (error) {
@@ -1679,10 +1679,46 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Dashboard statistics with caching
+  // Dashboard statistics
   app.get("/api/dashboard/stats", authenticateToken, async (req, res) => {
     try {
-      const stats = await DashboardCache.getStats();
+      const audits = await storage.getAllAudits();
+      const actions = await storage.getAllActions();
+      const teams = await storage.getAllTeams();
+      const users = await storage.getAllUsers();
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const todaysAudits = audits.filter(audit => {
+        if (!audit.scheduledDate) return false;
+        const auditDate = new Date(audit.scheduledDate);
+        auditDate.setHours(0, 0, 0, 0);
+        return auditDate.getTime() === today.getTime();
+      }).length;
+      
+      const pendingActions = actions.filter(action => action.status === 'pending').length;
+      const overdueActions = actions.filter(action => 
+        action.status === 'pending' && action.dueDate && new Date(action.dueDate) < new Date()
+      ).length;
+      
+      const totalAudits = audits.length;
+      const completedAudits = audits.filter(audit => audit.status === 'completed').length;
+      const complianceRate = totalAudits > 0 ? Math.round((completedAudits / totalAudits) * 100) : 0;
+      const activeUsers = users.filter(user => user.isActive).length;
+      const totalTeams = teams.length;
+      
+      const stats = {
+        todaysAudits,
+        pendingActions,
+        overdueActions,
+        complianceRate,
+        activeUsers,
+        totalTeams,
+        totalAudits,
+        completedAudits,
+        lastUpdated: new Date().toISOString()
+      };
       res.json(stats);
     } catch (error) {
       console.error("Dashboard stats error:", error);
@@ -1690,77 +1726,6 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Performance monitoring endpoint
-  app.get("/api/performance/stats", authenticateToken, async (req: any, res) => {
-    try {
-      // Only admin users can access performance stats
-      if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: "Access denied" });
-      }
 
-      const memoryUsage = process.memoryUsage();
-      const cpuUsage = process.cpuUsage();
-      const uptime = process.uptime();
-      
-      const wsStats = wsManager ? wsManager.getStats() : { totalConnections: 0, uniqueUsers: 0, connectedUsers: [] };
-      const cacheStats = cache.getStats();
-
-      res.json({
-        server: {
-          uptime: Math.round(uptime),
-          memory: {
-            heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024),
-            heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024),
-            rss: Math.round(memoryUsage.rss / 1024 / 1024),
-            external: Math.round(memoryUsage.external / 1024 / 1024)
-          },
-          cpu: {
-            user: cpuUsage.user,
-            system: cpuUsage.system
-          }
-        },
-        websocket: wsStats,
-        cache: cacheStats,
-        timestamp: new Date().toISOString()
-      });
-    } catch (error) {
-      console.error("Performance stats error:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });
-
-  // Cache management endpoint
-  app.post("/api/cache/clear", authenticateToken, async (req: any, res) => {
-    try {
-      // Only admin users can clear cache
-      if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: "Access denied" });
-      }
-
-      const { type } = req.body;
-      
-      switch (type) {
-        case 'dashboard':
-          DashboardCache.invalidate();
-          break;
-        case 'audits':
-          AuditCache.invalidateAll();
-          break;
-        case 'actions':
-          ActionCache.invalidateAll();
-          break;
-        case 'all':
-          cache.clear();
-          break;
-        default:
-          return res.status(400).json({ message: "Invalid cache type" });
-      }
-
-      res.json({ message: `Cache cleared: ${type}` });
-    } catch (error) {
-      console.error("Cache clear error:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });
 
 }

@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/components/auth/auth-provider";
 import { I18nProvider } from "@/lib/i18n";
 import { tokenStorage } from "@/lib/auth";
-// import { WebSocketProvider } from "@/components/real-time/websocket-provider";
+
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";

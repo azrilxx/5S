@@ -130,10 +130,6 @@ async function main(): Promise<void> {
       serveStatic(app);
     }
 
-    // Initialize WebSocket server
-    const { initializeWebSocket } = await import("./websocket.js");
-    initializeWebSocket(server);
-
     // Add final middleware after Vite setup
     const { addFinalMiddleware } = await import("./app.js");
     addFinalMiddleware(app);
