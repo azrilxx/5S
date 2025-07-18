@@ -43,12 +43,13 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     const token = localStorage.getItem('token');
     if (!token) return;
 
-    setConnectionStatus('connecting');
-    
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws?token=${token}`;
-    
-    const websocket = new WebSocket(wsUrl);
+    try {
+      setConnectionStatus('connecting');
+      
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws?token=${token}`;
+      
+      const websocket = new WebSocket(wsUrl);
 
     websocket.onopen = () => {
       console.log('WebSocket connected');
@@ -87,6 +88,10 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
     };
 
     setWs(websocket);
+    } catch (error) {
+      console.error('Failed to create WebSocket connection:', error);
+      setConnectionStatus('error');
+    }
   };
 
   const handleMessage = (message: WebSocketMessage) => {
@@ -146,14 +151,18 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (user) {
-      connect();
+      // Delay WebSocket connection to prevent blocking app startup
+      const timer = setTimeout(() => {
+        connect();
+      }, 1000);
+      
+      return () => {
+        clearTimeout(timer);
+        if (ws) {
+          ws.close();
+        }
+      };
     }
-
-    return () => {
-      if (ws) {
-        ws.close();
-      }
-    };
   }, [user]);
 
   // Ping-pong for connection health
