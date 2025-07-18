@@ -116,7 +116,7 @@ export default function Schedules() {
 
     createScheduleMutation.mutate({
       ...newScheduleData,
-      nextRun,
+      nextRun: nextRun.toISOString(),
     });
   };
 
