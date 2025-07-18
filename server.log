@@ -1,0 +1,882 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx watch server/index.ts
+
+[dotenv@17.2.0] injecting env (13) from .env (tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`)
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 5949
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+[AUDIT] 2025-07-17T02:03:28.177Z | LOGIN_ATTEMPT | SUCCESS | User: azril | IP: 127.0.0.1
+[2025-07-17T02:03:28.182Z] POST /api/auth/login 200 in 72ms :: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI…
+[2025-07-17T02:03:28.205Z] PUT /api/users/settings 404 in 3ms (user: azril) :: {"message":"User not found"}
+2:03:40 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 111s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  suppress all logs with { quiet: true })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 6027
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+[2025-07-17T02:04:20.116Z] PUT /api/users/settings 401 in 17ms :: {"message":"Access token required"}
+[AUDIT] 2025-07-17T02:04:38.557Z | LOGIN_ATTEMPT | SUCCESS | User: azril | IP: 127.0.0.1
+[2025-07-17T02:04:38.559Z] POST /api/auth/login 200 in 73ms :: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI…
+[MemStorage] updateUser called with ID: NaN, updates: {
+  language: 'zh',
+  notifications: { assignedActions: true, upcomingAudits: true, overdueItems: true },
+  theme: 'light'
+}
+[MemStorage] Available user IDs: [ 1, 2, 3, 4, 5, 6 ]
+[MemStorage] All users: [
+  { id: 1, username: 'admin' },
+  { id: 2, username: 'azril' },
+  { id: 3, username: 'lyn' },
+  { id: 4, username: 'calvin' },
+  { id: 5, username: 'shukri' },
+  { id: 6, username: 'may' }
+]
+[MemStorage] Found user for ID NaN: null
+[2025-07-17T02:04:38.577Z] PUT /api/users/settings 404 in 6ms (user: azril) :: {"message":"User not found"}
+2:04:52 AM [tsx] change in ./server/routes.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 71s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 6187
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+[AUDIT] 2025-07-17T02:05:25.502Z | LOGIN_ATTEMPT | SUCCESS | User: azril | IP: 127.0.0.1
+[2025-07-17T02:05:25.506Z] POST /api/auth/login 200 in 69ms :: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI…
+[MemStorage] updateUser called with ID: NaN, updates: {
+  language: 'zh',
+  notifications: { assignedActions: true, upcomingAudits: true, overdueItems: true },
+  theme: 'light'
+}
+[MemStorage] Available user IDs: [ 1, 2, 3, 4, 5, 6 ]
+[MemStorage] All users: [
+  { id: 1, username: 'admin' },
+  { id: 2, username: 'azril' },
+  { id: 3, username: 'lyn' },
+  { id: 4, username: 'calvin' },
+  { id: 5, username: 'shukri' },
+  { id: 6, username: 'may' }
+]
+[MemStorage] Found user for ID NaN: null
+[2025-07-17T02:05:25.518Z] PUT /api/users/settings 404 in 4ms (user: azril) :: {"message":"User not found"}
+2:05:41 AM [tsx] change in ./server/routes.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 47s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: 🔐 encrypt with dotenvx: https://dotenvx.com)
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 6342
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+[AUDIT] 2025-07-17T02:05:55.908Z | LOGIN_ATTEMPT | SUCCESS | User: azril | IP: 127.0.0.1
+[2025-07-17T02:05:55.912Z] POST /api/auth/login 200 in 72ms :: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI…
+[MemStorage] updateUser called with ID: NaN, updates: {
+  language: 'zh',
+  notifications: { assignedActions: true, upcomingAudits: true, overdueItems: true },
+  theme: 'light'
+}
+[MemStorage] Available user IDs: [ 1, 2, 3, 4, 5, 6 ]
+[MemStorage] All users: [
+  { id: 1, username: 'admin' },
+  { id: 2, username: 'azril' },
+  { id: 3, username: 'lyn' },
+  { id: 4, username: 'calvin' },
+  { id: 5, username: 'shukri' },
+  { id: 6, username: 'may' }
+]
+[MemStorage] Found user for ID NaN: null
+[2025-07-17T02:05:55.926Z] PUT /api/users/settings 404 in 6ms (user: azril) :: {"message":"User not found"}
+2:06:03 AM [tsx] change in ./server/routes.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 21s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  enable debug logging with { debug: true })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 6440
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+[AUDIT] 2025-07-17T02:06:31.009Z | LOGIN_ATTEMPT | SUCCESS | User: azril | IP: 127.0.0.1
+[2025-07-17T02:06:31.014Z] POST /api/auth/login 200 in 67ms :: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI…
+[MemStorage] updateUser called with ID: NaN, updates: {
+  language: 'zh',
+  notifications: { assignedActions: true, upcomingAudits: true, overdueItems: true },
+  theme: 'light'
+}
+[MemStorage] Available user IDs: [ 1, 2, 3, 4, 5, 6 ]
+[MemStorage] All users: [
+  { id: 1, username: 'admin' },
+  { id: 2, username: 'azril' },
+  { id: 3, username: 'lyn' },
+  { id: 4, username: 'calvin' },
+  { id: 5, username: 'shukri' },
+  { id: 6, username: 'may' }
+]
+[MemStorage] Found user for ID NaN: null
+[2025-07-17T02:06:31.030Z] PUT /api/users/settings 404 in 5ms (user: azril) :: {"message":"User not found"}
+2:07:25 AM [tsx] change in ./server/routes.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 80s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`)
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 6548
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+[2025-07-17T02:07:43.142Z] PUT /api/users/settings 401 in 4ms :: {"message":"Access token required"}
+2:08:13 AM [tsx] change in ./server/routes.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 47s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  override existing env vars with { override: true })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 6642
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+2:08:23 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 9s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: 🔐 encrypt with dotenvx: https://dotenvx.com)
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 6674
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+[AUDIT] 2025-07-17T02:09:10.961Z | LOGIN_ATTEMPT | SUCCESS | User: azril | IP: 127.0.0.1
+[2025-07-17T02:09:10.966Z] POST /api/auth/login 200 in 67ms :: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI…
+[2025-07-17T02:09:10.978Z] PUT /api/users/settings 404 in 2ms (user: azril) :: {"message":"User not found"}
+2:09:27 AM [tsx] change in ./server/routes.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 61s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 6752
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+2:20:41 AM [tsx] change in ./server/routes.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 673s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  write to custom object with { processEnv: myObject })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 7024
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+2:20:47 AM [tsx] change in ./server/routes.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 4s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  enable debug logging with { debug: true })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 7043
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+2:21:02 AM [tsx] change in ./server/routes.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 13s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit)
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 7074
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+[AUDIT] 2025-07-17T02:21:38.841Z | LOGIN_ATTEMPT | SUCCESS | User: azril | IP: 127.0.0.1
+[2025-07-17T02:21:38.846Z] POST /api/auth/login 200 in 68ms :: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI…
+[2025-07-17T02:21:38.857Z] PUT /api/users/profile 404 in 2ms (user: azril) :: {"message":"User not found"}
+[2025-07-17T02:23:08.769Z] PUT /api/users/settings 401 in 7ms :: {"error":{"message":"Access token required","timestamp":"2025-07-17T02:23:08.768Z…
+[AUDIT] 2025-07-17T02:23:22.573Z | LOGIN_ATTEMPT | SUCCESS | User: azril | IP: 127.0.0.1
+[2025-07-17T02:23:22.574Z] POST /api/auth/login 200 in 69ms :: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI…
+[2025-07-17T02:23:22.588Z] PUT /api/users/profile 404 in 4ms (user: azril) :: {"message":"User not found"}
+[2025-07-17T02:23:22.598Z] PUT /api/users/settings 404 in 1ms (user: azril) :: {"message":"User not found"}
+2:23:33 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 150s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild)
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 7306
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+[AUDIT] 2025-07-17T02:24:32.881Z | LOGIN_ATTEMPT | SUCCESS | User: azril | IP: 127.0.0.1
+[2025-07-17T02:24:32.885Z] POST /api/auth/login 200 in 68ms :: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI…
+[DEBUG] MemStorage.updateUser called with ID: NaN (type: number)
+[DEBUG] Available user IDs: [ 1, 2, 3, 4, 5, 6 ]
+[DEBUG] No user found for ID: NaN
+[2025-07-17T02:24:32.901Z] PUT /api/users/settings 404 in 5ms (user: azril) :: {"message":"User not found"}
+2:24:51 AM [tsx] change in ./server/middleware/auth.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 76s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  enable debug logging with { debug: true })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 7486
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+[AUDIT] 2025-07-17T02:26:56.183Z | LOGIN_ATTEMPT | SUCCESS | User: azril | IP: 127.0.0.1
+[2025-07-17T02:26:56.187Z] POST /api/auth/login 200 in 74ms :: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI…
+[AUTH] Set req.user: { id: 2, username: 'azril', role: 'admin', idType: 'number' }
+[DEBUG] MemStorage.updateUser called with ID: NaN (type: number)
+[DEBUG] Available user IDs: [ 1, 2, 3, 4, 5, 6 ]
+[DEBUG] No user found for ID: NaN
+[2025-07-17T02:26:56.200Z] PUT /api/users/settings 404 in 4ms (user: azril) :: {"message":"User not found"}
+2:27:11 AM [tsx] change in ./server/routes.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 138s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`)
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 7575
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+[AUDIT] 2025-07-17T02:27:29.916Z | LOGIN_ATTEMPT | SUCCESS | User: azril | IP: 127.0.0.1
+[2025-07-17T02:27:29.919Z] POST /api/auth/login 200 in 67ms :: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI…
+[AUTH] Set req.user: { id: 2, username: 'azril', role: 'admin', idType: 'number' }
+[DEBUG] MemStorage.updateUser called with ID: NaN (type: number)
+[DEBUG] Available user IDs: [ 1, 2, 3, 4, 5, 6 ]
+[DEBUG] No user found for ID: NaN
+[2025-07-17T02:27:29.931Z] PUT /api/users/settings 404 in 4ms (user: azril) :: {"message":"User not found"}
+2:27:58 AM [tsx] change in ./server/routes.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 45s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit)
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 7690
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+[AUDIT] 2025-07-17T02:30:07.585Z | LOGIN_ATTEMPT | SUCCESS | User: azril | IP: 127.0.0.1
+[2025-07-17T02:30:07.589Z] POST /api/auth/login 200 in 66ms :: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI…
+[AUTH] Set req.user: { id: 2, username: 'azril', role: 'admin', idType: 'number' }
+[DEBUG] MemStorage.updateUser called with ID: NaN (type: number)
+[DEBUG] Available user IDs: [ 1, 2, 3, 4, 5, 6 ]
+[DEBUG] No user found for ID: NaN
+[2025-07-17T02:30:07.602Z] PUT /api/users/settings 404 in 5ms (user: azril) :: {"message":"User not found"}
+2:31:11 AM [tsx] change in ./server/routes.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 192s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  enable debug logging with { debug: true })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 7850
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+2:31:23 AM [tsx] change in ./server/routes.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 11s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`)
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 7885
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+2:31:32 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 8s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild)
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 7916
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+2:31:39 AM [tsx] change in ./server/middleware/auth.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 5s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 7928
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+[AUDIT] 2025-07-17T02:33:06.941Z | LOGIN_ATTEMPT | SUCCESS | User: azril | IP: 127.0.0.1
+[2025-07-17T02:33:06.948Z] POST /api/auth/login 200 in 75ms :: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI…
+[2025-07-17T02:33:06.958Z] PUT /api/users/profile 404 in 3ms (user: azril) :: {"message":"User not found"}
+[2025-07-17T02:33:06.966Z] PUT /api/users/settings 200 in 1ms (user: azril) :: {"success":true,"settings":{"language":"zh","notifications":{"assig…
+[2025-07-17T02:33:06.977Z] PUT /api/users/settings 200 in 1ms (user: azril) :: {"success":true,"settings":{"language":"en","notifications":{"assig…
+2:33:40 AM [tsx] change in ./server/routes.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 120s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 8015
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+2:33:55 AM [tsx] change in ./server/routes.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 12s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  suppress all logs with { quiet: true })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 8047
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+[AUDIT] 2025-07-17T02:34:47.673Z | LOGIN_ATTEMPT | SUCCESS | User: azril | IP: 127.0.0.1
+[2025-07-17T02:34:47.679Z] POST /api/auth/login 200 in 74ms :: {"success":true,"data":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI…
+[2025-07-17T02:34:47.691Z] PUT /api/users/profile 200 in 4ms (user: azril) :: {"id":2,"username":"azril","name":"Azril Rahman","email":"azril@kgsb…
+[2025-07-17T02:34:47.705Z] PUT /api/users/settings 200 in 1ms (user: azril) :: {"success":true,"settings":{"language":"zh","notifications":{"assig…
+[2025-07-17T02:34:47.716Z] PUT /api/users/profile 200 in 1ms (user: azril) :: {"id":2,"username":"azril","name":"Azril Rahman Updated","email":"az…
+[2025-07-17T02:34:47.729Z] PUT /api/users/settings 200 in 1ms (user: azril) :: {"success":true,"settings":{"language":"en","notifications":{"assig…
+2:44:52 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 656s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  suppress all logs with { quiet: true })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 8362
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+2:56:57 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 723s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild)
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 8784
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+2:57:05 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 5s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  override existing env vars with { override: true })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5002 instead
+🚀 Server running on http://0.0.0.0:5002
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 8822
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5002
+   Network:  http://0.0.0.0:5002
+   Health:   http://localhost:5002/health
+
+💡 Press Ctrl+C to stop the server
+
+2:57:28 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 20s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  override existing env vars with { override: true })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5002 instead
+🚀 Server running on http://0.0.0.0:5002
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 8951
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5002
+   Network:  http://0.0.0.0:5002
+   Health:   http://localhost:5002/health
+
+💡 Press Ctrl+C to stop the server
+
+2:57:42 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 13s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: 🔐 encrypt with dotenvx: https://dotenvx.com)
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5002 instead
+🚀 Server running on http://0.0.0.0:5002
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 9049
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5002
+   Network:  http://0.0.0.0:5002
+   Health:   http://localhost:5002/health
+
+💡 Press Ctrl+C to stop the server
+
+2:57:46 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 2s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit)
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 9090
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+2:59:17 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 90s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 9359
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+2:59:56 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 38s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild)
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 9500
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+3:00:00 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 2s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  suppress all logs with { quiet: true })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 9521
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+3:01:14 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 72s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit)
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 9773
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+3:01:18 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 2s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  override existing env vars with { override: true })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 9794
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+3:01:56 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 37s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: 🔐 encrypt with dotenvx: https://dotenvx.com)
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 9937
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+3:03:10 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 72s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  suppress all logs with { quiet: true })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 10187
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
+3:04:28 AM [tsx] change in ./server/storage.ts Restarting...
+
+⚠️  Received SIGTERM. Starting graceful shutdown...
+✅ Server closed successfully (uptime: 77s)
+c[dotenv@17.2.0] injecting env (13) from .env (tip: ⚙️  enable debug logging with { debug: true })
+🚀 Starting development server...
+⚠️  Port 5000 is busy, using port 5001 instead
+🚀 Server running on http://0.0.0.0:5001
+📝 Environment: development
+🔒 Security headers: disabled
+⚡ Process ID: 10440
+🔄 Auto-restart enabled (watching for changes)
+✅ Server started successfully
+
+📍 Development URLs:
+   Local:    http://localhost:5001
+   Network:  http://0.0.0.0:5001
+   Health:   http://localhost:5001/health
+
+💡 Press Ctrl+C to stop the server
+
