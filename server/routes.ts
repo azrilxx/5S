@@ -1097,6 +1097,17 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
+  app.delete("/api/schedules/:id", authenticateToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteSchedule(parseInt(id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Delete schedule error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Report routes
   app.get("/api/reports", authenticateToken, async (req, res) => {
     try {

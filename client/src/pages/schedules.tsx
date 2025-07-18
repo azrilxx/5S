@@ -94,6 +94,25 @@ export default function Schedules() {
     },
   });
 
+  const deleteScheduleMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/schedules/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/schedules"] });
+      setSelectedSchedule(null);
+      toast({
+        title: "Success",
+        description: "Schedule deleted successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete schedule",
+        variant: "destructive",
+      });
+    },
+  });
+
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 });
   const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
@@ -135,6 +154,12 @@ export default function Schedules() {
       id: selectedSchedule.id,
       updates,
     });
+  };
+
+  const handleDeleteSchedule = (id: number) => {
+    if (window.confirm("Are you sure you want to delete this schedule?")) {
+      deleteScheduleMutation.mutate(id);
+    }
   };
 
   const getDayName = (dayIndex: number) => {
@@ -221,18 +246,35 @@ export default function Schedules() {
                     {getSchedulesForDay(day).map((schedule: any) => (
                       <div
                         key={schedule.id}
-                        className={`p-2 rounded-md text-xs cursor-pointer hover:opacity-80 ${getZoneColor(schedule.zone)}`}
-                        onClick={() => setSelectedSchedule(schedule)}
+                        className={`p-2 rounded-md text-xs relative group ${getZoneColor(schedule.zone)}`}
                       >
-                        <div className="font-medium">{schedule.zone}</div>
-                        <div className="flex items-center mt-1">
-                          <Clock className="h-3 w-3 mr-1" />
-                          {schedule.time}
+                        <div 
+                          className="cursor-pointer hover:opacity-80"
+                          onClick={() => setSelectedSchedule(schedule)}
+                        >
+                          <div className="font-medium">{schedule.zone}</div>
+                          <div className="flex items-center mt-1">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {schedule.time}
+                          </div>
+                          <div className="flex items-center">
+                            <MapPin className="h-3 w-3 mr-1" />
+                            {schedule.assignedTo}
+                          </div>
                         </div>
-                        <div className="flex items-center">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          {schedule.assignedTo}
-                        </div>
+                        {(user?.role === 'admin' || user?.role === 'superadmin') && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="absolute top-1 right-1 h-4 w-4 p-0 opacity-0 group-hover:opacity-100 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteSchedule(schedule.id);
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -283,6 +325,16 @@ export default function Schedules() {
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
+                      {(user?.role === 'admin' || user?.role === 'superadmin') && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteSchedule(schedule.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}

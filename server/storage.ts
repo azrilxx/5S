@@ -79,6 +79,7 @@ export interface IStorage {
   getSchedule(id: number): Promise<Schedule | undefined>;
   createSchedule(schedule: InsertSchedule): Promise<Schedule>;
   updateSchedule(id: number, schedule: Partial<InsertSchedule>): Promise<Schedule | undefined>;
+  deleteSchedule(id: number): Promise<boolean>;
   getActiveSchedules(): Promise<Schedule[]>;
 
   // Report methods
@@ -726,6 +727,10 @@ export class MemStorage implements IStorage {
     return updatedSchedule;
   }
 
+  async deleteSchedule(id: number): Promise<boolean> {
+    return this.schedules.delete(id);
+  }
+
   async getActiveSchedules(): Promise<Schedule[]> {
     return Array.from(this.schedules.values()).filter(schedule => schedule.isActive);
   }
@@ -1234,6 +1239,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(schedules.id, id))
       .returning();
     return schedule || undefined;
+  }
+
+  async deleteSchedule(id: number): Promise<boolean> {
+    const result = await db.delete(schedules).where(eq(schedules.id, id));
+    return result.rowCount > 0;
   }
 
   async getActiveSchedules(): Promise<Schedule[]> {
