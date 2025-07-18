@@ -6,6 +6,8 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { extractQuestionsFromText } from "./deepseek";
+import { DashboardCache, AuditCache, ActionCache, cache } from "./cache";
+import { wsManager } from "./websocket";
 
 const JWT_SECRET = process.env.JWT_SECRET || "karisma-5s-secret-key";
 
@@ -1002,9 +1004,19 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
   });
 
   // Action routes
-  app.get("/api/actions", authenticateToken, async (req, res) => {
+  app.get("/api/actions", authenticateToken, async (req: any, res) => {
     try {
-      const actions = await storage.getAllActions();
+      const { assignee, zone } = req.query;
+      let actions;
+      
+      if (assignee) {
+        actions = await ActionCache.getActionsByAssignee(assignee);
+      } else if (zone) {
+        actions = await ActionCache.getActionsByZone(zone);
+      } else {
+        actions = await storage.getAllActions();
+      }
+      
       res.json(actions);
     } catch (error) {
       console.error("Get actions error:", error);
@@ -1019,6 +1031,17 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
         ...actionData,
         assignedBy: req.user.username
       });
+      
+      // Invalidate relevant caches
+      ActionCache.invalidateForAssignee(action.assignedTo);
+      ActionCache.invalidateForZone(action.zone);
+      DashboardCache.invalidate();
+      
+      // Send real-time notification
+      if (wsManager) {
+        wsManager.notifyActionCreated(action.assignedTo, action);
+      }
+      
       res.status(201).json(action);
     } catch (error) {
       console.error("Create action error:", error);
@@ -1656,42 +1679,86 @@ export async function registerLegacyRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Dashboard statistics
+  // Dashboard statistics with caching
   app.get("/api/dashboard/stats", authenticateToken, async (req, res) => {
     try {
-      const audits = await storage.getAllAudits();
-      const actions = await storage.getAllActions();
-      const zones = await storage.getAllZones();
-      
-      const today = new Date();
-      const todayStr = today.toISOString().split('T')[0];
-      
-      const todaysAudits = audits.filter(audit => {
-        const auditDate = audit.scheduledDate ? new Date(audit.scheduledDate).toISOString().split('T')[0] : null;
-        return auditDate === todayStr;
-      });
-      
-      const pendingActions = actions.filter(action => action.status === 'open' || action.status === 'in_progress');
-      const overdueActions = actions.filter(action => {
-        if (!action.dueDate) return false;
-        return new Date(action.dueDate) < today && action.status !== 'closed';
-      });
-      
-      const completedAudits = audits.filter(audit => audit.status === 'completed');
-      const totalAudits = audits.length;
-      const complianceRate = totalAudits > 0 ? Math.round((completedAudits.length / totalAudits) * 100) : 0;
-      
-      res.json({
-        todaysAudits: todaysAudits.length,
-        pendingActions: pendingActions.length,
-        overdueActions: overdueActions.length,
-        complianceRate,
-        activeZones: zones.filter(zone => zone.isActive).length,
-        recentAudits: audits.slice(-5).reverse(),
-        recentActions: actions.slice(-5).reverse()
-      });
+      const stats = await DashboardCache.getStats();
+      res.json(stats);
     } catch (error) {
       console.error("Dashboard stats error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Performance monitoring endpoint
+  app.get("/api/performance/stats", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin users can access performance stats
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const memoryUsage = process.memoryUsage();
+      const cpuUsage = process.cpuUsage();
+      const uptime = process.uptime();
+      
+      const wsStats = wsManager ? wsManager.getStats() : { totalConnections: 0, uniqueUsers: 0, connectedUsers: [] };
+      const cacheStats = cache.getStats();
+
+      res.json({
+        server: {
+          uptime: Math.round(uptime),
+          memory: {
+            heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024),
+            heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024),
+            rss: Math.round(memoryUsage.rss / 1024 / 1024),
+            external: Math.round(memoryUsage.external / 1024 / 1024)
+          },
+          cpu: {
+            user: cpuUsage.user,
+            system: cpuUsage.system
+          }
+        },
+        websocket: wsStats,
+        cache: cacheStats,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Performance stats error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Cache management endpoint
+  app.post("/api/cache/clear", authenticateToken, async (req: any, res) => {
+    try {
+      // Only admin users can clear cache
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const { type } = req.body;
+      
+      switch (type) {
+        case 'dashboard':
+          DashboardCache.invalidate();
+          break;
+        case 'audits':
+          AuditCache.invalidateAll();
+          break;
+        case 'actions':
+          ActionCache.invalidateAll();
+          break;
+        case 'all':
+          cache.clear();
+          break;
+        default:
+          return res.status(400).json({ message: "Invalid cache type" });
+      }
+
+      res.json({ message: `Cache cleared: ${type}` });
+    } catch (error) {
+      console.error("Cache clear error:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });
