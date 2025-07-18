@@ -1,0 +1,50 @@
+## ✅ PURPOSE
+Prepare this full-stack web application for beta testing among staff. This is a 5S audit management tool to manage audits, actions, reports, and learning modules. **Do NOT modify stable code**. Focus only on the checklist below. Every change must be validated before redeployment.
+
+---
+
+## 🧹 FINAL CLEANUP & PREP
+
+### Users
+- ✅ Retain only the following:
+  - `azril` (admin)
+  - `shukri` (admin or superadmin)
+  - All confirmed staff or emails not ending in `@karisma.local`
+- 🚫 Do NOT remove or disable login functionality, roles, or permissions.
+
+---
+
+## 🎓 Learn 5S (Training Module)
+Keep the embedded YouTube links EXACTLY as shown in UI:
+- **Sort (Seiri)** → https://www.youtube.com/watch?v=Pu29athsH0E
+- **Set in Order (Seiton)** → https://www.youtube.com/watch?v=bLadn_zOx2Q
+- **Shine (Seiso)** → https://www.youtube.com/watch?v=GW_LTbKUBsg
+- 🚫 Do not embed or append any other YouTube videos.
+- ✅ Verify that they are displayed correctly and uniquely across each section.
+
+---
+
+## 📅 Training Page (Real-World Training Links)
+Replace dummy training content with the following official resources only:
+1. https://www.bsigroup.com/en-MY/training-courses/5s-principles-and-implementation/
+2. https://www.iconictraining.com.my/showproducts/productid/2536040/5s-principles-and-awareness-training/
+3. https://www.yenpremiumcoach.yenuni.com.my/5s-training-and-consultation/
+
+---
+
+## ✅ Final Notes
+- Do not overwrite any production-ready pages such as Dashboard, Audits, Action Tracker, Reports, or User Management.
+- Ensure Learn 5S section works as rendered in UI (see screenshots in `/attached_assets` if needed).
+- Ensure Replit internal database reflects only valid user records (confirmed staff + azril/shukri).
+
+---
+
+## 🚀 READY FOR REDEPLOY
+Once completed, confirm all routing and session functionality works as expected. You may now redeploy.
+"""
+
+# Write this new replit.md to the project folder
+with open(os.path.join(project_root, 'replit.md'), 'w', encoding='utf-8') as f:
+    f.write(final_replit_md)
+
+"✅ Final Replit prompt written to replit.md – ready for redeployment."
