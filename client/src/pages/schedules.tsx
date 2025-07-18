@@ -11,10 +11,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { ChevronLeft, ChevronRight, Plus, Edit, Trash2, Clock, MapPin } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { ZONES, TEAMS } from "@/lib/constants";
 import { useAuth } from "@/components/auth/auth-provider";
 import Layout from "@/components/layout/layout";
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, addWeeks, subWeeks, isSameDay } from "date-fns";
+import { Schedule, Team, Zone } from "@shared/schema";
 
 export default function Schedules() {
   const [currentWeek, setCurrentWeek] = useState(new Date());
@@ -34,15 +34,15 @@ export default function Schedules() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: schedules, isLoading } = useQuery({
+  const { data: schedules, isLoading } = useQuery<Schedule[]>({
     queryKey: ["/api/schedules"],
   });
 
-  const { data: teams } = useQuery({
+  const { data: teams } = useQuery<Team[]>({
     queryKey: ["/api/teams"],
   });
 
-  const { data: zones } = useQuery({
+  const { data: zones } = useQuery<Zone[]>({
     queryKey: ["/api/zones"],
   });
 
@@ -118,12 +118,13 @@ export default function Schedules() {
   const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
   const getSchedulesForDay = (day: Date) => {
-    return (schedules as any[])?.filter((schedule: any) => {
+    if (!schedules || !Array.isArray(schedules)) return [];
+    return schedules.filter((schedule) => {
       if (schedule.frequency === "weekly") {
         return schedule.dayOfWeek === day.getDay();
       }
       return false;
-    }) || [];
+    });
   };
 
   const handleCreateSchedule = () => {
@@ -168,8 +169,8 @@ export default function Schedules() {
   };
 
   const getTeamForZone = (zoneName: string) => {
-    if (!teams || !zoneName) return null;
-    const team = teams.find((team: any) => 
+    if (!teams || !Array.isArray(teams) || !zoneName) return null;
+    const team = teams.find((team) => 
       team.assignedZones && team.assignedZones.includes(zoneName)
     );
     return team ? team.name : null;
@@ -243,7 +244,7 @@ export default function Schedules() {
                     <div className="text-xs text-slate-500">{format(day, 'd')}</div>
                   </div>
                   <div className="space-y-2 p-2">
-                    {getSchedulesForDay(day).map((schedule: any) => (
+                    {getSchedulesForDay(day).map((schedule) => (
                       <div
                         key={schedule.id}
                         className={`p-2 rounded-md text-xs relative group ${getZoneColor(schedule.zone)}`}
@@ -298,19 +299,19 @@ export default function Schedules() {
                   </div>
                 ))}
               </div>
-            ) : (schedules as any[])?.length === 0 ? (
+            ) : !schedules || schedules.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-slate-500">No schedules found</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {(schedules as any[])?.map((schedule: any) => (
+                {schedules.map((schedule) => (
                   <div key={schedule.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50">
                     <div className="flex-1">
                       <h3 className="font-medium text-slate-900">{schedule.title}</h3>
                       <p className="text-sm text-slate-600">{schedule.zone}</p>
                       <p className="text-xs text-slate-500">
-                        {schedule.frequency} • {getDayName(schedule.dayOfWeek)} at {schedule.time} • 
+                        {schedule.frequency} • {schedule.dayOfWeek !== null ? getDayName(schedule.dayOfWeek) : 'N/A'} at {schedule.time} • 
                         Assigned to: {schedule.assignedTo}
                       </p>
                     </div>
@@ -370,9 +371,9 @@ export default function Schedules() {
                       <SelectValue placeholder="Select zone" />
                     </SelectTrigger>
                     <SelectContent>
-                      {ZONES.map((zone) => (
-                        <SelectItem key={zone} value={zone}>
-                          {zone}
+                      {zones && zones.map((zone) => (
+                        <SelectItem key={zone.id} value={zone.name}>
+                          {zone.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -389,9 +390,9 @@ export default function Schedules() {
                       <SelectValue placeholder="Select team" />
                     </SelectTrigger>
                     <SelectContent>
-                      {TEAMS.map((team) => (
-                        <SelectItem key={team} value={team}>
-                          {team}
+                      {teams && teams.map((team) => (
+                        <SelectItem key={team.id} value={team.name}>
+                          {team.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
