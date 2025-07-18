@@ -38,6 +38,14 @@ export default function Schedules() {
     queryKey: ["/api/schedules"],
   });
 
+  const { data: teams } = useQuery({
+    queryKey: ["/api/teams"],
+  });
+
+  const { data: zones } = useQuery({
+    queryKey: ["/api/zones"],
+  });
+
   const createScheduleMutation = useMutation({
     mutationFn: (scheduleData: any) => apiRequest("POST", "/api/schedules", scheduleData),
     onSuccess: () => {
@@ -132,6 +140,23 @@ export default function Schedules() {
   const getDayName = (dayIndex: number) => {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     return days[dayIndex];
+  };
+
+  const getTeamForZone = (zoneName: string) => {
+    if (!teams || !zoneName) return null;
+    const team = teams.find((team: any) => 
+      team.assignedZones && team.assignedZones.includes(zoneName)
+    );
+    return team ? team.name : null;
+  };
+
+  const handleZoneChange = (zoneName: string) => {
+    const assignedTeam = getTeamForZone(zoneName);
+    setNewScheduleData({
+      ...newScheduleData,
+      zone: zoneName,
+      assignedTo: assignedTeam || ""
+    });
   };
 
   const getZoneColor = (zone: string) => {
@@ -287,7 +312,7 @@ export default function Schedules() {
                   <Label htmlFor="zone">Zone</Label>
                   <Select
                     value={newScheduleData.zone}
-                    onValueChange={(value) => setNewScheduleData({ ...newScheduleData, zone: value })}
+                    onValueChange={handleZoneChange}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select zone" />
@@ -306,6 +331,7 @@ export default function Schedules() {
                   <Select
                     value={newScheduleData.assignedTo}
                     onValueChange={(value) => setNewScheduleData({ ...newScheduleData, assignedTo: value })}
+                    disabled={!!newScheduleData.assignedTo && !!newScheduleData.zone}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select team" />
@@ -318,6 +344,11 @@ export default function Schedules() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {newScheduleData.assignedTo && newScheduleData.zone && (
+                    <p className="text-xs text-green-600 mt-1">
+                      ✓ Auto-assigned based on zone
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-4">

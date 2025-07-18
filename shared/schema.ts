@@ -196,7 +196,9 @@ export const insertTeamSchema = createInsertSchema(teams).omit({ id: true });
 export const insertAuditSchema = createInsertSchema(audits).omit({ id: true, createdAt: true });
 export const insertChecklistItemSchema = createInsertSchema(checklistItems).omit({ id: true });
 export const insertActionSchema = createInsertSchema(actions).omit({ id: true, createdAt: true });
-export const insertScheduleSchema = createInsertSchema(schedules).omit({ id: true, createdAt: true });
+export const insertScheduleSchema = createInsertSchema(schedules).omit({ id: true, createdAt: true }).extend({
+  nextRun: z.string().optional().transform((val) => val ? new Date(val) : undefined)
+});
 export const insertReportSchema = createInsertSchema(reports).omit({ id: true, createdAt: true });
 export const insertQuestionSchema = createInsertSchema(questions).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertNotificationRuleSchema = createInsertSchema(notificationRules).omit({ id: true, createdAt: true, updatedAt: true });
